@@ -1,0 +1,188 @@
+	.nlist
+;----------------------------------------------------------------
+;	X68k High-speed Assembler
+;		テンポラリファイルコード
+;		< tmpcode.equ >
+;
+;		Copyright 1990-94  by Y.Nakamura
+;		          1996-99  by M.Kamada
+;----------------------------------------------------------------
+
+  .ifndef __TMPCODE_EQU__
+__TMPCODE_EQU__	equ	1
+
+	.include	has.equ
+
+;----------------------------------------------------------------
+;	オペランドトークンコード
+;----------------------------------------------------------------
+OT_EOL		equ	$0000	;行終了コード
+OT_CHAR		equ	$0000	;文字(下位バイトが文字コード)
+OT_VALUEB	equ	$0100	;数値データ(下位バイトがデータ)
+OT_VALUEW	equ	$0200	;数値データ(続くワードがデータ)
+OT_VALUE	equ	$0300	;数値データ(続くロングワードがデータ)
+OT_REAL		equ	$0400	;浮動小数点実数データ(続く10バイトがデータ)
+OT_STR		equ	$0500	;文字列データ(下位バイトが文字列長)
+OT_SYMBOL	equ	$0600	;シンボル(続くロングワードがポインタ)
+OT_REGISTER	equ	$0700	;レジスタ(下位バイトがレジスタ番号)
+OT_SIZE		equ	$0800	;サイズ指定子(.b/.w/.l/.s/.d/.x/.p)
+OT_OPERATOR	equ	$0900	;演算子(下位バイトが演算子コード)
+OT_LOCALREF	equ	$0A00	;ローカルラベル参照(@f/@b 下位バイトが相対位置)
+OT_VALUEQ	equ	$0B00	;数値データ(続く2ロングワードがデータ)
+OT_MAC		equ	$0C00	;'u'=.u
+
+
+;----------------------------------------------------------------
+;	RPN中間コード
+;----------------------------------------------------------------
+RPN_END		equ	$0000	;終了コード
+RPN_VALUEB	equ	$0100	;数値データ(下位バイトがデータ)
+RPN_VALUEW	equ	$0200	;数値データ(続くワードがデータ)
+RPN_VALUE	equ	$0300	;数値データ(続くロングワードがデータ)
+RPN_SYMBOL	equ	$0400	;シンボル(続くロングワードが内容へのポインタ)
+RPN_LOCATION	equ	$0500	;現在のロケーションカウンタ値('*'/'$')
+RPN_OPERATOR	equ	$0600	;演算子(下位バイトが演算子コード)
+
+
+;----------------------------------------------------------------
+;	式サイズ属性コード
+;----------------------------------------------------------------
+ESZ_IMM		equ	0	;イミディエイト
+ESZ_ABS		equ	4	;絶対アドレッシング
+ESZ_ADR		equ	8	;アドレスレジスタ間接ディスプレースメント
+ESZ_OPT		equ	$80	;最適化対象
+
+
+;----------------------------------------------------------------
+;	テンポラリデータコード
+;----------------------------------------------------------------
+T_EOF		equ	$0000	;ファイル終了
+T_LINE		equ	$0100	;1行開始
+
+T_SYMBOL	equ	$0200	;シンボル値
+T_RPN		equ	$0300	;逆ポーランド式
+
+T_DSPADR	equ	$0400	;(d,An)
+T_DSPPC		equ	$0500	;(d,PC)
+T_IDXADR	equ	$0600	;(d,An,Rn)
+T_IDXPC		equ	$0700	;(d,PC,Rn)
+T_EXTCODE	equ	$0800	;拡張ワード
+T_BDADR		equ	$0900	;アドレスレジスタ間接ベースディスプレースメント
+T_BDPC		equ	$0A00	;PC間接ベースディスプレースメント
+T_OD		equ	$0B00	;アウタディスプレースメント
+
+T_BRA		equ	$0C00	;bra/bsr/b<cc>.s/.w/.l
+T_CPBRA		equ	$0D00	;cpb<cc>.w/.l
+T_DSPCODE	equ	$0E00	;(d,An)/(d,PC)の命令コード
+T_CODERPN	equ	$0F00	;命令コード埋め込み式データ
+TCR_IMM8	equ	$00	;	subq/addq (1～8)
+TCR_IMM8S	equ	$01	;	as?/ls?/ro?/rox? (1～8)
+TCR_MOVEQ	equ	$02	;	moveq (-$80～$FF)
+TCR_TRAP	equ	$03	;	trap (0～15)
+TCR_BKPT	equ	$04	;	bkpt (0～7)
+TCR_IMM3Q	equ	$05	;	mov3q (-1,1～7)
+T_CONST		equ	$1000	;アドレス非依存データ
+T_BITFIELD	equ	$1100	;ビットフィールド式データ
+TBF_OF		equ	$00	;	オフセットが式
+TBF_WD		equ	$01	;	幅が式
+TBF_OFWD	equ	$02	;	オフセット・幅ともに式
+T_DS		equ	$1200	;.ds
+T_DCB		equ	$1300	;.dcb
+
+T_ALIGN		equ	$1400	;アラインメントの調整
+T_SECT		equ	$1500	;セクション変更
+T_OFFSET	equ	$1600	;.offset
+T_EQUCONST	equ	$1700	;定数の.equ/.set
+T_EQUEXPR	equ	$1800	;式・アドレスの.equ/.set
+T_XDEF		equ	$1900	;.xdef
+
+T_LIST		equ	$1A00	;リスト出力制御
+T_PAGE		equ	$1B00	;.page
+T_SUBTTL	equ	$1C00	;.subttl
+T_ORG		equ	$1D00	;.org
+
+T_END		equ	$1E00	;.end
+T_INCLD		equ	$1F00	;includeファイル開始
+T_INCLDEND	equ	$2000	;includeファイル終了
+
+T_MACDEF	equ	$2100	;マクロ定義開始
+T_MACEXT	equ	$2200	;マクロ展開開始
+T_EXITM		equ	$2300	;.exitm
+T_REPT		equ	$2400	;.rept展開開始
+T_IRP		equ	$2500	;.irp/.irpc展開開始
+T_MDEFBGN	equ	$2600	;マクロ等定義開始
+T_MDEFEND	equ	$2700	;マクロ等定義終了
+
+T_LN		equ	$2800	;.ln
+T_VAL		equ	$2900	;.val
+T_TAG		equ	$2A00	;.tag
+T_ENDEFS	equ	$2B00	;.endef(短形式)
+T_ENDEFL	equ	$2C00	;.endef(長形式)
+T_SCL		equ	$2D00	;.scl -1(関数定義終了)
+
+T_FEQUSET	equ	$2E00	;.fequ/.fset
+T_SYMDEF	equ	$2F00	;シンボル定義
+T_FDCB		equ	$3000	;.dcb(浮動小数点実数)
+T_JBRA		equ	$3100	;jbra/jbsr/jb<cc>
+T_DSPOPC	equ	$3200	;(d,OPC)
+T_LINK		equ	$3300	;link.w/.l
+
+T_NOPDEATH	equ	$3400	;削除すべきNOP
+T_NOPALIVE	equ	$3500	;挿入されたNOP
+
+T_PRNADV	equ	$3600	;PRNファイルへの先行出力
+
+T_OFFSYM	equ	$3700	;.offsym
+
+T_ERROR		equ	$3800	;エラー発生
+
+  .if 89<=verno060
+T_CPU		equ	$3900	;.cpu
+  .endif
+
+  .endif	;__TMPCODE_EQU__
+
+;----------------------------------------------------------------
+;
+;	Revision 2.2  2016-08-07 12:00:00  M.Kamada
+;	+89 BRA.L の後に .CPU 68000 があるとアセンブルできない不具合
+;
+;	Revision 2.1  1999  3/ 2(Tue) 16:53:11 M.Kamada
+;	+82 エラーメッセージを日本語化
+;	+82 T_ERRORを$FF00から通常のコードに変更
+;
+;	Revision 2.0  1999  2/27(Sat) 23:45:53 M.Kamada
+;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
+;
+;	Revision 1.9  1999  2/24(Wed) 21:01:04 M.Kamada
+;	+80 ColdFire対応
+;	+80 .offsym <初期値>,<シンボル>
+;
+;	Revision 1.8  1998 10/10(Sat) 01:51:49 M.Kamada
+;	+77 -pのとき.INSERTで1度に256バイト以上読み出すと誤動作する
+;
+;	Revision 1.7  1997 10/21(Tue) 16:29:08 M.Kamada
+;	+52 PMOVE.D #imm,CRPが正しくアセンブルできない不具合
+;
+;	Revision 1.6  1997 10/12(Sun) 23:31:09 M.Kamada
+;	+52 jmp/jsrを最適化する
+;
+;	Revision 1.5  1997  9/15(Mon) 15:27:28 M.Kamada
+;	+45 shift
+;
+;	Revision 1.4  1996 12/15(Sun) 01:12:11 M.Kamada
+;	+07 F43G対策
+;		削除すべきNOPのテンポラリコードを追加
+;
+;	Revision 1.3  1994/07/11  15:20:16  nakamura
+;	link命令の最適化用テンポラリコード追加
+;
+;	Revision 1.2  1994/03/05  14:09:30  nakamura
+;	仕様拡張に伴うテンポラリコードの追加
+;
+;	Revision 1.1  1994/02/13  14:32:34  nakamura
+;	Initial revision
+;
+;
+	.text
+	.list

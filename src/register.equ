@@ -1,0 +1,199 @@
+	.nlist
+;----------------------------------------------------------------
+;	X68k High-speed Assembler
+;		サイズ・レジスタ名
+;		< register.equ >
+;
+;	$Id: register.equ,v 1.6  1999  2/27(Sat) 23:44:40 M.Kamada Exp $
+;
+;		Copyright 1990-94  by Y.Nakamura
+;			  1996-99  by M.Kamada
+;----------------------------------------------------------------
+
+
+;----------------------------------------------------------------
+;	サイズコード
+;----------------------------------------------------------------
+SZ_NONE		equ	-1	;(サイズなし)
+SZ_BYTE		equ	0	; .b
+SZ_WORD		equ	1	; .w
+SZ_LONG		equ	2	; .l
+SZ_SHORT	equ	3	; .s
+SZ_SINGLE	equ	3	; .s (for FPP)
+SZ_DOUBLE	equ	4	; .d (for FPP)
+SZ_EXTEND	equ	5	; .x (for FPP)
+SZ_PACKED	equ	6	; .p (for FPP)
+SZ_QUAD		equ	7	; .q (for MMU)
+
+SZNO		equ	0	;(サイズなし)
+SZB		equ	1<<0	; .b
+SZW		equ	1<<1	; .w
+SZL		equ	1<<2	; .l
+SZS		equ	1<<3	; .s (for FPP)
+SZD		equ	1<<4	; .d (for FPP)
+SZX		equ	1<<5	; .x (for FPP)
+SZP		equ	1<<6	; .p (for FPP)
+SZQ		equ	1<<7	; .q (for MMU)
+
+
+;----------------------------------------------------------------
+;	レジスタ名コード
+;----------------------------------------------------------------
+
+;----------------------------------------------------------------
+;	汎用レジスタ
+REG_D0		equ	$00
+REG_D1		equ	$01
+REG_D2		equ	$02
+REG_D3		equ	$03
+REG_D4		equ	$04
+REG_D5		equ	$05
+REG_D6		equ	$06
+REG_D7		equ	$07
+
+REG_A0		equ	$08
+REG_A1		equ	$09
+REG_A2		equ	$0A
+REG_A3		equ	$0B
+REG_A4		equ	$0C
+REG_A5		equ	$0D
+REG_A6		equ	$0E
+REG_A7		equ	$0F
+REG_SP		equ	$0F
+
+;----------------------------------------------------------------
+;	汎用レジスタサプレス
+REG_ZD0		equ	$10
+REG_ZD1		equ	$11
+REG_ZD2		equ	$12
+REG_ZD3		equ	$13
+REG_ZD4		equ	$14
+REG_ZD5		equ	$15
+REG_ZD6		equ	$16
+REG_ZD7		equ	$17
+
+REG_ZA0		equ	$18
+REG_ZA1		equ	$19
+REG_ZA2		equ	$1A
+REG_ZA3		equ	$1B
+REG_ZA4		equ	$1C
+REG_ZA5		equ	$1D
+REG_ZA6		equ	$1E
+REG_ZA7		equ	$1F
+REG_ZSP		equ	$1F
+
+;----------------------------------------------------------------
+;	制御レジスタ
+REG_PC		equ	$20
+REG_CCR		equ	$21
+REG_SR		equ	$22
+REG_USP		equ	$23
+
+REG_SFC		equ	$24
+REG_DFC		equ	$25
+REG_VBR		equ	$26
+
+REG_MSP 	equ	$27
+REG_ISP 	equ	$28
+REG_CACR	equ	$29
+REG_CAAR	equ	$2A
+
+REG_BUSCR	equ	$2B
+REG_PCR		equ	$2C
+
+REG_ZPC		equ	$2E
+REG_OPC		equ	$2F
+
+REG_ROMBAR	equ	$30
+REG_RAMBAR0	equ	$34
+REG_RAMBAR1	equ	$35
+REG_MBAR	equ	$3F
+REG_ACC		equ	$70
+REG_MACSR	equ	$74
+REG_MASK	equ	$76
+
+;----------------------------------------------------------------
+;	MMUレジスタ(68851,68030,68040)
+REG_CRP 	equ	$40
+REG_SRP 	equ	$41
+REG_TC		equ	$42
+REG_TT0 	equ	$43
+REG_TT1 	equ	$44
+REG_MMUSR	equ	$45
+REG_PSR		equ	$45
+
+REG_URP 	equ	$46
+REG_ITT0	equ	$47
+REG_ITT1	equ	$48
+REG_DTT0	equ	$49
+REG_DTT1	equ	$4A
+
+REG_NC		equ	$5C
+REG_DC		equ	$5D
+REG_IC		equ	$5E
+REG_BC		equ	$5F
+
+REG_DRP 	equ	$4B
+REG_CAL 	equ	$4C
+REG_VAL 	equ	$4D
+REG_SCC 	equ	$4E
+REG_AC		equ	$4F
+REG_PCSR	equ	$50
+
+REG_BAD0	equ	$60
+REG_BAD1	equ	$61
+REG_BAD2	equ	$62
+REG_BAD3	equ	$63
+REG_BAD4	equ	$64
+REG_BAD5	equ	$65
+REG_BAD6	equ	$66
+REG_BAD7	equ	$67
+
+REG_BAC0	equ	$68
+REG_BAC1	equ	$69
+REG_BAC2	equ	$6A
+REG_BAC3	equ	$6B
+REG_BAC4	equ	$6C
+REG_BAC5	equ	$6D
+REG_BAC6	equ	$6E
+REG_BAC7	equ	$6F
+
+;----------------------------------------------------------------
+;	FPPレジスタ(68881,68882,68040)
+REG_FP0		equ	$80
+REG_FP1		equ	$81
+REG_FP2		equ	$82
+REG_FP3		equ	$83
+REG_FP4		equ	$84
+REG_FP5		equ	$85
+REG_FP6		equ	$86
+REG_FP7		equ	$87
+
+REG_FPCR	equ	$88
+REG_FPSR	equ	$89
+REG_FPIAR	equ	$8A
+
+
+;----------------------------------------------------------------
+;	$Log: register.equ,v $
+;	Revision 1.6  1999  2/27(Sat) 23:44:40 M.Kamada
+;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
+;
+;	Revision 1.5  1999  2/21(Sun) 00:44:30 M.Kamada
+;	+80 ColdFire対応
+;
+;	Revision 1.4  1996 11/13(Wed) 15:33:01 M.Kamada
+;	BUSCRとPCRを追加
+;
+;	Revision 1.3  1994/07/10  11:03:02  nakamura
+;	データサイズコード'.q'の追加
+;
+;	Revision 1.2  1994/03/05  05:15:10  nakamura
+;	新設疑似レジスタに対する定義値の追加
+;
+;	Revision 1.1  1994/02/13  14:30:40  nakamura
+;	Initial revision
+;
+;
+	.text
+	.list

@@ -1,0 +1,170 @@
+	.nlist
+;----------------------------------------------------------------
+;	X68k High-speed Assembler
+;		エラーハンドル
+;		< error2.equ >
+;
+;	$Id: error2.equ,v 1.8  1999 10/ 8(Fri) 21:04:55 M.Kamada Exp $
+;
+;		Copyright 1997-99  by M.Kamada
+;----------------------------------------------------------------
+
+
+abswarn			reg	abswarn2
+absshwarn		reg	absshwarn2
+shortwarn		reg	shortwarn2
+shortwarn_cmpa		reg	shortwarn_cmpa2
+shvalwarn_absw		reg	shvalwarn_absw2
+shvalwarn_d16		reg	shvalwarn_d162
+shvalwarn_d8		reg	shvalwarn_d82
+reglwarn		reg	reglwarn2
+alignwarn		reg	alignwarn2
+alignwarn_op		reg	alignwarn_op2
+softwarn		reg	softwarn2
+f43gwarn		reg	f43gwarn2
+movetouspwarn		reg	movetouspwarn2
+insigbitwarn		reg	insigbitwarn2
+indexszwarn		reg	indexszwarn2
+redefwarn_set		reg	redefwarn_set2
+redefwarn_offsym	reg	redefwarn_offsym2
+ds_negative_warn	reg	ds_negative_warn2
+
+forcederr		reg	forcederr2
+redeferr		reg	redeferr2
+redeferr_predefine	reg	redeferr_predefine2
+redeferr_set		reg	redeferr_set2
+redeferr_offsym		reg	redeferr_offsym2
+badopeerr		reg	badopeerr2
+badopeerr_local		reg	badopeerr_local2
+ilsymerr_value		reg	ilsymerr_value2
+ilsymerr_local		reg	ilsymerr_local2
+ilsymerr_real		reg	ilsymerr_real2
+ilsymerr_regsym		reg	ilsymerr_regsym2
+ilsymerr_register	reg	ilsymerr_register2
+ilsymerr_predefxdef	reg	ilsymerr_predefxdef2
+ilsymerr_predefxref	reg	ilsymerr_predefxref2
+ilsymerr_predefglobl	reg	ilsymerr_predefglobl2
+ilsymerr_lookfor	reg	ilsymerr_lookfor2
+exprerr			reg	exprerr2
+exprerr_ea		reg	exprerr_ea2
+exprerr_cannotscale	reg	exprerr_cannotscale2
+exprerr_scalefactor	reg	exprerr_scalefactor2
+exprerr_fullformat	reg	exprerr_fullformat2
+exprerr_immediate	reg	exprerr_immediate2
+regerr			reg	regerr2
+regerr_opc		reg	regerr_opc2
+iladrerr		reg	iladrerr2
+
+ilsizeerr_op		reg	ilsizeerr_op2
+ilsizeerr_pseudo	reg	ilsizeerr_pseudo2
+ilsizeerr_moveusp	reg	ilsizeerr_moveusp2
+ilsizeerr_cf_acc	reg	ilsizeerr_cf_acc2
+ilsizeerr_fpn		reg	ilsizeerr_fpn2
+ilsizeerr_fprn		reg	ilsizeerr_fprn2
+ilsizeerr_fpcr		reg	ilsizeerr_fpcr2
+ilsizeerr_fmovemfpn	reg	ilsizeerr_fmovemfpn2
+ilsizeerr_fmovemfpcr	reg	ilsizeerr_fmovemfpcr2
+ilsizeerr_cf_long	reg	ilsizeerr_cf_long2
+ilsizeerr_cf_bccl	reg	ilsizeerr_cf_bccl2
+ilsizeerr		reg	ilsizeerr2
+ilsizeerr_pseudo_no	reg	ilsizeerr_pseudo_no2
+ilsizeerr_op_no		reg	ilsizeerr_op_no2
+ilsizeerr_ccr		reg	ilsizeerr_ccr2
+ilsizeerr_sr		reg	ilsizeerr_sr2
+ilsizeerr_an		reg	ilsizeerr_an2
+ilsizeerr_movetosr	reg	ilsizeerr_movetosr2
+ilsizeerr_movefrsr	reg	ilsizeerr_movefrsr2
+ilsizeerr_000_long	reg	ilsizeerr_000_long2
+ilsizeerr_sftrotmem	reg	ilsizeerr_sftrotmem2
+ilsizeerr_bitmem	reg	ilsizeerr_bitmem2
+ilsizeerr_bitreg	reg	ilsizeerr_bitreg2
+ilsizeerr_000_bccl	reg	ilsizeerr_000_bccl2
+ilsizeerr_trapcc	reg	ilsizeerr_trapcc2
+
+iloprerr		reg	iloprerr2
+iloprerr_not_fixed	reg	iloprerr_not_fixed2
+iloprerr_too_many	reg	iloprerr_too_many2
+iloprerr_pseudo_many	reg	iloprerr_pseudo_many2
+iloprerr_local		reg	iloprerr_local2
+iloprerr_ds_negative	reg	iloprerr_ds_negative2
+iloprerr_end_xref	reg	iloprerr_end_xref2
+undefsymerr		reg	undefsymerr2
+undefsymerr_local	reg	undefsymerr_local2
+undefsymerr_offsym	reg	undefsymerr_offsym2
+divzeroerr		reg	divzeroerr2
+ilrelerr_outside	reg	ilrelerr_outside2
+ilrelerr_const		reg	ilrelerr_const2
+overflowerr		reg	overflowerr2
+ilvalueerr		reg	ilvalueerr2
+ilquickerr_addsubq	reg	ilquickerr_addsubq2
+ilquickerr_moveq	reg	ilquickerr_moveq2
+ilquickerr_mov3q	reg	ilquickerr_mov3q2
+ilquickerr_sftrot	reg	ilquickerr_sftrot2
+ilsfterr		reg	ilsfterr2
+featureerr_cpu		reg	featureerr_cpu2
+featureerr_xref		reg	featureerr_xref2
+nosymerr_macro		reg	nosymerr_macro2
+nosymerr_pseudo		reg	nosymerr_pseudo2
+tooinclderr		reg	tooinclderr2
+nofileerr		reg	nofileerr2
+mismacerr_exitm		reg	mismacerr_exitm2
+mismacerr_endm		reg	mismacerr_endm2
+mismacerr_local		reg	mismacerr_local2
+mismacerr_sizem		reg	mismacerr_sizem2
+mismacerr_eof		reg	mismacerr_eof2
+toomanylocsymerr	reg	toomanylocsymerr2
+macnesterr		reg	macnesterr2
+misiferr_else		reg	misiferr_else2
+misiferr_elseif		reg	misiferr_elseif2
+misiferr_endif		reg	misiferr_endif2
+misiferr_else_elseif	reg	misiferr_else_elseif2
+misiferr_eof		reg	misiferr_eof2
+termerr_doublequote	reg	termerr_doublequote2
+termerr_singlequote	reg	termerr_singlequote2
+termerr_bracket		reg	termerr_bracket2
+ilinterr		reg	ilinterr2
+offsymalignerr		reg	offsymalignerr2
+
+errout			reg	errout2
+
+crlf_msg		reg	crlf_msg2
+
+
+;----------------------------------------------------------------
+;	$Log: error2.equ,v $
+;	Revision 1.8  1999 10/ 8(Fri) 21:04:55 M.Kamada
+;	+86 ilsymerrを細分化
+;	+86 ilsizeerrを細分化
+;	+86 '%s に外部参照値は指定できません'
+;	+86 foo fequ fooのエラーメッセージがおかしい
+;
+;	Revision 1.7  1999  6/ 9(Wed) 23:38:51 M.Kamada
+;	+85 .offsymでシンボル指定があるとき.even/.quad/.alignをエラーにする
+;	+85 .dsの引数が負数のとき.text/.dataセクションではエラー,その他はワーニング
+;
+;	Revision 1.6  1999  4/24(Sat) 03:14:59 M.Kamada
+;	+84 マクロ内のローカルシンボルが多すぎるとバスエラーが出る不具合を修正
+;
+;	Revision 1.5  1999  3/16(Tue) 03:46:59 M.Kamada
+;	+83 「ローカルラベルの参照が不正です」を追加
+;
+;	Revision 1.4  1999  3/ 2(Tue) 20:47:41 M.Kamada
+;	+82 エラーメッセージを日本語化
+;	+82 疑似命令のパラメータが多すぎる場合のエラーチェックを強化
+;
+;	Revision 1.3  1999  2/27(Sat) 23:40:10 M.Kamada
+;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
+;
+;	Revision 1.2  1998  3/30(Mon) 21:22:54 M.Kamada
+;	+61 warning: insignificant bitを追加
+;
+;	Revision 1.1  1998  1/10(Sat) 15:45:44 M.Kamada
+;	+56 MOVE to USPのエラッタを回避
+;
+;	Revision 1.0  1997  9/14(Sun) 16:34:09 M.Kamada
+;	+46 error.sを分離
+;	Initial revision
+;
+;
+	.text
+	.list

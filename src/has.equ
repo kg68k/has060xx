@@ -1,0 +1,524 @@
+	.nlist
+;----------------------------------------------------------------
+;	X68k High-speed Assembler
+;		定数・マクロ定義
+;		< has.equ >
+;
+;		Copyright 1990-1994  by Y.Nakamura
+;			  1996-2023  by M.Kamada
+;----------------------------------------------------------------
+
+  .ifndef __HAS_EQU__
+__HAS_EQU__	equ	1
+
+;----------------------------------------------------------------
+version		reg	'3.09+91'	;バージョンNo.
+verno		equ	309		;(@VERSIONの値)
+verno060	equ	91		;__HAS060__の値
+copyright	reg	'(C) 1990-1994/1996-2023 Y.Nakamura/M.Kamada'	;title_msgの著作権表示
+
+  .ifndef EUCSRC
+EUCSRC		equ	0		;ソースの文字コード(0=SJIS,1=EUC)
+  .endif
+  .ifndef EUCMES
+EUCMES		equ	0		;メッセージの文字コード(0=SJIS,1=EUC)
+  .endif
+  .ifndef UNIX_NEWLINE
+UNIX_NEWLINE	equ	0		;メッセージの改行コード(0=$0D0A,1=$0A)
+  .endif
+
+;----------------------------------------------------------------
+;	定数の定義
+;----------------------------------------------------------------
+BELL		equ	$07
+TAB		equ	$09
+LF		equ	$0A
+FF		equ	$0C
+CR		equ	$0D
+EOF		equ	$1A
+
+STDOUT		equ	1
+STDERR		equ	2
+
+  .if UNIX_NEWLINE=0
+CRLF		reg	CR,LF
+  .else
+CRLF		reg	LF
+  .endif
+
+  .if 1
+MASK_HASH	equ	1
+;ハッシュテーブルのサイズを32768未満の2のべき乗にする
+SYMHASHSIZE	equ	8192	;シンボルハッシュテーブルのサイズ
+CMDHASHSIZE	equ	1024	;命令ハッシュテーブルのサイズ
+  .else
+SYMHASHSIZE	equ	10000	;シンボルハッシュテーブルのサイズ
+CMDHASHSIZE	equ	1000	;命令ハッシュテーブルのサイズ
+  .endif
+
+INCLDMAXNEST	equ	8	;インクルードファイルの最大ネスティング数
+MACROMAXNEST	equ	32	;マクロ展開の最大ネスティング数
+
+;SYMEXTCOUNTは16の倍数にすること
+SYMEXTCOUNT	equ	2000	;一度に用意するシンボルテーブル数
+
+MAXLINELEN	equ	1024	;一行の最大長
+
+LOCSYMBUFSIZE	equ	16384	;マクロ内のローカルシンボル名のバッファのサイズ
+				;(1つのマクロ定義で使えるローカルシンボルの最大サイズ)
+
+
+;----------------------------------------------------------------
+;	マクロ定義
+;----------------------------------------------------------------
+
+;----------------------------------------------------------------
+;	レジスタの値を偶数境界に合わせる
+doeven	.macro	reg
+	addq.l	#1,reg
+	and.b	#$FE,reg
+	.endm
+
+;----------------------------------------------------------------
+;	レジスタの値をロングワード境界に合わせる
+doquad	.macro	reg
+	addq.l	#3,reg
+	and.b	#$FC,reg
+	.endm
+
+;----------------------------------------------------------------
+;	大文字なら小文字化する
+tolower	.macro	reg
+	cmpi.b	#'Z',reg
+	bhi	@skip
+	cmpi.b	#'A',reg
+	bcs	@skip
+	ori.b	#$20,reg
+@skip:
+	.endm
+
+;----------------------------------------------------------------
+;	68000/68010ならジャンプする
+bra68	.macro	reg,label
+	move.b	(CPUTYPE,a6),reg
+	andi.b	#(C000|C010)>>8,reg
+	bne	label
+	.endm
+
+;----------------------------------------------------------------
+;	68000/68010でないならジャンプする
+bran68	.macro	reg,label
+	move.b	(CPUTYPE,a6),reg
+	andi.b	#(C000|C010)>>8,reg
+	beq	label
+	.endm
+
+;----------------------------------------------------------------
+;	32bitオフセットのbsrを行う
+bsrl	.macro	adr,reg
+@currentpc:
+	move.l	#adr-@currentpc,reg
+	jsr	(@currentpc,pc,reg.l)
+	.endm
+
+;----------------------------------------------------------------
+;	32ビットの相対lea
+llea	.macro	adr,reg
+@currentpc:
+	lea.l	(@currentpc,pc),reg
+	adda.l	#adr-@currentpc,reg
+	.endm
+
+;----------------------------------------------------------------
+;	現在のファイルポインタ位置を得る
+GETFPTR	.macro	adr,reg
+	move.l	(F_TOPOFST+adr,a6),reg
+	add.l	(F_PTROFST+adr,a6),reg
+	.endm
+
+;----------------------------------------------------------------
+;	EUC対応
+jissft	.macro	h,l
+	l:=l+$1F
+	h:=h+1
+  .if h.and.1
+	l:=l+$5E
+  .endif
+	h:=h/2
+  .if l>=$7F
+	l:=l+1
+  .endif
+	h:=h+$70
+  .if h>=$A0
+	h:=h+$40
+  .endif
+	.endm
+
+sftjis	.macro	h,l
+  .if h>=$E0
+	h:=h-$40
+  .endif
+	h:=h-$70
+  .if l>=$80
+	l:=l-1
+  .endif
+	h:=h*2
+  .if l>=$9E
+	l:=l-$5E
+	h:=h+1
+  .endif
+	h:=h-1
+	l:=l-$1F
+	.endm
+
+;シフトJISコードで書かれた文字列をEUCコードで埋め込む
+eucstr	.macro	str
+  .irpc c,str
+    .if '&c'<=$FF
+	.dc.b	'&c'
+    .else
+	h:=('&c'>>8).and.$FF
+	l:='&c'.and.$FF
+	sftjis	h,l
+	.dc.b	$80+h,$80+l
+    .endif
+  .endm
+	.endm
+
+mes	.macro	str
+  .if EUCMES=0
+	.dc.b	str
+  .else
+	eucstr	str
+  .endif
+	.endm
+
+;----------------------------------------------------------------
+;	シンボル定義属性
+;----------------------------------------------------------------
+SA_UNDEF	equ	0	;使用されたが定義されていない
+SA_NODET	equ	1	;定義されたが値が定まっていない
+SA_DEFINE	equ	2	;定義されて値が定まった
+SA_PREDEFINE	equ	3	;定義されて値が定まっており再定義できない
+
+
+;----------------------------------------------------------------
+;	セクションコード
+;----------------------------------------------------------------
+SECT_ABS	equ	$00	;定数
+SECT_TEXT	equ	$01	;テキスト
+SECT_DATA	equ	$02	;データ
+SECT_BSS	equ	$03	;ブロックストレージ
+SECT_STACK	equ	$04	;スタック
+SECT_RDATA	equ	$05	;データ			(64KB以内相対)
+SECT_RBSS	equ	$06	;ブロックストレージ
+SECT_RSTACK	equ	$07	;スタック
+SECT_RLDATA	equ	$08	;データ			(64KB以上相対)
+SECT_RLBSS	equ	$09	;ブロックストレージ
+SECT_RLSTACK	equ	$0A	;スタック
+N_SECTIONS	equ	$0A	;セクションの数(text/data/bss/stack/rl?data/rl?bss/rl?stack)
+
+
+;----------------------------------------------------------------
+;	外部定義属性
+;----------------------------------------------------------------
+SECT_GLOBL	equ	$FA	;グローバル(外部参照/定義)
+SECT_XDEF	equ	$FB	;外部定義
+SECT_RLCOMM	equ	$FC	;コモンエリア(64KB以上相対)
+SECT_RCOMM	equ	$FD	;コモンエリア(64KB以内相対)
+SECT_COMM	equ	$FE	;コモンエリア
+SECT_XREF	equ	$FF	;外部参照
+
+
+;----------------------------------------------------------------
+;	ファイルポインタの構造
+;----------------------------------------------------------------
+	.offset	0
+F_HANDLE:	.ds.w	1	;ファイルハンドル(オープン前なら-1)
+F_BUFPTR:	.ds.l	1	;ファイルバッファへのポインタ
+F_BUFLEN:	.ds.l	1	;ファイルバッファ長
+F_TOPOFST:	.ds.l	1	;バッファ先頭データのオフセット
+F_DATALEN:	.ds.l	1	;バッファ内のデータ長
+F_PTROFST:	.ds.l	1	;次のデータのオフセット
+F_NAMEPTR:	.ds.l	1	;ファイル名へのポインタ
+;F_DATAPTR:	.ds.l	1	;次のデータへのポインタ
+;F_BUFLEFT:	.ds.l	1	;未使用/未読のバッファ長
+F_PTRLEN:
+
+
+;----------------------------------------------------------------
+;	SCD拡張シンボルテーブルの構造
+;----------------------------------------------------------------
+	.offset	0
+SCD_NAME:	.ds.b	8	;シンボル名
+SCD_VAL:	.ds.l	1	;シンボル値
+SCD_SECT:	.ds.w	1	;値の存在するセクション
+SCD_TYPE:	.ds.w	1	;シンボルの型
+SCD_SCL:	.ds.b	1	;シンボルの記憶クラス
+SCD_LEN:	.ds.b	1	;シンボルテーブルの長さ
+SCD_TAG:	.ds.l	1	;構造シンボルのタグ位置
+SCD_SIZE:	.ds.l	1	;シンボルのサイズ
+SCD_DIM:	.ds.w	2	;配列シンボルの要素数
+SCD_NEXT:	.ds.l	1	;テーブルチェイン
+		.ds.w	1	;(未使用)
+SCD_TBLLEN:
+
+
+;----------------------------------------------------------------
+;	実効アドレス解釈バッファの内容
+;----------------------------------------------------------------
+	.offset	0
+EACODE:		.ds.w	1	;実効アドレスモードエンコード
+EXTCODE:	.ds.w	1	;拡張ワード
+EADTYPE:	.ds.b	1	;実効アドレスデータタイプ
+EAIMMCNT:	.ds.b	1	;実効アドレスのイミディエイトデータ数(FP命令用)
+
+RPNSIZE1:	.ds.b	1	;式のサイズ
+OPTIONALPC:	.ds.b	1	;実効アドレスのPCがoptionalならtrue
+	.even
+RPNLEN1:	.ds.w	1	;逆ポーランド式の長さ(-1なら定数/0なら式がない)
+RPNBUF1:	.ds.w	128	;逆ポーランド式バッファ/定数値
+
+RPNSIZE2:	.ds.b	1	;(od用)
+	.even
+RPNLEN2:	.ds.w	1	;
+RPNBUF2:	.ds.w	128	;
+EABUFSIZE:
+
+
+;----------------------------------------------------------------
+;	演算子コード
+;----------------------------------------------------------------
+;リンカに渡す演算子番号は変更不可
+;単項演算子
+OP_NEG		equ	$01
+OP_POS		equ	$02
+OP_NOT		equ	$03
+OP_HIGH		equ	$04
+OP_LOW		equ	$05
+OP_HIGHW	equ	$06
+OP_LOWW		equ	$07
+OP_NUL		equ	$08
+;二項演算子
+OP_MUL		equ	$09
+OP_DIV		equ	$0A
+OP_MOD		equ	$0B
+OP_SHR		equ	$0C
+OP_SHL		equ	$0D
+OP_ASR		equ	$0E
+OP_SUB		equ	$0F
+OP_ADD		equ	$10
+OP_EQ		equ	$11
+OP_NE		equ	$12
+OP_LT		equ	$13
+OP_LE		equ	$14
+OP_GT		equ	$15
+OP_GE		equ	$16
+OP_SLT		equ	$17
+OP_SLE		equ	$18
+OP_SGT		equ	$19
+OP_SGE		equ	$1A
+OP_AND		equ	$1B
+OP_XOR		equ	$1C
+OP_OR		equ	$1D
+;以降はリンカに渡さない演算子
+OPNOTLK		equ	$1E
+;.notb./.notw.
+OP_NOTB		equ	$1E
+OP_NOTW		equ	$1F
+;.sizeof./.defined.
+OP_SIZEOF	equ	$20
+OP_DEFINED	equ	$21
+;演算子の種類の数
+OPCOUNT		equ	$22
+
+  .endif	;__HAS_EQU__
+
+;----------------------------------------------------------------
+;
+;	Revision 5.2  2023-07-07 12:00:00  M.Kamada
+;	+91 -c4のときADDA.W/SUBA.W #$8000,Anが間違って変換される不具合
+;	+91 使用法のasをhas060に変更、環境変数の説明に(-iは後ろ)を追加
+;
+;	Revision 2.1  2023-07-06 12:00:00  M.Kamada
+;	+90 環境変数HASの-iをコマンドラインの-iの後に検索する
+;
+;	Revision 2.0  2016-08-07 12:00:00  M.Kamada
+;	+89 060turbo で 060high 1 のとき 16MB を超えるメモリを確保できる
+;	+89 BRA.L の後に .CPU 68000 があるとアセンブルできない不具合
+;
+;	Revision 1.45  2016-01-01 12:00:00  M.Kamada
+;	+88 title_msgの著作権表示をmain.sからhas.equに移動
+;	+88 タイトルメッセージが80文字に収まるように著作権表示をコンパクトに
+;	+88 PRNファイルの日付をYYYY-MM-DDに変更
+;	+88 .offsymにシンボルがないとき.offsetに遷移するとバスエラーが発生する不具合
+;	+88 文字列→浮動小数点数変換で正確に表現できる数に誤差が入る不具合
+;	+88 ワーニング「整数を単精度浮動小数点数の内部表現と見なします」を追加
+;	+88 エラー「浮動小数点数の内部表現の長さが合いません」を追加
+;	+88 -fの5番目の引数でPRNファイルのコード部の幅を指定
+;
+;	Revision 1.44  1999 11/17(Wed) 03:59:32 M.Kamada
+;	+87 tst (0,a0)+が「オペランドが多すぎます」になる
+;
+;	Revision 1.43  1999 10/ 8(Fri) 20:06:23 M.Kamada
+;	+86 外部参照宣言したシンボルを行頭ラベルとして再定義しようとするとバスエラーになる不具合
+;	+86 ilsymerrを細分化
+;	+86 ilsizeerrを細分化
+;	+86 浮動小数点数を含む式で+符号が使えなかった
+;	+86 浮動小数点数を含む式で加算と減算が逆になっていた
+;	+86 改行コードの変更に対応
+;	+86 EUC対応準備
+;	+86 '%s に外部参照値は指定できません'
+;	+86 foo fequ fooのエラーメッセージがおかしい
+;
+;	Revision 1.42  1999  6/ 9(Wed) 23:35:36 M.Kamada
+;	+85 .offsymでシンボル指定があるとき.even/.quad/.alignをエラーにする
+;	+85 演算子!=を有効にする
+;	+85 演算子.notb./.notw.を追加
+;	+85 .dsの引数が負数のとき.text/.dataセクションではエラー,その他はワーニング
+;
+;	Revision 1.41  1999  4/28(Wed) 22:21:33 M.Kamada
+;	+84 マクロ内のローカルシンボルが多すぎるとバスエラーが出る不具合を修正
+;	+84 1つのマクロでローカルシンボルを254個以上登録できる
+;
+;	Revision 1.40  1999  3/16(Tue) 03:32:21 M.Kamada
+;	+83 疑似命令のパラメータが間違っているときに多すぎると表示されることがあった
+;	+83 浮動小数点数を含む式で比較と整数の演算子が使えるようにする
+;	+83 -o./fooのとき.oが補完されなかった
+;	+83 エラーメッセージ中の疑似命令の先頭に'.'を付ける
+;	+83 数字ローカルラベルを4桁まで対応
+;
+;	Revision 1.39  1999  3/ 3(Wed) 14:42:55 M.Kamada
+;	+82 ColdFireのときCPUSHLがアセンブルできなかった
+;	+82 ハッシュテーブルのサイズを2のべき乗にしてdivuを除去
+;	+82 doquadマクロ追加
+;
+;	Revision 1.38  1999  2/27(Sat) 23:41:58 M.Kamada
+;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
+;
+;	Revision 1.37  1999  2/23(Tue) 02:27:47 M.Kamada
+;	+80 ColdFire対応
+;	+80 lleaマクロ追加
+;	+80 .sizeof.と.defined.を追加
+;
+;	Revision 1.36  1999  2/11(Thu) 02:49:05 M.Kamada
+;	+79 .dcの個別のサイズ指定で.w/.l以外を指定したときの挙動がおかしい
+;
+;	Revision 1.35  1998 11/19(Thu) 22:01:56 M.Kamada
+;	+78 -k0と-nを併用すると誤動作するため後から指定した方を有効にする
+;
+;	Revision 1.34  1998 10/10(Sat) 00:51:53 M.Kamada
+;	+77 -pのとき.INSERTで1度に256バイト以上読み出すと誤動作する
+;
+;	Revision 1.33  1998  8/26(Wed) 13:27:30 M.Kamada
+;	+76 マクロ内ローカルシンボル@～を2個以上定義すると誤動作する
+;
+;	Revision 1.32  1998  8/22(Sat) 15:45:47 M.Kamada
+;	+75 数字ローカルラベルが定義できなくなっていた
+;
+;	Revision 1.31  1998  8/20(Thu) 23:18:41 M.Kamada
+;	+74 マクロ定義中の@～を自動的にローカル宣言する
+;
+;	Revision 1.30  1998  8/19(Wed) 00:22:30 M.Kamada
+;	+73 .dcのデータに個別にサイズを指定できる
+;
+;	Revision 1.29  1998  8/18(Tue) 19:35:57 M.Kamada
+;	+72 .sizemの第2引数のローカルシンボルにマクロの引数の個数を定義する
+;
+;	Revision 1.28  1998  8/ 2(Sun) 16:30:34 M.Kamada
+;	+71 -1のときFMOVE FPn,<label>がエラーになる
+;
+;	Revision 1.27  1998  7/29(Wed) 02:33:11 M.Kamada
+;	+70 .INSERTの引数に10進数以外の数値を指定したときの不具合を修正
+;
+;	Revision 1.26  1998  7/14(Tue) 01:20:12 M.Kamada
+;	+68 .insertを追加
+;	+69 プレデファインシンボル__HAS__と__HAS060__を追加
+;
+;	Revision 1.25  1998  7/ 5(Sun) 20:43:47 M.Kamada
+;	+67 STOP/LPSTOP #<data> で無意味なビットが立っていたらワーニングを出す
+;
+;	Revision 1.24  1998  5/24(Sun) 19:42:22 M.Kamada
+;	+66 ANDI to SR/CCRで未定義ビットをクリアしようとしたらワーニングを出す
+;	+66 -y[n]のnを書くと常に-y0になる不具合を修正
+;
+;	Revision 1.22  1998  4/13(Mon) 04:17:36 M.Kamada
+;	+64 move An,USPの行にラベルがあるとI11対策が行われない
+;
+;	Revision 1.21  1998  3/31(Tue) 02:03:17 M.Kamada
+;	+61 MOVE #<imm>,SR/CCR で無意味なビットが立っていたらワーニングを出す
+;	+62 MOVEP.L (d,An),Dnの展開にSWAPを使う
+;	+63 jmp/jsrを最適化する
+;
+;	Revision 1.20  1998  3/27(Fri) 06:30:06 M.Kamada
+;	+60 .OFFSETセクションでDSの引数に行頭のシンボルを使えないバグ
+;
+;	Revision 1.19  1998  2/ 8(Sun) 00:59:50 M.Kamada
+;	+59 jbra/jbsr/jbccにサイズを指定できる
+;
+;	Revision 1.18  1998  1/25(Sun) 21:15:12 M.Kamada
+;	+58 逆条件ニモニックとelifを追加
+;
+;	Revision 1.17  1998  1/24(Sat) 17:11:40 M.Kamada
+;	+57 バージョン変更
+;
+;	Revision 1.16  1998  1/ 9(Fri) 22:21:42 M.Kamada
+;	+56 バージョン変更
+;
+;	Revision 1.15  1998  1/ 3(Sat) 22:33:19 M.Kamada
+;	+55 バージョン変更
+;
+;	Revision 1.15  1997 11/23(Sun) 16:00:01 M.Kamada
+;	+99 バージョン変更
+;		バージョン変更
+;
+;	Revision 1.14  1997  9/15(Mon) 15:29:52 M.Kamada
+;	+45 アセンブル条件追加
+;
+;	Revision 1.13  1997  9/14(Sun) 02:55:29 M.Kamada
+;	+99 バージョン変更
+;		バージョン変更
+;
+;	Revision 1.12  1997  6/24(Tue) 21:56:16 M.Kamada
+;	+34 プレデファインシンボルの定義属性SA_PREDEFINEを追加
+;
+;	Revision 1.11  1997  6/24(Tue) 17:53:21 M.Kamada
+;	+99 バージョン変更
+;		バージョン変更
+;
+;	Revision 1.10  1994/07/28  12:43:42  nakamura
+;	若干のバグ修正
+;
+;	Revision 1.9  1994/07/08  16:00:42  nakamura
+;	コメントキャラクタ,データサイズ追加
+;	link命令の最適化処理追加
+;	バグフィックス など
+;
+;	Revision 1.8  1994/06/09  14:20:04  nakamura
+;	バグ修正,シンボルに使用できる文字の拡張('$')。
+;
+;	Revision 1.7  1994/04/25  14:35:12  nakamura
+;	若干のバグ修正
+;
+;	Revision 1.6  1994/04/09  14:07:36  nakamura
+;	若干のバグ修正。
+;	jbra/jbsr/jb<cc>命令で絶対ロング以外のアドレッシングを使用可能にした。
+;
+;	Revision 1.5  1994/03/10  16:15:18  nakamura
+;	次の命令へのブランチを削除すると暴走するバグを修正
+;
+;	Revision 1.4  1994/03/01  13:57:50  nakamura
+;	バグフィックスおよび仕様拡張
+;
+;	Revision 1.3  1994/02/24  12:16:02  nakamura
+;	*** empty log message ***
+;
+;	Revision 1.2  1994/02/20  14:52:20  nakamura
+;	*** empty log message ***
+;
+;	Revision 1.1  1994/02/13  14:32:56  nakamura
+;	Initial revision
+;
+;
+	.text
+	.list

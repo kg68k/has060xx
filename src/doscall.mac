@@ -1,0 +1,292 @@
+	.nlist
+
+*Human v2.00以上のDOSコール名
+_EXIT		equ	$FF00
+_GETCHAR	equ	$FF01
+_PUTCHAR	equ	$FF02
+_COMINP		equ	$FF03
+_COMOUT		equ	$FF04
+_PRNOUT		equ	$FF05
+_INPOUT		equ	$FF06
+_INKEY		equ	$FF07
+_GETC		equ	$FF08
+_PRINT		equ	$FF09
+_GETS		equ	$FF0A
+_KEYSNS		equ	$FF0B
+_KFLUSH		equ	$FF0C
+_FFLUSH		equ	$FF0D
+_CHGDRV		equ	$FF0E
+_CHDRV		equ	$FF0E
+_DRVCTRL	equ	$FF0F
+
+_CONSNS		equ	$FF10
+_PRNSNS		equ	$FF11
+_CINSNS		equ	$FF12
+_COUTSNS	equ	$FF13
+
+_FATCHK		equ	$FF17
+_HENDSP		equ	$FF18	*仮名
+_CURDRV		equ	$FF19
+_GETSS		equ	$FF1A
+_FGETC		equ	$FF1B
+_FGETS		equ	$FF1C
+_FPUTC		equ	$FF1D
+_FPUTS		equ	$FF1E
+_ALLCLOSE	equ	$FF1F
+
+_SUPER		equ	$FF20
+_FNCKEY		equ	$FF21
+_KNJCTRL	equ	$FF22
+_CONCTRL	equ	$FF23
+_KEYCTRL	equ	$FF24
+_INTVCS		equ	$FF25
+_PSPSET		equ	$FF26
+_GETTIM2	equ	$FF27
+_SETTIM2	equ	$FF28
+_NAMESTS	equ	$FF29
+_GETDATE	equ	$FF2A
+_SETDATE	equ	$FF2B
+_GETTIME	equ	$FF2C
+_SETTIME	equ	$FF2D
+_VERIFY		equ	$FF2E
+_DUP0		equ	$FF2F
+
+_VERNUM		equ	$FF30
+_KEEPPR		equ	$FF31
+_GETDPB		equ	$FF32
+_BREAKCK	equ	$FF33
+_DRVXCHG	equ	$FF34
+_INTVCG		equ	$FF35
+_DSKFRE		equ	$FF36
+_NAMECK		equ	$FF37
+
+_MKDIR		equ	$FF39
+_RMDIR		equ	$FF3A
+_CHDIR		equ	$FF3B
+_CREATE		equ	$FF3C
+_OPEN		equ	$FF3D
+_CLOSE		equ	$FF3E
+_READ		equ	$FF3F
+
+_WRITE		equ	$FF40
+_DELETE		equ	$FF41
+_SEEK		equ	$FF42
+_CHMOD		equ	$FF43
+_IOCTRL		equ	$FF44
+_DUP		equ	$FF45
+_DUP2		equ	$FF46
+_CURDIR		equ	$FF47
+_MALLOC		equ	$FF48
+_MFREE		equ	$FF49
+_SETBLOCK	equ	$FF4A
+_EXEC		equ	$FF4B
+_EXIT2		equ	$FF4C
+_WAIT		equ	$FF4D
+_FILES		equ	$FF4E
+_NFILES		equ	$FF4F
+
+*$FF50～$FF7Fは68030以上では使用不可
+~0~_SETPDB	equ	$FF50
+~0~_GETPDB	equ	$FF51
+~0~_SETENV	equ	$FF52
+~0~_GETENV	equ	$FF53
+~0~_VERIFYG	equ	$FF54
+~0~_COMMON	equ	$FF55
+~0~_RENAME	equ	$FF56
+~0~_FILEDATE	equ	$FF57
+~0~_MALLOC2	equ	$FF58
+
+~0~_MAKETMP	equ	$FF5A
+~0~_NEWFILE	equ	$FF5B
+~0~_LOCK	equ	$FF5C
+
+~0~_ASSIGN	equ	$FF5F
+
+~0~_FFLUSH_SET	equ	$FF7A	*Human v2.15以上
+~0~_OS_PATCH	equ	$FF7B	*Human v2.15以上
+~0~_GET_FCB_ADR	equ	$FF7C
+~0~_GETFCB	equ	$FF7C	*仮名
+~0~_S_MALLOC	equ	$FF7D
+~0~_S_MFREE	equ	$FF7E
+~0~_S_PROCESS	equ	$FF7F
+
+*$FF80～$FFAFはHuman v2.15以降で定義されている
+_SETPDB		equ	$FF80
+_GETPDB		equ	$FF81
+_SETENV		equ	$FF82
+_GETENV		equ	$FF83
+_VERIFYG	equ	$FF84
+_COMMON		equ	$FF85
+_RENAME		equ	$FF86
+_FILEDATE	equ	$FF87
+_MALLOC2	equ	$FF88
+
+_MAKETMP	equ	$FF8A
+_NEWFILE	equ	$FF8B
+_LOCK		equ	$FF8C
+
+_ASSIGN		equ	$FF8F
+
+*$FF90～$FF93は060turbo.sysで定義されている
+_MALLOC3	equ	$FF90	*060turbo用
+_SETBLOCK2	equ	$FF91	*060turbo用
+_MALLOC4	equ	$FF92	*060turbo用
+_S_MALLOC2	equ	$FF93	*060turbo用
+
+_FFLUSH_SET	equ	$FFAA
+_FFLUSHMD	equ	$FFAA	*仮名
+_OS_PATCH	equ	$FFAB
+_GET_FCB_ADR	equ	$FFAC
+_GETFCB		equ	$FFAC	*仮名
+_S_MALLOC	equ	$FFAD
+_S_MFREE	equ	$FFAE
+_S_PROCESS	equ	$FFAF
+
+_EXITVC		equ	$FFF0
+_CTRLVC		equ	$FFF1
+_ERRJVC		equ	$FFF2
+_DISKRED	equ	$FFF3
+_DISKWRT	equ	$FFF4
+_INDOSFLG	equ	$FFF5
+_SUPER_JSR	equ	$FFF6
+_BUS_ERR	equ	$FFF7
+_OPEN_PR	equ	$FFF8
+_KILL_PR	equ	$FFF9
+_GET_PR		equ	$FFFA
+_SUSPEND	equ	$FFFB
+_SUSPEND_PR	equ	$FFFB	*仮名
+_SLEEP_PR	equ	$FFFC
+_SEND_PR	equ	$FFFD
+_TIME_PR	equ	$FFFE
+_CHANGE_PR	equ	$FFFF
+
+
+*_KFLUSHのXC名
+__KFLUSHGP	equ	$0001
+__KFLUSHIO	equ	$0006
+__KFLUSHIN	equ	$0007
+__KFLUSHGC	equ	$0008
+__KFLUSHGS	equ	$000A
+
+
+*_HENDSPのXC名
+__HENDSPMO	equ	$0000
+__HENDSPMP	equ	$0001
+__HENDSPMR	equ	$0002
+__HENDSPMC	equ	$0003
+__HENDSPIO	equ	$0004
+__HENDSPIP	equ	$0005
+__HENDSPIR	equ	$0006
+__HENDSPIC	equ	$0007
+__HENDSPSO	equ	$0008
+__HENDSPSP	equ	$0009
+__HENDSPSR	equ	$000A
+__HENDSPSC	equ	$000B
+
+
+*_FNCKEYのXC名
+__FNCKEYGT	equ	$0000
+__FNCKEYST	equ	$0001
+
+
+*_CONCTRLのXC名
+__C_PUTC	equ	$0000
+__C_PRINT	equ	$0001
+__C_COLOR	equ	$0002
+__C_LOCATE	equ	$0003
+__C_DOWN_S	equ	$0004
+__C_UP_S	equ	$0005
+__C_UP		equ	$0006
+__C_DOWN	equ	$0007
+__C_RIGHT	equ	$0008
+__C_LEFT	equ	$0009
+__C_CLS_ED	equ	$000A0000
+__C_CLS_ST	equ	$000A0001
+__C_CLS_AL	equ	$000A0002
+__C_ERA_ED	equ	$000B0000
+__C_ERA_ST	equ	$000B0001
+__C_ERA_AL	equ	$000B0002
+__C_INS		equ	$000C
+__C_DEL		equ	$000D
+__C_FNKMOD	equ	$000E
+__C_WINDOW	equ	$000F
+__C_WIDTH	equ	$0010
+__C_CURON	equ	$0011
+__C_CUROFF	equ	$0012
+
+
+*_KEYCTRLのXC名
+__K_KEYINP	equ	$0000
+__K_KEYSNS	equ	$0001
+__K_SFTSNS	equ	$0002
+__K_KEYBIT	equ	$0003
+__K_INSMOD	equ	$0004
+
+
+*_BREAKCKのXC名
+__BREAKCK_OFF	equ	$0000
+__BREAKCK_ON	equ	$0001
+__BREAKCK_KILL	equ	$0002
+__CTRL_C_CHECK	equ	$01FF
+__CTRL_C_ON	equ	$0101
+__CTRL_C_OFF	equ	$0100
+__CTRL_N_CHECK	equ	$02FF
+__CTRL_N_ON	equ	$0201
+__CTRL_N_OFF	equ	$0200
+__CTRL_P_CHECK	equ	$03FF
+__CTRL_P_ON	equ	$0301
+__CTRL_P_OFF	equ	$0300
+__CTRL_Q_CHECK	equ	$04FF
+__CTRL_Q_ON	equ	$0401
+__CTRL_Q_OFF	equ	$0400
+__CTRL_S_CHECK	equ	$05FF
+__CTRL_S_ON	equ	$0501
+__CTRL_S_OFF	equ	$0500
+__BREAKCK_CHECK	equ	$FFFF
+
+
+*_IOCTRLのXC名
+__IOCTRLGT	equ	$0000
+__IOCTRLST	equ	$0001
+__IOCTRLRH	equ	$0002
+__IOCTRLWH	equ	$0003
+__IOCTRLRD	equ	$0004
+__IOCTRLWD	equ	$0005
+__IOCTRLIS	equ	$0006
+__IOCTRLOS	equ	$0007
+__IOCTRLDVGT	equ	$0009
+__IOCTRLFDGT	equ	$000A
+__IOCTRLRTSET	equ	$000B
+__IOCTRLDVCTL	equ	$000C
+__IOCTRLFDCTL	equ	$000D
+
+
+*_EXECのXC名
+__LOADEXEC	equ	$0000
+__LOAD		equ	$0001
+__PATHCHK	equ	$0002
+__LOADONLY	equ	$0003
+__EXECONLY	equ	$0004
+__BINDNO	equ	$0005
+
+
+*_COMMONのXC名
+__COMMON_CK	equ	$0000
+__COMMON_RD	equ	$0001
+__COMMON_WT	equ	$0002
+__COMMON_LK	equ	$0003
+__COMMON_FRE	equ	$0004
+__COMMON_DEL	equ	$0005
+
+
+*_ASSIGNのXC名
+__MAKEASSIGN	equ	$0000
+__GETASSIGN	equ	$0001
+__RASSIGN	equ	$0004
+
+
+DOS	.macro	num
+	.dc.w	num
+	.endm
+
+	.list

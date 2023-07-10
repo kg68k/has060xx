@@ -1,0 +1,141 @@
+	.nlist
+;----------------------------------------------------------------
+;	X68k High-speed Assembler
+;		実効アドレスモード
+;		< eamode.equ >
+;
+;	$Id: eamode.equ,v 1.2  1999  2/27(Sat) 23:38:34 M.Kamada Exp $
+;
+;		Copyright 1990-94  by Y.Nakamura
+;			  1999     by M.Kamada
+;----------------------------------------------------------------
+
+
+;----------------------------------------------------------------
+;	実効アドレスモードエンコード
+;----------------------------------------------------------------
+EAC_DN		equ	@00	;データレジスタ直接
+EAC_AN		equ	@10	;アドレスレジスタ直接
+EAC_ADR		equ	@20	;アドレスレジスタ間接
+EAC_INCADR	equ	@30	;ポストインクリメント付きアドレスレジスタ間接
+EAC_DECADR	equ	@40	;プリデクリメント付きアドレスレジスタ間接
+EAC_DSPADR	equ	@50	;ディスプレースメント付きアドレスレジスタ間接
+EAC_IDXADR	equ	@60	;インデックス付きアドレスレジスタ間接
+EAC_BDADR	equ	@60	;ベースディスプレースメント付きアドレスレジスタ間接
+EAC_MEMADR	equ	@60	;ポスト/プリインデックス付きメモリ間接
+EAC_ABSW	equ	@70	;絶対ショート
+EAC_ABSL	equ	@71	;絶対ロング
+EAC_DSPPC	equ	@72	;ディスプレースメント付きPC間接
+EAC_IDXPC	equ	@73	;インデックス付きPC間接
+EAC_BDPC	equ	@73	;ベースディスプレースメント付きPC間接
+EAC_MEMPC	equ	@73	;ポスト/プリインデックス付きPCメモリ間接
+EAC_IMM		equ	@74	;イミディエイト
+
+
+;----------------------------------------------------------------
+;	実効アドレスモードビット
+;----------------------------------------------------------------
+EA_DN		equ	1<<0	;データレジスタ直接
+EA_AN		equ	1<<1	;アドレスレジスタ直接
+EA_ADR		equ	1<<2	;アドレスレジスタ間接
+EA_INCADR	equ	1<<3	;ポストインクリメント付きアドレスレジスタ間接
+EA_DECADR	equ	1<<4	;プリデクリメント付きアドレスレジスタ間接
+EA_DSPADR	equ	1<<5	;ディスプレースメント付きアドレスレジスタ間接
+EA_IDXADR	equ	1<<6	;インデックス付きアドレスレジスタ間接
+EA_BDADR	equ	1<<6	;ベースディスプレースメント付きアドレスレジスタ間接
+EA_MEMADR	equ	1<<6	;ポスト/プリインデックス付きメモリ間接
+EA_ABSW		equ	1<<7	;絶対ショート
+EA_ABSL		equ	1<<8	;絶対ロング
+EA_DSPPC	equ	1<<9	;ディスプレースメント付きPC間接
+EA_IDXPC	equ	1<<10	;インデックス付きPC間接
+EA_BDPC		equ	1<<10	;ベースディスプレースメント付きPC間接
+EA_MEMPC	equ	1<<10	;ポスト/プリインデックス付きPCメモリ間接
+EA_IMM		equ	1<<11	;イミディエイト
+
+
+;----------------------------------------------------------------
+;	実効アドレスモードグループ
+;----------------------------------------------------------------
+;	データモード
+EG_DATA		equ	EA_DN|EA_ADR|EA_INCADR|EA_DECADR|EA_DSPADR|EA_IDXADR|EA_ABSW|EA_ABSL|EA_DSPPC|EA_IDXPC|EA_IMM
+;	メモリモード
+EG_MEM		equ	EA_ADR|EA_INCADR|EA_DECADR|EA_DSPADR|EA_IDXADR|EA_ABSW|EA_ABSL|EA_DSPPC|EA_IDXPC|EA_IMM
+;	可変モード
+EG_ALT		equ	EA_DN|EA_AN|EA_ADR|EA_INCADR|EA_DECADR|EA_DSPADR|EA_IDXADR|EA_ABSW|EA_ABSL
+;	制御モード
+EG_CTRL 	equ	EA_ADR|EA_DSPADR|EA_IDXADR|EA_ABSW|EA_ABSL|EA_DSPPC|EA_IDXPC
+
+
+;----------------------------------------------------------------
+;	実効アドレスデータタイプ
+;----------------------------------------------------------------
+EAD_NONEREG	equ	0	;データは不要( Dn,An )
+EAD_NONE	equ	1	;データは不要( (An),(An)+,-(An) )
+EAD_DSPADR	equ	2	;ディスプレースメント付きアドレスレジスタ間接
+EAD_IDXADR	equ	3	;インデックス付きアドレスレジスタ間接
+EAD_BDADR	equ	4	;ベースディスプレースメント付きアドレスレジスタ間接
+EAD_MEMADR	equ	5	;ポスト/プリインデックス付きメモリ間接
+EAD_DSPPC	equ	6	;ディスプレースメント付きPC間接
+EAD_IDXPC	equ	7	;インデックス付きPC間接
+EAD_BDPC	equ	8	;ベースディスプレースメント付きアPC間接
+EAD_MEMPC	equ	9	;ポスト/プリインデックス付きPCメモリ間接
+EAD_ABSLW	equ	10	;絶対ロング/ショート
+EAD_IMM		equ	11	;イミディエイト
+
+
+;----------------------------------------------------------------
+;	拡張ワードエンコードビット位置
+;----------------------------------------------------------------
+EXWB_ODSIZE	equ	0	;アウタディスプレースメントサイズ
+EXWB_IDXPOS	equ	2	;インデックス位置(プリ/ポスト)
+EXWB_BDSIZE	equ	4	;ベースディスプレースメントサイズ
+EXWB_IS		equ	6	;インデックスレジスタサプレス
+EXWB_BS		equ	7	;ベースレジスタサプレス
+EXWB_FORMAT	equ	8	;フォーマット
+EXWB_SCALE	equ	9	;スケールファクタ
+EXWB_IDXSIZE	equ	11	;インデックスレジスタサイズ
+EXWB_IDXREG	equ	12	;インデックスレジスタ番号
+
+
+;----------------------------------------------------------------
+;	拡張ワードエンコード
+;----------------------------------------------------------------
+EXW_DSPNUL	equ	1	;ヌルディスプレースメント
+EXW_DSPW	equ	2	;ワードディスプレースメント
+EXW_DSPL	equ	3	;ロングワードディスプレースメント
+
+EXW_ODNUL	equ	EXW_DSPNUL<<EXWB_ODSIZE	;アウタディスプレースメントサイズ
+EXW_ODW		equ	EXW_DSPW<<EXWB_ODSIZE
+EXW_ODL		equ	EXW_DSPL<<EXWB_ODSIZE
+EXW_BDNUL	equ	EXW_DSPNUL<<EXWB_BDSIZE	;ベースディスプレースメントサイズ
+EXW_BDW		equ	EXW_DSPW<<EXWB_BDSIZE
+EXW_BDL		equ	EXW_DSPL<<EXWB_BDSIZE
+
+EXW_PREIDX	equ	0<<EXWB_IDXPOS	;プリインデックス
+EXW_POSTIDX	equ	1<<EXWB_IDXPOS	;ポストインデックス
+
+EXW_IS		equ	1<<EXWB_IS	;インデックスレジスタサプレス
+EXW_BS		equ	1<<EXWB_BS	;ベースレジスタサプレス
+
+EXW_FULL	equ	1<<EXWB_FORMAT	;拡張ワードフルフォーマット
+
+EXW_SCALE1	equ	0<<EXWB_SCALE	;スケールファクタ *1
+EXW_SCALE2	equ	1<<EXWB_SCALE	;		  *2
+EXW_SCALE4	equ	2<<EXWB_SCALE	;		  *4
+EXW_SCALE8	equ	3<<EXWB_SCALE	;		  *8
+
+EXW_IDXW	equ	0<<EXWB_IDXSIZE	;インデックスレジスタサイズ
+EXW_IDXL	equ	1<<EXWB_IDXSIZE
+
+
+;----------------------------------------------------------------
+;	$Log: eamode.equ,v $
+;	Revision 1.2  1999  2/27(Sat) 23:38:34 M.Kamada
+;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
+;
+;	Revision 1.1  1994/02/13  14:31:42  nakamura
+;	Initial revision
+;
+;
+	.text
+	.list
