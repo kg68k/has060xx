@@ -659,17 +659,13 @@ deflocsymbol::
 ;	    d2.b=シンボルテーブルタイプ
 ;	out:a1=シンボルテーブルへのポインタ
 defstrsymbol::
-	movea.l	a0,a2
-	moveq.l	#-2,d1			;文字列の長さを求める
-defstrsymbol1:
-	addq.w	#1,d1
-	tst.b	(a2)+
-	bne	defstrsymbol1
+	bsr	strlen
+	subq.l	#1,d1			;文字列長-1
 	movea.l	a0,a2
 	bsr	isdefdsym
 	tst.w	d0
 	beq	defstrsymbol9		;すでに登録済だった
-	clr.b	(1,a2,d1.w)		;(/8が指定された場合のため)
+	clr.b	(1,a2,d1.l)		;(/8が指定された場合のため)
 	bsr	getsymtbl
 	move.l	a0,(a1)
 	movea.l	a0,a1

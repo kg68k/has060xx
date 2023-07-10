@@ -9,7 +9,7 @@
 ;			  1996-99  by M.Kamada
 ;----------------------------------------------------------------
 
-	.include	DOSCALL.MAC
+	.include	doscall.mac
 	.include	has.equ
 	.include	tmpcode.equ
 	.include	error2.equ
@@ -201,22 +201,16 @@ srchincld::
 	movea.l	a0,a2
 	lea.l	(-128,a5),a0		;カレントディレクトリからファイルを検索する
 	bsr	srchinclds
-	tst.l	d0
 	beq	srchincld7
-	lea.l	(INCLUDEPATH,a6),a3	;-i path からファイルを検索する
-srchincld1:
-	move.l	(a3),d0
-	beq	srchincld2
-	movea.l	d0,a3
-	lea.l	(4,a3),a1
-	lea.l	(-128,a5),a0
-	bsr	pathcpy
-	bsr	srchinclds
-	tst.l	d0
-	beq	srchincld7
-	bra	srchincld1		;次の'-i'パスを検索する
 
-srchincld2:
+	lea	(INCPATHCMD,a6),a3	;コマンドラインの -i path からファイルを検索する
+	bsr	srchincldilist
+	beq	srchincld7
+
+	lea	(INCPATHENV,a6),a3	;環境変数の -i path からファイルを検索する
+	bsr	srchincldilist
+	beq	srchincld7
+
 	lea.l	(-128,a5),a0		;環境変数'include'のパスからファイルを検索する
 	movea.l	a0,a1
 	pea.l	(a0)
@@ -228,7 +222,6 @@ srchincld2:
 	bmi	srchincld6		;環境変数が設定されていない
 	bsr	pathcpy
 	bsr	srchinclds
-	tst.l	d0
 	beq	srchincld7
 srchincld6:				;ファイルが見つからなかった
 	moveq.l	#-1,d0
@@ -248,6 +241,19 @@ srchincld9:
 	movem.l	(sp)+,a1-a3
 	unlk	a5
 	rts
+
+srchincldilistlp:
+	movea.l	d0,a3
+	movea.l	(4,a3),a1		;パス名
+	lea	(-128,a5),a0
+	bsr	pathcpy
+	bsr	srchinclds
+	beq	9f
+srchincldilist:
+	move.l	(a3),d0
+	bne	srchincldilistlp	;次の'-i'パスを検索する
+	moveq	#-1,d0
+9:	rts
 
 srchinclds:				;ファイルがあるかどうかをチェック
 	movea.l	a2,a1
@@ -729,7 +735,7 @@ getline9:
 ;	out:(LINEBUF～)=入力行 /d0.l=エラーなら負の数
 readline:
 	movem.l	d1-d3/a0-a2,-(sp)
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	move.l	a0,(LINEPTR,a6)
 	movea.l	(INPFILPTR,a6),a1
 	movea.l	(F_BUFPTR,a1),a2

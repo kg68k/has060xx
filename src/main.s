@@ -5,9 +5,10 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
+;			  2023       by TcbnErik
 ;----------------------------------------------------------------
 
-	.include	DOSCALL.MAC
+	.include	doscall.mac
 	.include	has.equ
 	.include	symbol.equ
 	.include	register.equ
@@ -22,12 +23,16 @@
 ;	メインプログラム
 ;----------------------------------------------------------------
 asmmain::
+	bra.s	@f
+	.dc.b	'#HUPAIR',0
+@@:
 	move.l	#STACKBTM-asmmain,d0
 	lea.l	(asmmain,pc,d0.l),sp	;lea.l (STACKBTM,pc),sp
 	move.l	#WORKBEGIN-asmmain,d0
 	lea.l	(asmmain,pc,d0.l),a6	;lea.l (WORKBEGIN,pc),a6
 	bsr	meminit			;メモリ領域の確保
 	bsr	workinit		;ワークエリアの初期化
+	bsr	g2asmode
 	bsr	defressym		;予約済みシンボルの初期化
 	bsr	cpuinit			;CPUモードの初期化
 	bsr	makeprndate		;日時文字列の作成
@@ -62,7 +67,7 @@ asmmain1:
 	addq.l	#4,sp
 	lea.l	(beep_msg,pc),a0
 	bsr	printmsg		;ビープ音を鳴らす
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	lea.l	(fatal_msg1,pc),a1
 	bsr	strcpy
 	move.w	(NUMOFERR,a6),d0
@@ -72,7 +77,7 @@ asmmain1:
 	lea.l	(fatal_msg2,pc),a1
 	bsr	strcpy
 	clr.b	(a0)
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	bra	asmmain3
 
 asmmain2:
@@ -133,11 +138,13 @@ main_crlf_msg:
 	.dc.b	CRLF,0
 
 title_msg::
+	.dc.b	'HAS060X.X ',version_x, ' ',copyright_x,CRLF
+	.dc.b	'  based on '
 	.dc.b	'X68k High-speed Assembler v',version,' ',copyright,CRLF,0
 
 usage_msg:
   .if 91<=verno060
-	mes	'使用法: has060 [スイッチ] ファイル名'
+	mes	'使用法: has060x [スイッチ] ファイル名'
   .else
 	mes	'使用法: as [スイッチ] ファイル名'
   .endif
@@ -227,13 +234,11 @@ usage_msg:
 	mes	'    環境変数 HAS の内容がコマンドラインの手前に挿入されます'
   .endif
 	.dc.b	CRLF
-	mes	'    環境変数 HAS の先頭が '
-	.dc.b	"'*'"
-	mes	' のとき '
-	.dc.b	"'/'"
-	mes	' をスイッチと見なしません'
-	.dc.b	CRLF
 	.dc.b	0
+
+multifile_msg:	mes	'複数のファイル名は指定できません'
+		.dc.b	CRLF
+		.dc.b	0
 
 no_msg:		mes	'エラーはありません'
 		.dc.b	CRLF
@@ -244,6 +249,7 @@ fatal_msg2:	mes	' 個ありました．アセンブルを中止します'
 		.dc.b	CRLF
 		.dc.b	0
 env_has:	.dc.b	'HAS',0		;コマンドラインに追加する環境変数名
+env_g2as:	.dc.b	'G2AS',0
 nulstr:		.dc.b	0
 	.even
 
@@ -315,17 +321,8 @@ meminit3:
 ;	ワークエリアの初期化
 ;----------------------------------------------------------------
 workinit:
-	lea.l	(WORKCLRST,a6),a0
-	move.w	#(WORKSIZE-WORKCLRST)/2-1,d0
-workinit1:
-	clr.w	(a0)+
-	dbra	d0,workinit1
 	move.l	(MEMPTR,a6),(TEMPPTR,a6)
 
-	clr.l	(INCLUDEPATH,a6)
-  .if 90<=verno060
-	clr.l	(ENVINCLUDE,a6)
-  .endif
 	lea.l	(nulstr,pc),a0
 	move.l	a0,(TEMPPATH,a6)
 	move.l	a0,(PRNTITLE,a6)
@@ -354,11 +351,15 @@ workinit1:
 
 	clr.w	(SYMTBLCOUNT,a6)
 	lea.l	(SYMTBLBEGIN,a6),a0
-	clr.l	(a0)
 	move.l	a0,(SYMTBLCURBGN,a6)
 
 	move.l	(TEMPPTR,a6),d0
-	doeven	d0			;ロングワード境界に合わせる
+	doquad	d0			;ロングワード境界に合わせる
+	move.l	d0,(LINEBUFPTR,a6)	;処理中の行の読み込みバッファ
+	add.l	#MAXLINELEN,d0
+	move.l	d0,(OPRBUFPTR,a6)	;オペランドの中間コード変換バッファ/文字列処理用ワーク
+	add.l	#MAXLINELEN*2,d0
+
 	move.l	(MEMLIMIT,a6),d1
 	sub.l	d0,d1			;d1=未使用領域のサイズ
 	move.l	d1,d2
@@ -388,9 +389,22 @@ workinit2:
 	add.l	d1,d0
 	move.l	d0,(TEMPPTR,a6)		;それ以降がシンボル名・マクロ登録用ワーク
 
-	bsr	memcheck
-	rts
+	bra	memcheck
+;	rts
 
+;----------------------------------------------------------------
+;	g2asモードの初期化
+;----------------------------------------------------------------
+g2asmode:
+	move.l	(asmmain-$100+$c4,pc),d0			;実行ファイルのファイル名
+	ori.l	#$20002020,d0
+	cmpi.l	#'g2as',d0
+	bne	9f
+	st	(G2ASMODE,a6)
+	bsr	option_c_4
+	bra	option_1
+9:
+	rts
 
 ;----------------------------------------------------------------
 ;	プレデファインシンボルの初期化
@@ -465,7 +479,10 @@ predefinesymbol1:
 	pea.l	(symbol_has060,pc)
 	pea.l	(verno060).w		;69～
 	bsr	def_predefinesymbol
-	lea.l	(8+8,sp),sp
+	pea.l	(symbol_has060x,pc)
+	pea.l	(verno_x)
+	bsr	def_predefinesymbol
+	lea.l	(8+8+8,sp),sp
 
 predefinesymbol99:
 	rts
@@ -490,6 +507,7 @@ symbol_date:	.dc.b	'__DATE__',0
 symbol_time:	.dc.b	'__TIME__',0
 symbol_has:	.dc.b	'__HAS__',0
 symbol_has060:	.dc.b	'__HAS060__',0
+symbol_has060x:	.dc.b	'__HAS060X__',0
 	.even
 
 
@@ -513,58 +531,31 @@ cpuinit1:
 ;	コマンドラインの解釈を行う
 ;----------------------------------------------------------------
 docmdline:
-	movea.l	(CMDLINEPTR,a6),a0
-	movea.l	(TEMPPTR,a6),a1
-;環境変数HASをコマンドラインの手前に入れる
-	clr.b	(a1)
-	move.l	a1,-(sp)
+	movea.l	(TEMPPTR,a6),a0		;コマンドラインより先に環境変数HASを解釈する
+	clr.b	(a0)
+	move.l	a0,-(sp)
 	clr.l	-(sp)
-	pea.l	(env_has,pc)
+	lea.l	(env_has,pc),a2
+	tst.b	(G2ASMODE,a6)
+	beq	@f
+	addq.l	#env_g2as-env_has,a2
+@@:
+	pea.l	(a2)
 	bsr	getenv
 	lea.l	(12,sp),sp
-	cmpi.b	#'*',(a1)
+	cmpi.b	#'*',(a0)
 	bne	docmdline1
-	move.b	#' ',(a1)
-	st.b	(SWITCHCHAR,a6)		;環境変数の先頭に'*'があったら'/'をスイッチにしない
+	addq.l	#1,a0			;環境変数の先頭の'*'は無視('/'は常にスイッチにしない)
 docmdline1:
-	tst.b	(a1)+
-	bne	docmdline1
-	move.b	#' ',(-1,a1)		;環境変数HASの後ろにコマンドラインをつなぐ
-  .if 90<=verno060
-	move.l	a1,(ENVBOUNDARY,a6)
-  .endif
-docmdline2:
-	move.b	(a0)+,(a1)+
-	bne	docmdline2
-	movea.l	(TEMPPTR,a6),a0
-	move.l	a1,(TEMPPTR,a6)
-docmdline3:
-	bsr	optionsw
-	tst.b	d0
-	beq	docmdline10
-	subq.l	#1,a0
-	bsr	getcmdstring		;ソースファイル名を得る
-	move.l	(SOURCEFILE,a6),d0
-	beq	docmdline39
-	cmp.l	(PRNFILE,a6),d0
-	beq	docmdline39
-	cmp.l	(SYMFILE,a6),d0
-	bne	usage			;ソースファイル名が2つある
-docmdline39:
-	move.l	a1,(SOURCEFILE,a6)
-	bra	docmdline3
+	bsr	dechupair
+	lea	(INCPATHENV,a6),a2
+	bsr	docmdline3
 
-docmdline10:				;コマンドラインが終了
-  .if 90<=verno060
-	lea.l	(INCLUDEPATH,a6),a1
-	bra	docmdline102
-docmdline101:
-	movea.l	d0,a1
-docmdline102:
-	move.l	(a1),d0
-	bne	docmdline101
-	move.l	(ENVINCLUDE,a6),(a1)	;ENVINCLUDEをINCLUDEPATHの後ろに繋ぐ
-  .endif
+	movea.l	(CMDLINEPTR,a6),a0
+	bsr	dechupair
+	lea	(INCPATHCMD,a6),a2
+	bsr	docmdline3
+					;コマンドラインが終了
 	move.l	(SOURCEFILE,a6),d2
 	beq	usage			;ソースファイルの指定がないので使用法を表示
 	movea.l	d2,a0
@@ -646,27 +637,42 @@ docmdline99:
 	move.b	d0,(NOABSSHORT,a6)
 	move.b	(COMPATSWQ,a6),(NOQUICK,a6)
 docmdline999:
+docmdline3end:
 	rts
+
+docmdline3:
+	move.l	a2,(INCPATHPTR,a6)
+	lea	(a1),a5
+docmdline3lp:
+	cmpa.l	a5,a0
+	bcc	docmdline3end		;全ての引数を処理した
+	move.b	(a0),d0
+	beq	docmdline3next		;空文字列の引数
+	cmpi.b	#'-',d0
+	bne	@f
+	bsr	optionsw
+	bra	docmdline3lp
+@@:
+	move.l	(SOURCEFILE,a6),d0
+	beq	@f
+	cmp.l	(PRNFILE,a6),d0
+	beq	@f
+	cmp.l	(SYMFILE,a6),d0
+	bne	multifile		;ソースファイル名が2つある
+@@:
+	move.l	a0,(SOURCEFILE,a6)
+docmdline3next:
+@@:	tst.b	(a0)+
+	bne	@b
+	bra	docmdline3lp
 
 ;----------------------------------------------------------------
 ;	オプションスイッチの処理
 optionsw:
-	bsr	skipspc
-	move.b	(a0)+,d0
-	cmp.b	#'-',d0
-	beq	optionsw1
-	tst.b	(SWITCHCHAR,a6)
-	bne	optionsw0		;'/'をスイッチに使用しない場合
-	cmp.b	#'/',d0
-	beq	optionsw1
-optionsw0:
-	rts
-
-optionsw1:
-	move.b	(a0),d0
-	cmp.b	#' ',d0
-	bls	optionsw
 	addq.l	#1,a0
+optionsw1:
+	move.b	(a0)+,d0
+	beq	optionsw0
 	lea.l	(opt_switch,pc),a1
 	moveq.l	#-1,d2
 	cmp.b	#'Z',d0
@@ -684,6 +690,8 @@ optionsw2:
 	move.w	(optjp_tbl,pc,d2.w),d2
 	jsr	(optjp_tbl,pc,d2.w)
 	bra	optionsw1
+optionsw0:
+	rts
 
 ;----------------------------------------------------------------
 ;	オプションスイッチのジャンプテーブル
@@ -710,61 +718,84 @@ optjp_tbl:
 ;----------------------------------------------------------------
 ;	-t path		テンポラリパス指定
 option_t:
-	bsr	skipspc
 	bsr	getcmdstring
-	move.l	a1,(TEMPPATH,a6)
+	move.l	a0,(TEMPPATH,a6)
+	bra	skipstring
+
+skipstring:
+@@:	tst.b	(a0)+
+	bne	@b
+	subq.l	#1,a0
 	rts
 
 ;----------------------------------------------------------------
 ;	-i path		インクルードパス指定
 option_i:
-	lea.l	(INCLUDEPATH,a6),a1
-  .if 90<=verno060
-	cmpa.l	(ENVBOUNDARY,a6),a0
-	bcc	option_i1
-	lea.l	(ENVINCLUDE,a6),a1
-  .endif
+	movea.l	(INCPATHPTR,a6),a1	;INCPATHENV/INCPATHCMD
+	bra	option_i1
+option_i2:
+	movea.l	d0,a1
 option_i1:
 	move.l	(a1),d0			;パス名チェインを1つたどる
 	bne	option_i2
+
 	move.l	(TEMPPTR,a6),d0		;チェインの終端
-	addq.l	#1,d0
-	bclr.l	#0,d0
+	doquad	d0
 	move.l	d0,(a1)			;1つチェインを追加する
 	move.l	d0,a1
-	clr.l	(a1)
-	addq.l	#4,d0
-	move.l	d0,(TEMPPTR,a6)
-	bsr	skipspc
-	bsr	getcmdstring		;パス名を得る
-	rts
-
-option_i2:
-	movea.l	d0,a1
-	bra	option_i1
+	clr.l	(a1)+			;次のチェイン(現時点では終端)
+	bsr	getcmdstring
+	move.l	a0,(a1)+		;パス名
+	move.l	a1,(TEMPPTR,a6)
+	bra	skipstring
 
 ;----------------------------------------------------------------
 ;	-o name		オブジェクトファイル名
 option_o:
-	bsr	skipspc
 	bsr	getcmdstring
-	move.l	a1,(OBJFILE,a6)
+	move.l	a0,(OBJFILE,a6)
 	move.l	a0,-(sp)		;パスをスキップしてから'.'を検索する
-	movea.l	a1,a0
 	bsr	getfilename
-	movea.l	(sp)+,a0
 option_o1:
 	move.b	(a1)+,d0
 	beq	option_o2
 	cmp.b	#'.',d0
 	bne	option_o1
-	rts
+	bra	9f
 
 option_o2:				;拡張子が省略されたら.oを加える
-	move.b	#'.',(-1,a1)
-	move.b	#'o',(a1)+
-	clr.b	(a1)+
-	move.l	a1,(TEMPPTR,a6)
+	movea.l	(OBJFILE,a6),a0
+	lea	(dot_o,pc),a1
+	bsr	strdupcat
+	move.l	d0,(OBJFILE,a6)
+9:
+	movea.l	(sp)+,a0
+	bra	skipstring
+
+dot_o:
+	.dc.b	'.o',0
+	.even
+
+strdupcat:
+	movem.l	d1/a0-a3,-(sp)
+	movea.l	(TEMPPTR,a6),a2
+	lea	(a2),a3
+	bsr	strlen
+	adda.l	d1,a3
+	exg	a0,a1
+	bsr	strlen
+	adda.l	d1,a3
+	addq.l	#1,a3
+	move.l	a3,(TEMPPTR,a6)
+	bsr	memcheck
+
+	move.l	a2,d0			;新しい文字列のポインタ
+@@:	move.b	(a1)+,(a2)+
+	bne	@b
+	subq.l	#1,a2
+@@:	move.b	(a0)+,(a2)+
+	bne	@b
+	movem.l	(sp)+,d1/a0-a3
 	rts
 
 ;----------------------------------------------------------------
@@ -773,33 +804,25 @@ option_p:
 	st.b	(MAKEPRN,a6)
 	lea.l	(PRNFILE,a6),a2
 option_p1:
-	move.b	(a0),d0
-	beq	option_p2
-	cmp.b	#' ',d0
-	bls	option_p3
-	bsr	getcmdstring		;-p[file]の場合
-	move.l	a1,(a2)
-option_p2:
-	rts
+	tst.b	(a0)
+	bne	option_p5		;-pFILE の場合
+@@:
+	addq.l	#1,a0
+	cmpa.l	a5,a0
+	bcc	option_p9		;コマンドラインの末尾に -p
+	tst.b	(a0)
+	beq	@b
+@@:
+	cmp.b	#'-',(a0)
+	beq	option_p9		;-p -? ならファイル名指定なし
 
-option_p3:				;-p [file]の場合(ソースファイル名の可能性有り)
-	bsr	skipspc
-	move.b	(a0),d0
-	beq	option_p2
-	cmp.b	#'-',d0
-	beq	option_p9
-	tst.b	(SWITCHCHAR,a6)
-	bne	option_p4		;'/'をスイッチに使用しない場合
-	cmp.b	#'/',d0
-	beq	option_p9
-option_p4:
-	bsr	getcmdstring
-	move.l	a1,(a2)
-	tst.l	(SOURCEFILE,a6)
-	bne	option_p2
-	move.l	a1,(SOURCEFILE,a6)
-	rts
-
+	tst.l	(SOURCEFILE,a6)		;-p FILE の場合、ソースファイル名の可能性あり
+	bne	@f
+	move.l	a0,(SOURCEFILE,a6)
+@@:
+option_p5:
+	move.l	a0,(a2)
+	bra	skipstring
 option_p9:
 	subq.l	#1,a0
 	rts
@@ -814,7 +837,7 @@ option_x:
 ;----------------------------------------------------------------
 ;	-s symbol[=num]	シンボルの定義
 option_s:
-	bsr	skipspc
+	bsr	getcmdstring
 	bsr	getcmdnum
 	bmi	option_s02
 ;シンボルの先頭が数字で1～4以外のときはエラー
@@ -833,18 +856,26 @@ option_s01:
 	.dc.w	10,100,1000,10000
 
 option_s02:
-	cmpi.b	#'=',(a0)
+	lea	(a0),a1
+@@:	tst.b	(a1)+
+	bne	@b
+	pea	(-1,a1)			;-sの処理が終わったらオプション解釈を終了して次の引数へ
+
+	moveq	#'=',d0
+	cmp.b	(a0),d0
 	beq	usage
-	move.w	#'=',-(sp)
-	bsr	getcmdstring_stop
-	addq.l	#2,sp
-	move.l	a1,a2
+	bsr	strsplit
+	bsr	strlen
+	clr	d1
+	tst.l	d1
+	bne	usage			;シンボル名が長すぎる
+
+	move.l	a0,a2			;シンボル名
+	move.l	a1,a0			;= の直後の文字列
 	moveq.l	#0,d1
-	moveq.l	#0,d2
 	moveq.l	#0,d7
-	cmpi.b	#'=',(a0)
-	bne	option_s1
-	addq.l	#1,a0			;=num の指定があった
+	move.l	a0,d0
+	beq	option_s1		;=num の指定がない(=0 とみなす)
 	cmpi.b	#'-',(a0)
 	bne	option_s0
 	st.b	d7
@@ -856,7 +887,6 @@ option_s0:
 	beq	option_s1
 	neg.l	d1
 option_s1:
-	move.l	a0,-(sp)
 	move.l	d1,-(sp)
 	movea.l	a2,a0
 	moveq.l	#ST_VALUE,d2		;数値シンボル
@@ -867,6 +897,20 @@ option_s1:
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;定義済シンボル
 	clr.b	(SYM_SECTION,a1)	;セクション番号
 	move.l	(sp)+,(SYM_VALUE,a1)	;シンボル値
+	movea.l	(sp)+,a0
+	rts
+
+strsplit:
+	move.l	a0,-(sp)
+	suba.l	a1,a1			;検索文字の次のアドレス(なければ 0)
+@@:
+	tst.b	(a0)
+	beq	9f
+	cmp.b	(a0)+,d0
+	bne	@b
+	lea	(a0),a1			;検索文字が見つかった
+	clr.b	-(a0)
+9:
 	movea.l	(sp)+,a0
 	rts
 
@@ -1070,9 +1114,8 @@ option_c_exoff:
 	rts
 
 option_c_x::
-	move.b	(a0),d0
-	cmp.b	#' ',d0
-	bls	option_c_2
+	tst.b	(a0)
+	beq	option_c_2
 option_c_x0:
 	move.l	(TEMPPTR,a6),d0
 	addq.l	#1,d0
@@ -1161,14 +1204,10 @@ option_c_x95:
 option_c_x99:
 	move.b	(a0)+,d0
 option_c_x96:
-	cmp.b	#' ',d0
-	bls	option_c_x97		;0を含むのでa0をデクリメントしてから終了
 	cmp.b	#',',d0
+	beq	option_c_x0
+	tst.b	d0
 	bne	usage
-	bra	option_c_x0
-
-option_c_x97:
-	subq.l	#1,a0
 option_c_x98:
 	rts
 
@@ -1239,7 +1278,7 @@ option_b4_0:
 ;----------------------------------------------------------------
 ;	-m nn		CPUモードの指定
 option_m:
-	bsr	skipspc
+	bsr	getcmdstring
 	bsr	getcmdnum
 	bmi	usage
   .if 89<=verno060
@@ -1351,31 +1390,13 @@ option_r:
 
 ;----------------------------------------------------------------
 ;	コマンドラインから文字列を得る
+@@:
+	addq.l	#1,a0			;次の引数を返す
+	cmpa.l	a5,a0
+	bcc	usage
 getcmdstring:
-	clr.w	-(sp)
-	bsr	getcmdstring_stop
-	addq.l	#2,sp
-	rts
-
-getcmdstring_stop:
 	tst.b	(a0)
-	beq	usage
-	movea.l	(TEMPPTR,a6),a1
-	move.l	a1,-(sp)
-getcmdstring1:
-	move.b	(a0)+,d0
-	cmp.b	#' ',d0
-	bls	getcmdstring2
-	cmp.b	(4+4+1,sp),d0
-	beq	getcmdstring2
-	move.b	d0,(a1)+
-	bra	getcmdstring1
-
-getcmdstring2:
-	subq.l	#1,a0
-	clr.b	(a1)+
-	move.l	a1,(TEMPPTR,a6)
-	move.l	(sp)+,a1
+	beq	@b
 	rts
 
 ;----------------------------------------------------------------
@@ -1421,11 +1442,19 @@ tfrfilename9:
 	rts
 
 ;----------------------------------------------------------------
+;	コマンドラインのエラー
+multifile:
+	pea	(multifile_msg,pc)
+	bra	error
+
+;----------------------------------------------------------------
 ;	使用法を表示して終了する
 usage:
+	pea	(usage_msg,pc)
+error:
 	lea.l	(title_msg,pc),a0
 	bsr	printmsg
-	lea.l	(usage_msg,pc),a0
+	movea.l	(sp)+,a0
 	bsr	printmsg
 	move.w	#1,-(sp)
 	DOS	_EXIT2

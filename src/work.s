@@ -26,11 +26,9 @@ WORKCLRST::			;(ここから先のワークが0で初期化される)
 
 ;----------------------------------------------------------------
 ;	ファイル管理
-INCLUDEPATH::	.ds.l	1	;インクルードパス名へのポインタ
-  .if 90<=verno060
-ENVINCLUDE::	.ds.l	1	;環境変数HASで指定されたインクルードパス名へのポインタ
-ENVBOUNDARY::	.ds.l	1	;環境変数HASとコマンドラインを連結するときの境界
-  .endif
+INCPATHPTR::	.ds.l	1	;INCPATHPTR/INCPATHCMDへのポインタ
+INCPATHENV::	.ds.l	1	;環境変数で指定されたインクルードパス名のリスト
+INCPATHCMD::	.ds.l	1	;コマンドラインで指定されたインクルードパス名のリスト
 TEMPPATH::	.ds.l	1	;テンポラリパス名へのポインタ
 PRNWIDTH::	.ds.w	1	;PRNファイルの表示幅
 PRNPAGEL::	.ds.w	1	;PRNファイル1ページの行数
@@ -99,7 +97,7 @@ PCTOABSLCAN::	.ds.b	1	;-b4でなくてlea/pea/jmp/jsrのときtrue
 ABSLTOOPC::	.ds.b	1	;絶対ロングを(d,OPC)にするならtrue		(-1)
 ABSLTOOPCCAN::	.ds.b	1	;ABSLTOOPCを無効化する
 
-SWITCHCHAR::	.ds.b	1	;'/'をスイッチとして認識しないならtrue
+G2ASMODE::	.ds.b	1	;g2asモード
 MAKESCD::	.ds.b	1	;SCD用シンボル情報を出力するならtrue
 MAKERSECT::	.ds.b	1	;相対セクション情報を出力するならtrue
 COMPATSWA::	.ds.b	1	;(HAS v2.x互換) -aスイッチが指定されたらtrue
@@ -225,7 +223,7 @@ RPNSTACK::	.ds.w	256	;逆ポーランド式変換/演算用スタック
 ROFSTSYMNO::	.ds.w	1	;オフセット付き外部参照でのシンボル番号
 EXPRORGNUM::	.ds.w	1	;式のorgセクション番号
 
-OPRBUF::	.ds.w	MAXLINELEN*2	;オペランドの中間コード変換バッファ/文字列処理用ワーク
+OPRBUFPTR::	.ds.l	1	;オペランドの中間コード変換バッファ/文字列処理用ワークへのポインタ
 RPNBUF::
 EABUF1::	.ds.b	EABUFSIZE	;実効アドレス解釈バッファ
 EABUF2::	.ds.b	EABUFSIZE	;	〃
@@ -283,7 +281,7 @@ PREDEFINE::	.ds.b	1	;プレデファインシンボルを使うならtrue
 	.quad
 LINENUM::	.ds.l	1	;処理中の行番号
 LINEPTR::	.ds.l	1	;処理中の行バッファを指すポインタ
-LINEBUF::	.ds.b	MAXLINELEN	;処理中の行の読み込みバッファ
+LINEBUFPTR::	.ds.l	1	;処理中の行の読み込みバッファへのポインタ
 
 PRNLATR::	.ds.w	1	;処理中の行の場所(0:ソース/1:インクルード/2:マクロ展開)
 PAGEFLG::	.ds.w	1	;PRNファイルの改ページフラグ
@@ -375,6 +373,8 @@ OPTDSPCODE::	.ds.w	1	;修正する命令コード(ディスプレースメント
 ;----------------------------------------------------------------
 LOCSYMBUF::	.ds.b	LOCSYMBUFSIZE+256	;マクロ内のローカルシンボル名のバッファ
 				;(1つのマクロ定義で使えるローカルシンボルの最大サイズ)
+
+	.fail	$8000<=$	;この手前のシンボルは(d16,a6)で参照できる
 
 ;----------------------------------------------------------------
 ;	ハッシュテーブル本体

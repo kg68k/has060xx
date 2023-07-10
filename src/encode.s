@@ -164,7 +164,7 @@ deflabel_offsym2:
 ;	行のラベル解釈、命令のコード化
 ;----------------------------------------------------------------
 encodeline::
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	a0,a2
 	sf.b	(LABXDEF,a6)
 	move.w	#-1,(LABNAMELEN,a6)
@@ -460,7 +460,7 @@ deflocal5:
 ;	in :a0=オペランド文字列へのポインタ
 ;	out:(OPRBUF-)=コード化されたオペランド
 encodeopr::
-	lea.l	(OPRBUF,a6),a2
+	movea.l	(OPRBUFPTR,a6),a2
 	tst.b	(ISIFSKIP,a6)
 	bne	encodeopr99
 encodeopr1:

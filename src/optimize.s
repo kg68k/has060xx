@@ -1501,13 +1501,13 @@ calctmpexpr5:
 	move.l	a4,(LOCOFFSET,a6)
 	bsr	tmpreadd0w		;式が続く場合
 	move.w	d0,d1			;逆ポーランド式の長さ
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 calctmpexpr6:
 	bsr	tmpreadd0w		;式本体を読み込む
 	move.w	d0,(a1)+
 	dbra	d1,calctmpexpr6
 	clr.w	(a1)+			;(エンドコード)
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 	bsr	calcrpn			;読み込んだ式を計算する
 	movea.l	(sp)+,a1
 	rts

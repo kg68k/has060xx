@@ -9,7 +9,7 @@
 ;			  1996-2016  by M.Kamada
 ;----------------------------------------------------------------
 
-	.include	DOSCALL.MAC
+	.include	doscall.mac
 	.include	has.equ
 	.include	register.equ
 
@@ -141,15 +141,14 @@ skipspc9:
 ;----------------------------------------------------------------
 ;	文字列の長さを得る
 ;	in :a0=文字列へのポインタ
-;	out:d1.w=文字列の長さ-1
+;	out:d1.l=文字列の長さ-1
 strlen::
-	move.l	a0,-(sp)
-	moveq.l	#-2,d1
-strlen1:
-	addq.w	#1,d1
-	tst.b	(a0)+
-	bne	strlen1
-	move.l	(sp)+,a0
+	move.l	a0,d1
+@@:	tst.b	(a0)+
+	bne	@b
+	subq.l	#1,a0
+	exg	d1,a0
+	sub.l	a0,d1
 	rts
 
 ;----------------------------------------------------------------
@@ -524,7 +523,7 @@ prnpaging1:
 	movem.l	d0-d1/a0-a1,-(sp)
 	addq.w	#1,(PRNSPAGE,a6)
 	move.w	(PRNPAGEL,a6),d0
-	subq.w	#4,d0
+	subq.w	#4+1,d0			;タイトル行が2行に増えた分も差し引く
 	move.w	d0,(PRNCOUNT,a6)
 	lea.l	(title_msg,pc),a0
 	bsr	prnlout1		;タイトル行を出力

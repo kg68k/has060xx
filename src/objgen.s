@@ -128,7 +128,7 @@ outaligninfo:
 	bne	outaligninfo1		;デバッグ情報のみが必要な場合は,
 	move.b	#1,(MAXALIGN,a6)		;アライン値は2^1=2とする。
 outaligninfo1:
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	move.b	#'*',(a0)+		;'*'+ファイル名+'*' というシンボルを作成する
 	movea.l	(SOURCEFILE,a6),a1
 	bsr	strcpy
@@ -139,7 +139,7 @@ outaligninfo1:
 	moveq.l	#0,d0
 	move.b	(MAXALIGN,a6),d0
 	bsr	wrtd0l
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	bra	wrtstr
 
 outaligninfo9:
@@ -1225,7 +1225,7 @@ fdcbcmd1:
 	add.l	d0,d2
 	dbra	d1,fdcbcmd1
 	add.l	d2,(LOCATION,a6)		;必要なサイズだけカウンタを進める
-	lea.l	(OPRBUF,a6),a2
+	movea.l	(OPRBUFPTR,a6),a2
 	movea.l	a2,a1
 	moveq.l	#3-1,d1
 fdcbcmd2:
@@ -1559,7 +1559,7 @@ macext:					;22xx マクロ展開開始
 	move.b	(sp)+,(MACSIZE,a6)	;オペレーションサイズ
 	move.w	(SYM_MACLOCS,a0),d0
 	add.w	d0,(MACLOCSMAX,a6)
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	moveq.l	#0,d1
 	bsr	tmpreadd0w		;マクロ引数リストの開始位置
 	move.w	d0,d1
@@ -2231,7 +2231,7 @@ prnsymtable01:
 	divu.w	#21,d1			;1行に表示できるシンボルの数
 	subq.w	#1,d1
 prnsymtable1:
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	move.w	d1,d2
 prnsymtable2:				;' xxxxxxxx(xx) xxxxxxxx '
 	move.l	(a1)+,d0
@@ -2259,7 +2259,7 @@ prnsymtable5:
   .endif
 	move.b	#LF,(a0)+
 	clr.b	(a0)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout			;1行分を表示
 	bra	prnsymtable1
 
@@ -2271,7 +2271,7 @@ prnsymtable9:
   .endif
 	move.b	#LF,(a0)+
 	clr.b	(a0)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout			;最後の1行を表示
 prnsymtable0:
 	lea.l	(crlf_msg,pc),a0
@@ -2362,13 +2362,13 @@ prnundefsym2:
 	cmpi.b	#SA_DEFINE,(SYM_ATTRIB,a2)
 	bcc	prnundefsym8		;確定済みシンボル
 prnundefsym3:
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	(SYM_NAME,a2),a1
 	bsr	strcpy
 	lea.l	(crlf_msg,pc),a1
 	bsr	strcpy
 	clr.b	(a0)
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	bsr	prnstdout
 prnundefsym8:
 	lea.l	(SYM_TBLLEN,a2),a2	;次のシンボルアドレス
@@ -2419,7 +2419,7 @@ prnlineadv3:
 	tst.b	(a1)
 	ble	prnline9
 	move.w	#15-1,d0
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 prnlineadv4:
 	move.b	#' ',(a0)+
 	dbra	d0,prnlineadv4
@@ -2429,7 +2429,7 @@ prnlineadv4:
   .endif
 	move.b	#LF,(a0)+
 	clr.b	(a0)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout
 	bra	prnlineadv3
 
@@ -2463,7 +2463,7 @@ prnline9:
 ;	PRNファイルのファイル名行を表示する
 prnfname::
 	sf.b	(PFILFLG,a6)
-	lea.l	(OPRBUF,a6),a2
+	movea.l	(OPRBUFPTR,a6),a2
 	move.b	#'<',(a2)+		;'< ～ >'
 	movea.l	(INPFILE,a6),a0
 	bsr	getfilename
@@ -2476,7 +2476,7 @@ prnfname1:
   .endif
 	move.b	#LF,(a2)+
 	clr.b	(a2)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout
 	bra	prnline9
 
@@ -2485,7 +2485,7 @@ prnfname1:
 prn1line:
 	movea.l	(PRNLPTR,a6),a0
 	clr.b	(a0)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	move.l	(LINENUM,a6),d0
 	moveq.l	#5,d1			;(5桁でゼロサプレス)
 	bsr	convdec			;'xxxxx '(行番号)
@@ -2511,7 +2511,7 @@ prn1line02:
 prn1line1:
 	move.b	d0,(a0)+
 	lea.l	(PRNCODE,a6),a1
-	lea.l	(LINEBUF,a6),a2
+	movea.l	(LINEBUFPTR,a6),a2
 prn1line2:
 	bsr	prn1code		;コード部を出力
 	bsr	prn1srce		;ソース部を出力
@@ -2520,7 +2520,7 @@ prn1line2:
   .endif
 	move.b	#LF,(a0)+
 	clr.b	(a0)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout
 prn1line3:
 	tst.b	(a1)+
@@ -2531,7 +2531,7 @@ prn1line3:
 prn1line4:
 	subq.l	#1,a1
 	move.w	#15-1,d0		;2行以上にまたがる場合
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 prn1line5:
 	move.b	#' ',(a0)+
 	dbra	d0,prn1line5
@@ -2630,7 +2630,7 @@ makesymfile1:
 makesymfile2:
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a2)
 	beq	makesymfile8		;ローカルシンボルなら何もしない
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	(SYM_NAME,a2),a1
 	moveq.l	#16,d1
 makesymfile3:
@@ -2735,7 +2735,7 @@ makesymfile7:
   .endif
 	move.b	#LF,(a0)+
 	clr.b	(a0)
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	bsr	prnlout
 makesymfile8:
 	lea.l	(SYM_TBLLEN,a2),a2	;次のシンボルアドレス
@@ -2788,7 +2788,7 @@ tmpreadsymex1:
 ;	in :---
 ;	out:d0.w=結果の属性/d1.l=結果の値
 tmpreadsym:
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	move.w	#RPN_SYMBOL,(a0)+
 	bsr	tmpreadd0l
 	move.l	d0,(a0)+
@@ -2827,13 +2827,13 @@ getsymdata02:
 tmpreadexpr:
 	bsr	tmpreadd0w
 	move.w	d0,d1			;逆ポーランド式の長さ
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 tmpreadexpr1:
 	bsr	tmpreadd0w		;式本体を読み込む
 	move.w	d0,(a1)+
 	dbra	d1,tmpreadexpr1
 	clr.w	(a1)+			;(エンドコード)
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 	bra	calcrpn			;読み込んだ式を計算する
 
 ;----------------------------------------------------------------
@@ -3008,7 +3008,7 @@ prnextcode9:
 ;	in :---
 ;	out:---
 outobjrpn:
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 outobjrpn1:
 	move.w	(a1)+,d0
 	beq	outobjrpn9		;式が終了(RPN_END)

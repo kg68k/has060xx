@@ -5,6 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
+;			  2023       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -197,7 +198,7 @@ asmline1:
 	bsr	alignwarn_op		;偶数境界に合っていないのでワーニングを出す
 
 asmline2:
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(EABUF1,a6),a4
 	lea.l	(EABUF2,a6),a5
 
@@ -3150,11 +3151,26 @@ bfdataout6:
 ;----------------------------------------------------------------
 ;	movem	<list>,<ea>/<ea>,<list>
 ~movem::
+	moveq	#0,d5			;-1レジスタリストが#imm形式(<list>,<ea>のみ)
+	moveq	#0,d6			;0なら#immの値が確定済
+
 	bsr	getreglist		;レジスタリストオペランドを得る
-	bmi	~movem5
+	bpl	@f
+	movea.l	a4,a1
+	bsr	geteamode		;実効アドレスオペランドを得る
+	cmp.w	#EA_IMM,d0
+	bne	~movem5
+	moveq	#-1,d5
+	tst.w	(RPNLEN1,a1)
+	spl	d6
+	bpl	@f			;式の値が未確定
+	move.l	(RPNBUF1,a1),d1
+	cmp.l	#$10000,d1
+	bcc	overflowerr
+@@:
 	move.w	d1,-(sp)
 	CHKLIM				;<list>,<ea>
-	movea.l	a4,a1
+	movea.l	a5,a1
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
 ;movem <list>,<ea>
 ;ColdFireは(an),(d16,an)のみ
@@ -3169,6 +3185,8 @@ bfdataout6:
 	bne	~movem6
 	cmp.w	#EA_DECADR,d0		;-(An)
 	bne	iladrerr
+	tst.b	d5
+	bne	~movem6
 	moveq.l	#0,d0			;-(An)の場合はレジスタリストを反転する
 	moveq.l	#16-1,d2
 ~movem1:
@@ -3180,8 +3198,6 @@ bfdataout6:
 
 ~movem5:				;<ea>,<list>
 	ori.w	#$0400,d7
-	movea.l	a4,a1
-	bsr	geteamode		;実効アドレスオペランドを得る
 	and.w	#EG_CTRL|EA_INCADR,d0	;制御モードまたは(An)+
 	beq	iladrerr
 ;movem <ea>,<list>
@@ -3193,8 +3209,25 @@ bfdataout6:
 ~movem51:
 	CHKLIM
 	bsr	getreglist		;レジスタリストオペランドを得る
-	bmi	iladrerr
+	bpl	@f
+	movea.l	a5,a1
+	bsr	geteamode		;実効アドレスオペランドを得る
+	cmp.w	#EA_IMM,d0
+	bne	iladrerr
+	tst.w	(RPNLEN1,a1)
+	spl	d6
+	bpl	@f			;式の値が未確定
+	move.l	(RPNBUF1,a1),d1
+	cmp.l	#$10000,d1
+	bcc	overflowerr
+@@:
 ~movem6:
+	movea.l	a4,a1
+	move.l	a5,d5
+	btst.l	#10,d7
+	bne	@f			;<ea>,<list>
+	exg.l	d5,a1			;<list>,<ea>
+@@:
 	bsr	getopsize		;サイズを得る
 	cmpi.b	#SZ_WORD,d0
 	beq	~movem7
@@ -3203,8 +3236,17 @@ bfdataout6:
 	or.w	(EACODE,a1),d7
 	bsr	f43g_fifth		;5番目のチェック
 	DSPOPOUT			;命令コードの出力
+	tst.b	d6
+	bne	1f
 	move.w	d1,d0			;レジスタリスト
 	bsr	wrt1wobj		;特殊オペランドの出力
+	bra	2f
+1:
+	exg.l	d5,a1			;レジスタリストが#式
+	moveq.l	#SZ_WORD,d0
+	bsr	ead_imm1
+	exg.l	d5,a1
+2:
 	bra	eadataout
 
 ;----------------------------------------------------------------
@@ -3749,7 +3791,7 @@ gettrapccopr:
 	movem.w	d6-d7,-(sp)
 	bsr	encodeopr		;オペランドをコード化する
 	movem.w	(sp)+,d6-d7
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(EABUF1,a6),a1
 	tst.w	(a0)
 	beq	gettrapccopr5		;オペランドなし

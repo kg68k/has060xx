@@ -397,7 +397,7 @@ defmacsizem9:
 ;----------------------------------------------------------------
 ;	マクロ行1行のコード置換・登録
 defmacline:
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	(TEMPPTR,a6),a2
 	tst.b	(MACMODE,a6)
 	bpl	defmacline1
@@ -586,7 +586,7 @@ domacro::
 	move.l	a1,d0
 	bsr	wrtd0l			;シンボルテーブルへのポインタ
 	move.l	(LINEPTR,a6),d0
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	sub.l	a0,d0
 	bsr	wrtd0w			;引数へのオフセット
 	move.l	a1,-(sp)
@@ -706,7 +706,7 @@ macexexit1:
 macexline::
 	movem.l	d1-d3/a0-a2,-(sp)
 	movea.l	(MACLPTR,a6),a2
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 	moveq.l	#0,d3
 macexline1:
 	move.b	(a2)+,d0
@@ -862,6 +862,7 @@ macexlsym:				;シンボル値
 	move.l	a0,-(sp)
 	movea.l	a1,a0
 	bsr	strlen
+	subq.l	#1,d1
 	bsr	isdefdsym		;その引数はシンボルとして登録されているか?
 	movea.l	(sp)+,a0
 	bra	macexlsym2

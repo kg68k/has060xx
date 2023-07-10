@@ -6,6 +6,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
+;			  2023       by TcbnErik
 ;----------------------------------------------------------------
 
   .ifndef __HAS_EQU__
@@ -16,6 +17,10 @@ version		reg	'3.09+91'	;バージョンNo.
 verno		equ	309		;(@VERSIONの値)
 verno060	equ	91		;__HAS060__の値
 copyright	reg	'(C) 1990-1994/1996-2023 Y.Nakamura/M.Kamada'	;title_msgの著作権表示
+
+version_x	reg	'1.0.0'		;バージョンNo.
+verno_x		equ	$01_00_00	;__HAS060X__の値
+copyright_x	reg	'(C) 2023 TcbnErik'
 
   .ifndef EUCSRC
 EUCSRC		equ	0		;ソースの文字コード(0=SJIS,1=EUC)
@@ -62,7 +67,7 @@ MACROMAXNEST	equ	32	;マクロ展開の最大ネスティング数
 ;SYMEXTCOUNTは16の倍数にすること
 SYMEXTCOUNT	equ	2000	;一度に用意するシンボルテーブル数
 
-MAXLINELEN	equ	1024	;一行の最大長
+MAXLINELEN	equ	8*1024	;一行の最大長
 
 LOCSYMBUFSIZE	equ	16384	;マクロ内のローカルシンボル名のバッファのサイズ
 				;(1つのマクロ定義で使えるローカルシンボルの最大サイズ)

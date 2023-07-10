@@ -8,7 +8,7 @@
 ;----------------------------------------------------------------
 
 	.include	has.equ
-	.include	DOSCALL.MAC
+	.include	doscall.mac
 	.include	cputype.equ
 	.include	register.equ
 	.include	tmpcode.equ
@@ -29,7 +29,7 @@ dopseudo::
 ;----------------------------------------------------------------
 ;	オペランドの値を計算する
 calcopr:
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
 	bsr	convrpn
 	tst.w	d0
@@ -49,7 +49,7 @@ calcconst::
 ;	ifの条件式の値を得る
 ifcond:
 	bsr	encodeopr
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
 	bsr	convrpn
 	tst.w	d0
@@ -187,7 +187,7 @@ f43gcut1:
 	move.b	#SZ_WORD,(CMDOPSIZE,a6)
 ~~dc1:
 ~~dc2:
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 ~~dc3:
 	bsr	dodcparam		;パラメータ1つについて処理
 	move.w	(a0)+,d0
@@ -322,7 +322,7 @@ dodcreal:
 	beq	dodcreal1
 	bsr	alignwarn		;偶数境界に合っていないのでワーニングを出す
 dodcreal1:
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	tst.w	(a0)
 	beq	iloprerr		;パラメータがない
 dodcreal2:
@@ -567,7 +567,7 @@ ds_iloprerr_ds_negative:
 	move.l	d0,(TEMPPTR,a6)
 	bsr	memcheck
 	st.b	(SYM_FSIZE,a2)		;(move.b #-1,(SYM_FSIZE,a2))
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	getdcreal		;浮動小数点実数オペランドを得る
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
@@ -673,7 +673,7 @@ pseudo_redeferr_a1:
 	cmpi.b	#SECT_RLCOMM,(SYM_EXTATR,a1)
 	bcc	pseudo_redeferr_a1	;.xref/.commシンボルだった
 	movea.l	a1,a2			;シンボルテーブルへのポインタ
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
 	bsr	convrpn
 	tst.w	d0
@@ -719,7 +719,7 @@ pseudo_redeferr_a1:
 ~~reg::
 	moveq.l	#ST_REGSYM,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
-	lea.l	(OPRBUF,a6),a2
+	movea.l	(OPRBUFPTR,a6),a2
 	move.l	(TEMPPTR,a6),d0
 	doeven	d0
 	movea.l	d0,a0
@@ -803,7 +803,7 @@ pseudo_redeferr_a1:
 	move.w	d2,-(sp)
 	bsr	encodeopr
 	move.w	(sp)+,d2
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 ~~globl2:
 	move.w	(a1)+,d0
 	cmp.w	#OT_SYMBOL,d0
@@ -869,7 +869,7 @@ pseudo_redeferr_a1:
 	move.w	d2,-(sp)
 	bsr	encodeopr
 	move.w	(sp)+,d2
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 	move.w	(a1)+,d0
 	cmp.w	#OT_SYMBOL,d0
 	bne	iloprerr		;シンボル以外の記述はエラー
@@ -1251,7 +1251,7 @@ skipfend:
 	cmp.b	#';',d0
 	beq	~~end9
 	bsr	encodeopr
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
 	tst.w	(a0)
 	beq	~~end9			;開始アドレス指定がなかった
@@ -1280,7 +1280,7 @@ skipfend:
 ~~insert::
 	tst.b	(a0)
 	beq	iloprerr		;ファイル名の指定がない
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 ~~insert1:
 	move.b	(a0)+,d0
 	move.b	d0,(a1)+
@@ -1293,7 +1293,7 @@ skipfend:
 	clr.b	(-1,a1)
 
 	clr.w	-(sp)
-	pea.l	(OPRBUF,a6)
+	move.l	(OPRBUFPTR,a6),-(sp)
 	DOS	_OPEN
 	addq.l	#6,sp
 	move.l	d0,d3			;d3=ファイルハンドル
@@ -1311,7 +1311,7 @@ skipfend:
 	moveq.l	#0,d2			;オフセット
 	moveq.l	#-1,d1			;サイズ
 
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	cmpi.w	#','|OT_CHAR,(a0)
 	bne	~~insert4
 ~~insert_param_loop:
@@ -1405,14 +1405,14 @@ skipfend:
 ~~include::
 	tst.b	(a0)
 	beq	iloprerr		;ファイル名の指定がない
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 ~~include1:
 	move.b	(a0)+,d0
 	move.b	d0,(a1)+
 	cmp.b	#' ',d0
 	bhi	~~include1
 	clr.b	(-1,a1)
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	bsr	srchincld		;インクルードファイルを検索
 	tst.w	d0
 	bmi	nofileerr
@@ -1486,7 +1486,7 @@ skipfend:
 ;	.page	[+/<式>]
 ~~page::
 	bsr	encodeopr
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
 	bsr	convrpn
 	tst.w	d0
@@ -1545,7 +1545,7 @@ skipfend:
 ~~comment::
 	bsr	deflabel		;行頭にラベルがあったら定義しておく
 	move.w	#-1,(LABNAMELEN,a6)
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 	tst.b	(a0)
 	beq	~~comment85		;文字列がなければ次の一行のみをコメントとする
 ~~comment1:				;コメント終了文字列を得る
@@ -1563,12 +1563,12 @@ skipfend:
 	bmi	~~comment9		;読み飛ばし中にソースが終了してしまった
 	or.w	#T_LINE,d0		;1行開始
 	bsr	wrtobjd0w
-	lea.l	(LINEBUF,a6),a0
+	movea.l	(LINEBUFPTR,a6),a0
 ~~comment4:
 	bsr	skipspc
 	tst.b	(a0)
 	beq	~~comment3
-	lea.l	(OPRBUF,a6),a1
+	movea.l	(OPRBUFPTR,a6),a1
 ~~comment5:
 	move.b	(a1)+,d0
 	beq	~~comment6
@@ -2303,7 +2303,7 @@ checksymdeb9:
 	move.b	#'*',(a0)		;.val .   → .val *
 ~~val1:
 	bsr	encodeopr
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
 	bsr	convrpn
 	tst.w	d0
@@ -2388,7 +2388,7 @@ checksymdeb9:
 	bsr	encodeopr
 	move.b	#1,(SCD_LEN+SCDTEMP,a6)	;テーブルはロングデータ
 	moveq.l	#4-1,d2
-	lea.l	(OPRBUF,a6),a0
+	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(SCD_DIM+SCDTEMP,a6),a2
 ~~dim1:
 	lea.l	(RPNBUF,a6),a1

@@ -9,7 +9,7 @@
 ;		          1997-2016  by M.Kamada
 ;----------------------------------------------------------------
 
-	.include	DOSCALL.MAC
+	.include	doscall.mac
 	.include	has.equ
 	.include	tmpcode.equ
 	.include	symbol.equ
@@ -80,7 +80,7 @@ warnout1:
 	beq	warnout8
 warnout2:				;パス1/パス3でPRNファイルを作成する場合は
 	move.w	#STDOUT,-(sp)
-	pea.l	(LINEBUF,a6)		;行の内容も表示する
+	move.l	(LINEBUFPTR,a6),-(sp)	;行の内容も表示する
 	DOS	_FPUTS
 	pea.l	(crlf_msg,pc)
 	DOS	_PRINT
