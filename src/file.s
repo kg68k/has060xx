@@ -298,28 +298,6 @@ maketmpname25:
 	bsr	strcpy			;テンポラリファイル名を転送
 	addq.l	#1,a0
 	move.l	a0,(TEMPPTR,a6)
-	subq.l	#8,a0
-	movea.l	a0,a1			;'000'の位置
-	moveq.l	#0,d2
-maketmpname3:
-	movea.l	a1,a0
-	move.l	d2,d0
-	moveq.l	#-3,d1			;(3桁でゼロサプレスしない)
-	bsr	convdec
-	clr.w	-(sp)
-	move.l	(14,sp),-(sp)		;a0
-	DOS	_OPEN			;オープンしてみる
-	addq.l	#6,sp
-	tst.l	d0
-	bmi	maketmpname9		;ファイルがないのでテンポラリファイルとして使用
-	move.w	d0,-(sp)
-	DOS	_CLOSE
-	addq.l	#2,sp
-	addq.w	#1,d2
-	cmpi.w	#1000,d2
-	bcs	maketmpname3		;次の名前があるかどうか探す
-	bra	tmpopenabort		;テンポラリファイル名が作成できない
-
 maketmpname9:
 	movem.l	(sp)+,d0-d2/a0-a1
 	rts
@@ -511,9 +489,22 @@ writebuf::
 	beq	writebuf9		;ファイルバッファが空
 	tst.w	(F_HANDLE,a1)
 	bpl	writebuf8		;ファイルはすでに作成されている
+
+;最初の書き込みならファイルを作成する
 	move.w	#$20,-(sp)		;ファイル属性(Archive)
 	move.l	(F_NAMEPTR,a1),-(sp)
-	DOS	_CREATE			;最初の書き込みならファイルを作成する
+	pea.l	(TEMPFILPTR,a6)
+	cmpa.l	(sp)+,a1
+	bne	1f			;出力ファイルの作成
+	DOS	_VERNUM			;テンポラリファイルの作成
+	cmp.w	#$020F,d0
+	bcc	3f
+	.dc.w	$FF5a			;DOS _MAKETMP (～v2.03)
+	bra	@f
+3:	.dc.w	$FF8a			;DOS _MAKETMP (v2.15～)
+	bra	@f
+1:	DOS	_CREATE
+@@:
 	addq.l	#6,sp
 	tst.l	d0
 	bpl	writebuf1
