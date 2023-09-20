@@ -125,6 +125,7 @@ errtbl	.macro
 	error	1,redeferr_offsym,	'シンボル %s は .offsym 以外で定義されています'
 	error	1,badopeerr,		'命令が解釈できません'
 	error	1,badopeerr_local,	'ローカルラベルの記述が不正です'
+	error	1,badopeerr_locallen,	'ローカルラベルの桁数が多すぎるため定義できません'
 	error	0,ilsymerr_value
 	error	0,ilsymerr_local
 	error	0,ilsymerr_real
@@ -173,6 +174,7 @@ errtbl	.macro
 	error	1,iloprerr_too_many,	'%s のオペランドが多すぎます'
 	error	1,iloprerr_pseudo_many,	'%s の引数が多すぎます'
 	error	1,iloprerr_local,	'ローカルラベルの参照が不正です'
+	error	1,iloprerr_locallen,	'ローカルラベルの桁数が多すぎるため参照できません'
 	error	1,iloprerr_ds_negative,	'%s の引数が負数です'
 	error	1,iloprerr_end_xref,	'.end に外部参照値は指定できません'
 	error	1,iloprerr_internalfp,	'浮動小数点数の内部表現の長さが合いません'

@@ -418,7 +418,7 @@ deflocal21:
 	tst.w	d1
 	beq	deflocal22		;1文字
 	cmp.w	(LOCALLENMAX,a6),d1
-	bcc	badopeerr_local		;最大桁数を越えている?
+	bcc	badopeerr_locallen	;最大桁数を越えている?
 deflocal211:
 	move.w	d0,d2			;×1
 	add.w	d0,d0			;×2
@@ -771,7 +771,7 @@ encodelocal20:				;0f～9f/0b～9b
 	addq.w	#2-1,d2			;0=1文字(0桁),1=2文字(1桁),
 					;2=3文字(2桁),3=4文字(3桁),4=5文字(4桁)
 	cmp.w	(LOCALLENMAX,a6),d2
-	bhi	iloprerr_local		;最大桁数を越えている?
+	bhi	iloprerr_locallen	;最大桁数を越えている?
 encodelocal21:
 	move.w	d0,d2			;×1
 	add.w	d0,d0			;×2
