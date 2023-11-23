@@ -512,13 +512,12 @@ prnnextpage9:
 ;	out:---
 prnpaging:
 	subq.w	#1,(PRNCOUNT,a6)
-	bcs	prnpaging1
-	bne	prnpaging9
+	bhi	prnpaging9
 	move.l	a0,-(sp)
 	lea.l	(pageff_msg,pc),a0
 	bsr	prnlout1		;改ページコードを出力
 	movea.l	(sp)+,a0
-prnpaging1:
+prnpaging1::
 	link	a5,#-80
 	movem.l	d0-d1/a0-a1,-(sp)
 	addq.w	#1,(PRNSPAGE,a6)
@@ -535,6 +534,10 @@ prnpaging1:
 	bsr	strcpy
 	lea.l	(-80,a5),a0
 	bsr	prnlout1		;タイトル文字列・日時を表示
+
+	tst.b	(NOPAGEFF,a6)		;ページングしない場合は
+	bne	prnpaging4		;サブタイトル文字列・ページ数を表示しない
+
 	movea.l	(PRNSUBTTL,a6),a1
 	bsr	tfrtitle
 	move.w	(PRNMPAGE,a6),d0

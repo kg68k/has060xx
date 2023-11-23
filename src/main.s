@@ -54,6 +54,7 @@ asmmain0:
 	movea.l	(PRNFILE,a6),a0
 	bsr	prnopen			;PRNファイルをオープンする
 	move.w	d0,(PRNHANDLE,a6)
+	bsr	prnpaging1		;タイトル行を出力
 asmmain1:
 	bsr	asmpass1		;パス1
 	bsr	asmpass2		;パス2

@@ -43,6 +43,9 @@ OBJ = main.o hupair.o optimize.o doasm.o file.o misc.o symbol.o \
 
 all:	has060x.x
 
+hasx.zip:	has060x.x CHANGELOG.txt
+	rm -f $@
+	zip -9 $@ $^
 
 clean:
 	rm -f $(OBJ) has060x.x
