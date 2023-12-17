@@ -140,47 +140,6 @@ T_CPU		equ	$3900	;.cpu
 
   .endif	;__TMPCODE_EQU__
 
-;----------------------------------------------------------------
-;
-;	Revision 2.2  2016-08-07 12:00:00  M.Kamada
-;	+89 BRA.L の後に .CPU 68000 があるとアセンブルできない不具合
-;
-;	Revision 2.1  1999  3/ 2(Tue) 16:53:11 M.Kamada
-;	+82 エラーメッセージを日本語化
-;	+82 T_ERRORを$FF00から通常のコードに変更
-;
-;	Revision 2.0  1999  2/27(Sat) 23:45:53 M.Kamada
-;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
-;
-;	Revision 1.9  1999  2/24(Wed) 21:01:04 M.Kamada
-;	+80 ColdFire対応
-;	+80 .offsym <初期値>,<シンボル>
-;
-;	Revision 1.8  1998 10/10(Sat) 01:51:49 M.Kamada
-;	+77 -pのとき.INSERTで1度に256バイト以上読み出すと誤動作する
-;
-;	Revision 1.7  1997 10/21(Tue) 16:29:08 M.Kamada
-;	+52 PMOVE.D #imm,CRPが正しくアセンブルできない不具合
-;
-;	Revision 1.6  1997 10/12(Sun) 23:31:09 M.Kamada
-;	+52 jmp/jsrを最適化する
-;
-;	Revision 1.5  1997  9/15(Mon) 15:27:28 M.Kamada
-;	+45 shift
-;
-;	Revision 1.4  1996 12/15(Sun) 01:12:11 M.Kamada
-;	+07 F43G対策
-;		削除すべきNOPのテンポラリコードを追加
-;
-;	Revision 1.3  1994/07/11  15:20:16  nakamura
-;	link命令の最適化用テンポラリコード追加
-;
-;	Revision 1.2  1994/03/05  14:09:30  nakamura
-;	仕様拡張に伴うテンポラリコードの追加
-;
-;	Revision 1.1  1994/02/13  14:32:34  nakamura
-;	Initial revision
-;
-;
+
 	.text
 	.list

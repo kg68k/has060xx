@@ -6,6 +6,7 @@
 ;	$Id: error2.s,v 2.0  2016-01-01 12:00:00  M.Kamada Exp $
 ;
 ;		Copyright 1997-2016  by M.Kamada
+;		Copyright 2023       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -134,48 +135,4 @@ crlf_msg2::		.dc.b	CRLF,0
 
 
 ;----------------------------------------------------------------
-;	$Log: error2.s,v $
-;	Revision 2.0  2016-01-01 12:00:00  M.Kamada
-;	+88 ワーニング「整数を単精度浮動小数点数の内部表現と見なします」を追加
-;	+88 エラー「浮動小数点数の内部表現の長さが合いません」を追加
-;
-;	Revision 1.9  1999 10/ 8(Fri) 21:05:30 M.Kamada
-;	+86 ilsymerrを細分化
-;	+86 ilsizeerrを細分化
-;	+86 改行コードの変更に対応
-;	+86 '%s に外部参照値は指定できません'
-;	+86 foo fequ fooのエラーメッセージがおかしい
-;
-;	Revision 1.8  1999  6/ 9(Wed) 23:40:08 M.Kamada
-;	+85 .offsymでシンボル指定があるとき.even/.quad/.alignをエラーにする
-;	+85 .dsの引数が負数のとき.text/.dataセクションではエラー,その他はワーニング
-;
-;	Revision 1.7  1999  4/24(Sat) 03:15:15 M.Kamada
-;	+84 マクロ内のローカルシンボルが多すぎるとバスエラーが出る不具合を修正
-;
-;	Revision 1.6  1999  3/16(Tue) 03:47:26 M.Kamada
-;	+83 「ローカルラベルの参照が不正です」を追加
-;
-;	Revision 1.5  1999  3/ 2(Tue) 20:47:20 M.Kamada
-;	+82 エラーメッセージを日本語化
-;	+82 疑似命令のパラメータが多すぎる場合のエラーチェックを強化
-;
-;	Revision 1.4  1999  2/27(Sat) 23:40:33 M.Kamada
-;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
-;
-;	Revision 1.3  1998  3/30(Mon) 21:21:58 M.Kamada
-;	+61 warning: insignificant bitを追加
-;
-;	Revision 1.2  1998  1/10(Sat) 15:45:18 M.Kamada
-;	+56 MOVE to USPのエラッタを回避
-;
-;	Revision 1.1  1997 10/28(Tue) 16:40:34 M.Kamada
-;	+52 記述された整数が64bitを超えたらエラー
-;
-;	Revision 1.0  1997  9/14(Sun) 16:36:41 M.Kamada
-;	+46 error.sを分離
-;	Initial revision
-;
-;
-	.text
-	.list
+	.end

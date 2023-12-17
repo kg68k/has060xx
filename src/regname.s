@@ -243,30 +243,3 @@ opconv_tbl::
 
 ;----------------------------------------------------------------
 	.end
-
-;----------------------------------------------------------------
-;	$Log: regname.s,v $
-;	Revision 1.7  1999  6/ 9(Wed) 21:05:13 M.Kamada
-;	+85 演算子.notb./.notw.を追加
-;
-;	Revision 1.6  1999  2/28(Sun) 00:31:06 M.Kamada
-;	+82 ColdFireのときCPUSHLがアセンブルできなかった
-;
-;	Revision 1.5  1999  2/27(Sat) 23:44:58 M.Kamada
-;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
-;
-;	Revision 1.4  1999  2/23(Tue) 02:26:27 M.Kamada
-;	+80 ColdFire対応
-;	+80 .sizeof.と.defined.を追加
-;
-;	Revision 1.3  1996 11/13(Wed) 15:33:45 M.Kamada
-;	+02 68060対応
-;		BUSCRとPCRを追加
-;
-;	Revision 1.2  1994/03/05  12:20:52  nakamura
-;	レジスタ名zd0～zd7,za0～za7,opcを追加
-;
-;	Revision 1.1  1994/02/13  14:17:46  nakamura
-;	Initial revision
-;
-;

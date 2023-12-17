@@ -128,14 +128,5 @@ EXW_IDXW	equ	0<<EXWB_IDXSIZE	;インデックスレジスタサイズ
 EXW_IDXL	equ	1<<EXWB_IDXSIZE
 
 
-;----------------------------------------------------------------
-;	$Log: eamode.equ,v $
-;	Revision 1.2  1999  2/27(Sat) 23:38:34 M.Kamada
-;	+81 ソースリストのフォーマットを変更(実行ファイルは+80とまったく同じ)
-;
-;	Revision 1.1  1994/02/13  14:31:42  nakamura
-;	Initial revision
-;
-;
 	.text
 	.list
