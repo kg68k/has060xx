@@ -136,9 +136,7 @@ T_OFFSYM	equ	$3700	;.offsym
 
 T_ERROR		equ	$3800	;エラー発生
 
-  .if 89<=verno060
 T_CPU		equ	$3900	;.cpu
-  .endif
 
   .endif	;__TMPCODE_EQU__
 

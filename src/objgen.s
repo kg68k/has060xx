@@ -57,9 +57,8 @@ asmpass319:
 	clr.w	(PAGEFLG,a6)
 	sf.b	(ISMACDEF,a6)
 
-  .if 89<=verno060
 	move.w	(ICPUTYPE,a6),(CPUTYPE,a6)	;CPUTYPE,CPUTYPE2
-  .endif
+
 	bsr	makeobjhead		;オブジェクトヘッダの作成
 	bsr	resetlocctr		;ロケーションカウンタの初期化
 	bsr	outaligninfo		;アラインメント情報の出力
@@ -432,9 +431,7 @@ pass3_tbl:
 
 	bra.w	error		;38	エラー発生
 
-  .if 89<=verno060
 	bra.w	cputype		;39	.cpu
-  .endif
 
 ;----------------------------------------------------------------
 error:
@@ -453,13 +450,11 @@ nopalive:				;35xx 挿入されたNOP
 	bsr	f43gwarn
 	bra	constdata
 
-  .if 89<=verno060
 ;----------------------------------------------------------------
 cputype:				;39xx .cpu
 	bsr	tmpreadd0w
 	move.w	d0,(CPUTYPE,a6)		;CPUTYPE,CPUTYPE2
 	rts
-  .endif
 
 ;----------------------------------------------------------------
 symdef:					;2FXX シンボル定義

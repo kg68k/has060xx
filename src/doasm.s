@@ -124,10 +124,9 @@ asmpass101:
 	move.l	sp,(SPSAVE,a6)
 	lea.l	(asm1loop9,pc),a0
 	move.l	a0,(ERRRET,a6)
-  .if 89<=verno060
+
 	move.l	(ICPUNUMBER,a6),d1
 	bsr	cputype_update
-  .endif
 	bra	asm1loop9
 
 asm1loop:
@@ -1291,15 +1290,12 @@ setfpop_tbl:				;サイズコードテーブル
 	sub.l	(RPNBUF1,a1),d1
 ;ADDA/SUBA→LEA
 ~sbadcpa1w:
-  .if 91<=verno060
 ;ADDA.L #32768,An → SUBA.W #-32768,An は可
 ;ADDA.W #32768,An → SUBA.W #-32768,An は不可
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
 	bne	~sbadcpa1w001
-  .endif
 	cmp.l	#$00008000,d1
 	beq	~sbadcpa18000
-  .if 91<=verno060
 ~sbadcpa1w001:
 ;ADDA.L #-32768,An → LEA.L (-32768,An),An は可
 ;ADDA.W #-32768,An → LEA.L (-32768,An),An は可
@@ -1312,7 +1308,6 @@ setfpop_tbl:				;サイズコードテーブル
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
 	bne	~sbadcpa199
 ~sbadcpa1w002:
-  .endif
 	move.l	d1,d0
 	ext.l	d1
 	cmp.l	d0,d1

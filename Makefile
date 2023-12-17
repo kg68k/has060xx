@@ -4,7 +4,10 @@
 MKDIR_P = mkdir -p
 U8TOSJ = u8tosj
 
+SRCDIR_MK = srcdir.mk
 SRC_DIR = src
+-include $(SRCDIR_MK)
+
 BLD_DIR = build
 
 
@@ -20,6 +23,11 @@ all: directories $(SJ_DOCS) $(SJ_SRCS)
 
 directories: $(BLD_DIR)
 
+# Do not use $(SRCDIR_MK) as the target name to prevent automatic remaking of the makefile.
+srcdir_mk:
+	rm -f $(SRCDIR_MK)
+	echo "SRC_DIR = $(CURDIR)/src" > $(SRCDIR_MK)
+	
 $(BLD_DIR):
 	$(MKDIR_P) $@
 

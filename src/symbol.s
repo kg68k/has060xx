@@ -25,7 +25,6 @@
 ;	ハッシュ関数の計算
 ;	in :a2=文字列へのポインタ/d2.w=文字列長-1
 ;	out:d0.l=ハッシュ関数値		(d3を破壊)
-  .ifdef MASK_HASH
 hashfnc	.macro	hashsize_minus_1
 	moveq.l	#0,d0
 @loop:
@@ -37,22 +36,6 @@ hashfnc	.macro	hashsize_minus_1
 	dbra	d2,@loop
 	and.l	hashsize_minus_1,d0	;d0.l=シンボルのハッシュ関数値
 	.endm
-  .else
-hashfnc	.macro	hashsize
-	moveq.l	#0,d0
-	moveq.l	#0,d3
-@loop:
-	move.b	(a2)+,d3
-	ori.b	#$20,d3			;(大文字・小文字の違いは無視)
-	sub.w	d3,d0			;mulu.w #7,d3
-	lsl.w	#3,d3			;add.w d3,d0
-	add.w	d3,d0			;
-	dbra	d2,@loop
-	divu.w	hashsize,d0		;ハッシュテーブルサイズ
-	clr.w	d0
-	swap.w	d0			;d0.w=シンボルのハッシュ関数値
-	.endm
-  .endif
 
 
 ;----------------------------------------------------------------
@@ -63,11 +46,7 @@ defressym::
 	doquad	d0			;念のため
 	movea.l	d0,a3
 	lea.l	(reg_tbl,pc),a2		;レジスタ名シンボルの初期化
-  .ifdef MASK_HASH
 	move.l	#SYMHASHSIZE-1,d5	;ロングにすること
-  .else
-	move.w	#SYMHASHSIZE,d5
-  .endif
 	movea.l	(SYMHASHPTR,a6),a5
 defressym1:
 	movea.l	a2,a0
@@ -91,11 +70,7 @@ defressym2:
 
 	llea	opcode_tbl,a2		;命令名シンボルの初期化
 	llea	opadr_tbl,a4
-  .ifdef MASK_HASH
 	move.l	#CMDHASHSIZE-1,d5	;ロングにすること
-  .else
-	move.w	#CMDHASHSIZE,d5
-  .endif
 	movea.l	(CMDHASHPTR,a6),a5
 defressym3:
 	movea.l	a2,a0
@@ -168,11 +143,7 @@ isdefdsym::
 isdefdsym1:
 	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
-  .ifdef MASK_HASH
 	hashfnc	#SYMHASHSIZE-1		;シンボルハッシュ関数値を計算
-  .else
-	hashfnc	#SYMHASHSIZE		;シンボルハッシュ関数値を計算
-  .endif
 	lsl.l	#2,d0
 	add.l	(SYMHASHPTR,a6),d0	;シンボルハッシュテーブルアドレス
 	movea.l	d0,a1
@@ -239,11 +210,7 @@ isdefdmac::
 isdefdmac1:
 	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
-  .ifdef MASK_HASH
 	hashfnc	#CMDHASHSIZE-1		;命令ハッシュ関数値を計算
-  .else
-	hashfnc	#CMDHASHSIZE		;命令ハッシュ関数値を計算
-  .endif
 	lsl.l	#2,d0
 	add.l	(CMDHASHPTR,a6),d0	;命令ハッシュテーブルアドレス
 	movea.l	d0,a1
@@ -299,19 +266,11 @@ isdefdmac11:				;2バイト文字
 ;	out:d0.l=登録済なら0 /a1=シンボルテーブルへのポインタ
 ;		 未登録なら-1/a1=ハッシュテーブル未使用部へのポインタ
 isdefdlocsym::
-  .ifdef MASK_HASH
 	move.l	d1,d0
 	swap.w	d0
 	lsl.w	#5,d0
 	eor.w	d1,d0
 	and.l	#SYMHASHSIZE-1,d0	;ロングにすること
-  .else
-	moveq.l	#0,d0
-	move.w	d1,d0
-	divu.w	#SYMHASHSIZE,d0
-	clr.w	d0
-	swap.w	d0			;d0.w=シンボルのハッシュ関数値
-  .endif
 	lsl.l	#2,d0
 	add.l	(SYMHASHPTR,a6),d0	;シンボルのハッシュテーブルアドレス
 	movea.l	d0,a1
@@ -363,11 +322,7 @@ getmaccmd1:
 getmaccmd2:
 	move.w	d4,d2			;文字列長-1(8文字目まで)
 	movea.l	a0,a2			;文字列へのポインタ
-  .ifdef MASK_HASH
 	hashfnc	#CMDHASHSIZE-1		;命令ハッシュ関数値を計算
-  .else
-	hashfnc	#CMDHASHSIZE		;命令ハッシュ関数値を計算
-  .endif
 	lsl.l	#2,d0
 	add.l	(CMDHASHPTR,a6),d0	;命令ハッシュテーブルアドレス
 	movea.l	d0,a1
@@ -487,11 +442,7 @@ getcmdmac1:
 getcmdmac2:
 	move.w	d4,d2			;文字列長-1(8文字目まで)
 	movea.l	a0,a2			;文字列へのポインタ
-  .ifdef MASK_HASH
 	hashfnc	#CMDHASHSIZE-1		;命令ハッシュ関数値を計算
-  .else
-	hashfnc	#CMDHASHSIZE		;命令ハッシュ関数値を計算
-  .endif
 	lsl.l	#2,d0
 	add.l	(CMDHASHPTR,a6),d0	;命令ハッシュテーブルアドレス
 	movea.l	d0,a1

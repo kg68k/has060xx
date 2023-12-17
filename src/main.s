@@ -144,11 +144,7 @@ title_msg::
 	.dc.b	'X68k High-speed Assembler v',version,' ',copyright,CRLF,0
 
 usage_msg:
-  .if 91<=verno060
 	mes	'使用法: has060x [スイッチ] ファイル名'
-  .else
-	mes	'使用法: as [スイッチ] ファイル名'
-  .endif
 	.dc.b	CRLF
 	.dc.b	TAB,'-1',TAB,TAB
 	mes	'絶対ロング→PC間接(-b1と-eを伴う)'
@@ -229,11 +225,7 @@ usage_msg:
 	mes	'プレデファインシンボル(0=[禁止],[1]=許可)'
 	.dc.b	CRLF
 ;-z HAS拡張機能のワーニング禁止(廃止)
-  .if 91<=verno060
 	mes	'    環境変数 HAS の内容がコマンドラインの手前(-iは後ろ)に挿入されます'
-  .else
-	mes	'    環境変数 HAS の内容がコマンドラインの手前に挿入されます'
-  .endif
 	.dc.b	CRLF
 	.dc.b	0
 
@@ -268,7 +260,7 @@ meminit:					;lea.l $10(a0),a0
 ;CMDLINEPTR(a6)の更新を_SETBLOCKのエラーチェック後に行う
 	addq.l	#1,a2
 	move.l	a2,(CMDLINEPTR,a6)	;コマンドライン文字列へのポインタ
-  .if 89<=verno060
+
 	moveq.l	#1,d0
 	.cpu	68020
 	and.b	*-3(pc,d0.w*2),d0	;0=68000,1=68020以上
@@ -280,7 +272,6 @@ meminit:					;lea.l $10(a0),a0
 	cmpa.l	#'060T',a1
 	beq	meminit3		;060turboのとき
 meminit2:
-  .endif
 	move.l	#$FFFFFF,-(sp)
 	DOS	_MALLOC			;メモリを最大限確保
 	addq.l	#4,sp
@@ -300,7 +291,6 @@ meminit1:
 	move.l	d0,(MEMLIMIT,a6)
 	rts
 
-  .if 89<=verno060
 ;060turboのとき16MBを超えるメモリを確保できる
 meminit3:
 	move.l	#$7FFFFFFF,-(sp)
@@ -315,7 +305,6 @@ meminit3:
 	tst.l	d0
 	bmi	nomemabort
 	bra	meminit1
-  .endif
 
 
 ;----------------------------------------------------------------
@@ -516,16 +505,9 @@ symbol_has060x:	.dc.b	'__HAS060X__',0
 ;	CPUモードの初期化
 ;----------------------------------------------------------------
 cpuinit:
-  .if 89<=verno060
 	move.l	#68000,(ICPUNUMBER,a6)
 	move.w	#C000,(ICPUTYPE,a6)
 	rts
-  .else
-	sf.b	(F43GTEST,a6)
-cpuinit1:
-	move.l	#~~cpu_68000-cpuinit1,d0
-	jmp	(cpuinit1,pc,d0.l)
-  .endif
 
 
 ;----------------------------------------------------------------
@@ -1282,34 +1264,13 @@ option_m:
 	bsr	getcmdstring
 	bsr	getcmdnum
 	bmi	usage
-  .if 89<=verno060
+
 	bsr	cputype_convert
 	bmi	@f
 	move.l	d1,(ICPUNUMBER,a6)
 	move.w	d0,(ICPUTYPE,a6)
 	rts
 @@:
-  .else
-	cmp.l	#68000,d1
-	beq	~~cpu_68000
-	cmp.l	#68010,d1
-	beq	~~cpu_68010
-	cmp.l	#68020,d1
-	beq	~~cpu_68020
-	cmp.l	#68030,d1
-	beq	~~cpu_68030
-	cmp.l	#68040,d1
-	beq	~~cpu_68040
-	cmp.l	#68060,d1
-	beq	~~cpu_68060
-	cmp.l	#5200,d1
-	beq	~~cpu_5200
-	cmp.l	#5300,d1
-	beq	~~cpu_5300
-	cmp.l	#5400,d1
-	beq	~~cpu_5400
-  .endif
-
 	cmp.l	#1000,d1
 	bls	usage
 	cmp.l	#32768,d1

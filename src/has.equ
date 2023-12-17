@@ -51,15 +51,9 @@ CRLF		reg	CR,LF
 CRLF		reg	LF
   .endif
 
-  .if 1
-MASK_HASH	equ	1
 ;ハッシュテーブルのサイズを32768未満の2のべき乗にする
 SYMHASHSIZE	equ	8192	;シンボルハッシュテーブルのサイズ
 CMDHASHSIZE	equ	1024	;命令ハッシュテーブルのサイズ
-  .else
-SYMHASHSIZE	equ	10000	;シンボルハッシュテーブルのサイズ
-CMDHASHSIZE	equ	1000	;命令ハッシュテーブルのサイズ
-  .endif
 
 INCLDMAXNEST	equ	8	;インクルードファイルの最大ネスティング数
 MACROMAXNEST	equ	32	;マクロ展開の最大ネスティング数

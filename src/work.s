@@ -136,12 +136,10 @@ MAXALIGN::	.ds.b	1	;ソース中で使用された最大のアライン値(2^n)
 DSPADRCODE::	.ds.b	1	;処理中の実効アドレスが(d,An)/(d,PC)ならtrue
 DSPADRDEST::	.ds.b	1	;処理中の実効アドレスがデスティネーションならtrue
 
-  .if 89<=verno060
 	.align	4
 ICPUNUMBER::	.ds.l	1	;CPU番号の初期値(68000など)
 ICPUTYPE::	.ds.w	1	;CPUタイプの初期値(C000など)
 CPUNUMBER::	.ds.l	1	;現在のCPU番号(68000など)
-  .endif
 	.even
 CPUTYPE::	.ds.b	1	;現在のCPUタイプ
 CPUTYPE2::	.ds.b	1	;ColdFireのタイプ

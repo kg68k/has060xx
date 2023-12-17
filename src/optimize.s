@@ -56,9 +56,7 @@ asmpass29:
 
 ;----------------------------------------------------------------
 dopass2:
-  .if 89<=verno060
 	move.w	(ICPUTYPE,a6),(CPUTYPE,a6)	;CPUTYPE,CPUTYPE2
-  .endif
 	bsr	tmpreadd0w
 	move.w	d0,d1
 	beq	dopass29		;テンポラリファイル終了
@@ -140,9 +138,7 @@ pass2_tbl:
 
 	bra.w	error		;38	エラー発生
 
-  .if 89<=verno060
 	bra.w	cputype		;39	.cpu
-  .endif
 
 ;----------------------------------------------------------------
 nopdeath:				;34xx 削除すべきNOP
@@ -164,13 +160,11 @@ nopdeath_nul:
 nopalive:				;35xx 挿入されたNOP
 	bra	constdata
 
-  .if 89<=verno060
 ;----------------------------------------------------------------
 cputype:				;39xx .cpu
 	bsr	tmpreadd0w
 	move.w	d0,(CPUTYPE,a6)		;CPUTYPE,CPUTYPE2
 	rts
-  .endif
 
 ;----------------------------------------------------------------
 prnctrl:				;1Axx リスト出力制御

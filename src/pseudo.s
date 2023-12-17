@@ -1610,7 +1610,6 @@ skipfend:
 	bsr	calcconst
 	pea.l	(pseudo_tail_check,pc)	;最後に行の終了をチェックする
 					;よって以降でa0を破壊してはならない
-  .if 89<=verno060
 	bsr	cputype_update
 	bmi	featureerr_cpu
 	rts
@@ -1641,156 +1640,8 @@ skipfend:
 ~~cpu_5400::
 	move.l	#5400,d1
 	bra	cputype_update
-  .else
-	cmp.l	#68000,d1
-	beq	~~cpu_68000_change
-	cmp.l	#68010,d1
-	beq	~~cpu_68010_change
-	cmp.l	#68020,d1
-	beq	~~cpu_68020_change
-	cmp.l	#68030,d1
-	beq	~~cpu_68030_change
-	cmp.l	#68040,d1
-	beq	~~cpu_68040_change
-	cmp.l	#68060,d1
-	beq	~~cpu_68060_change
-	cmp.l	#5200,d1
-	beq	~~cpu_5200_change
-	cmp.l	#5300,d1
-	beq	~~cpu_5300_change
-	cmp.l	#5400,d1
-	beq	~~cpu_5400_change
-	bra	featureerr_cpu		;他のCPUは未サポート
 
-~~cpu_68000_change:
-	bsr	~~cpu_changesymbol
-~~cpu_68000::
-	move.l	#68000,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C000,(CPUTYPE,a6)
-	bra	~~cpu_word0
 
-~~cpu_68010_change:
-	bsr	~~cpu_changesymbol
-~~cpu_68010::
-	move.l	#68010,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C010,(CPUTYPE,a6)
-~~cpu_word0:
-;F43G対策のシーケンスをカットする
-	bsr	f43gcut
-;F43G対策を行わない
-	sf.b	(F43GTEST,a6)
-~~cpu_word:				;ディスプレースメントはワードのみ
-	sf.b	(EXTSIZEFLG,a6)
-	move.b	#SZ_WORD,(EXTSIZE,a6)
-	move.l	#2,(EXTLEN,a6)
-	rts
-
-~~cpu_68020_change:
-	bsr	~~cpu_changesymbol
-~~cpu_68020::
-	move.l	#68020,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C020|CFPP|CMMU,(CPUTYPE,a6)
-	bra	~~cpu_long
-
-~~cpu_68030_change:
-	bsr	~~cpu_changesymbol
-~~cpu_68030::
-	move.l	#68030,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C030|CFPP,(CPUTYPE,a6)
-	bra	~~cpu_long
-
-~~cpu_68040_change:
-	bsr	~~cpu_changesymbol
-~~cpu_68040::
-	move.l	#68040,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C040,(CPUTYPE,a6)
-	bra	~~cpu_long0
-
-~~cpu_68060_change:
-	bsr	~~cpu_changesymbol
-~~cpu_68060::
-	move.l	#68060,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C060,(CPUTYPE,a6)
-~~cpu_long0:
-	move.w	#1<<9,(FPCPID,a6)	;68040のFPU IDは1のみ
-~~cpu_long:
-	tst.b	(F43GTEST,a6)
-	bne	~~cpu_f43gset
-	tst.b	(IGNORE_ERRATA,a6)
-	seq.b	(F43GTEST,a6)
-;IGNORE_ERRATAがONでもレコードは初期化すること
-;(-k1 -m68060 -k0のとき-k0ではレコードを初期化しないから)
-;レコードが初期化されていなければ初期化する
-	movem.l	d0/a0,-(sp)
-	lea.l	(F43GREC,a6),a0
-	move.l	a0,(F43GPTR,a6)
-	moveq.l	#5-1,d0
-~~cpu_f43gloop:
-;	clr.l	(8,a0)
-	clr.w	(12,a0)
-	lea.l	(-16,a0),a0
-	move.l	a0,(16+4,a0)
-	lea.l	(16*2,a0),a0
-	move.l	a0,(-16,a0)
-	dbra	d0,~~cpu_f43gloop
-	lea.l	(F43GREC,a6),a0
-	move.l	a0,(16*4,a0)
-	lea.l	(F43GREC+16*4,a6),a0
-	move.l	a0,(-16*4+4,a0)
-	movem.l	(sp)+,d0/a0
-~~cpu_f43gset:
-	bra	~~cpu_long2
-
-~~cpu_5200_change:
-	bsr	~~cpu_changesymbol
-~~cpu_5200::
-	move.l	#5200,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C520,(CPUTYPE,a6)
-	bra	~~cpu_long3
-
-~~cpu_5300_change:
-	bsr	~~cpu_changesymbol
-~~cpu_5300::
-	move.l	#5300,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C530,(CPUTYPE,a6)
-	bra	~~cpu_long3
-
-~~cpu_5400_change:
-	bsr	~~cpu_changesymbol
-~~cpu_5400::
-	move.l	#5400,-(sp)
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
-	move.w	#C540,(CPUTYPE,a6)
-~~cpu_long3:
-	bsr	f43gcut			;F43G対策のシーケンスをカットする
-	sf.b	(F43GTEST,a6)		;F43G対策を行わない
-~~cpu_long2:
-	tst.b	(EXTSHORT,a6)
-	beq	~~cpu_word		;外部参照デフォルトはワード
-	st.b	(EXTSIZEFLG,a6)
-	move.b	#SZ_LONG,(EXTSIZE,a6)	;ディスプレースメントをロングワードにする
-	move.l	#4,(EXTLEN,a6)
-	rts
-  .endif
-
-  .if 89<=verno060
 ;---------------------------------------------------------------
 ;CPU番号をCPUタイプに変換する
 ;<d1.l:CPU番号(68000など)
@@ -1827,9 +1678,7 @@ cputype_convert::
 	moveq.l	#-1,d0
 8:	tst.l	d0
 	rts
-  .endif
 
-  .if 89<=verno060
 ;---------------------------------------------------------------
 ;CPU番号を受け取ってCPUを更新する
 ;	アセンブル開始時にCPU番号の初期値(-mまたはデフォルト)をICPUNUMBERに保存しておく
@@ -1952,7 +1801,6 @@ cputype_update::
 98:	tst.l	d0
 	movem.l	(sp)+,d1-d2
 	rts
-  .endif
 
 ;---------------------------------------------------------------
 ;<d1.l:CPU
