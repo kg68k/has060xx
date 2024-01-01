@@ -8,6 +8,11 @@ AS = has060 -c4 -u
 
 LK = hlk -e4 -x
 
+U8TOSJ = u8tosj
+
+SRCDIR_MK = ../srcdir.mk
+SRC_DIR = ../src
+-include $(SRCDIR_MK)
 
 BIN = README.DOC HAS060.DOC HAS060.X DEBUGGED.DOC KNOWNBUG.DOC \
 	HISTORY.DOC PROJECTS.DOC \
@@ -43,12 +48,20 @@ OBJ = main.o hupair.o optimize.o doasm.o file.o misc.o symbol.o \
 
 all:	has060x.x
 
+.PHONY: clean archive
+
+archive: hasx.zip
+
+CHANGELOG.txt: $(SRC_DIR)/../CHANGELOG.md
+	rm -f $@
+	$(U8TOSJ) < $^ > $@
+
 hasx.zip:	has060x.x CHANGELOG.txt
 	rm -f $@
 	zip -9 $@ $^
 
 clean:
-	rm -f $(OBJ) has060x.x
+	rm -f $(OBJ) has060x.x CHANGELOG.txt
 
 
 has060x.x:	$(OBJ)

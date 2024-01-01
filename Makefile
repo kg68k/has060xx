@@ -11,9 +11,6 @@ SRC_DIR = src
 BLD_DIR = build
 
 
-DOCS = CHANGELOG.txt
-SJ_DOCS = $(addprefix $(BLD_DIR)/,$(DOCS))
-
 SRCS = $(wildcard $(SRC_DIR)/*)
 SJ_SRCS = $(subst $(SRC_DIR)/,$(BLD_DIR)/,$(SRCS))
 
@@ -36,11 +33,8 @@ $(BLD_DIR):
 $(BLD_DIR)/%: $(SRC_DIR)/%
 	$(U8TOSJ) < $^ >! $@
 
-$(BLD_DIR)/CHANGELOG.txt: CHANGELOG.md
-	$(U8TOSJ) < $^ >! $@
-
 
 clean:
-	rm -f $(SJ_DOCS) $(SJ_SRCS)
+	rm -f $(SJ_SRCS)
 
 # EOF
