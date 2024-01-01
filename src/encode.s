@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1997-99  by M.Kamada
+;			  2024     by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -807,6 +808,12 @@ encodestr2:
 	move.w	d0,(a2)+
 	tst.w	d1
 	beq	encodeopr1		;ヌルストリング
+	.fail	MAXLINELEN>$10000
+	cmpi.w	#OT_STR_WORDLEN,d1
+	bcs	@f
+	move.b	#OT_STR_WORDLEN,(-1,a2)
+	move.w	d1,(a2)+		;文字列長をワードで格納する
+@@:
 	subq.w	#1,d1
 	bset.l	#0,d1			;(d1.w = even(d1.w) - 1)
 encodestr3:

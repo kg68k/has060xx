@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
+;		          2024       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -232,7 +233,7 @@ convrpnnum_str:
 	and.w	#$00FF,d0
 	beq	convrpnnum9		;ヌルストリング→エラー
 	cmp.w	#4,d0
-	bhi	convrpnnum9		;4文字以上→エラー
+	bhi	convrpnnum9		;4文字より長い→エラー
 	subq.w	#1,d0
 	moveq.l	#0,d2
 convrpnnum_str1:
@@ -309,12 +310,17 @@ convrpnnum_sizeof1:
 	bne	convrpnnum_sizeof2
 ;.sizeof.('～')
 convrpnnum_sizeof11:
-	move.w	(a0)+,d0
-	and.w	#$00FF,d0
+	moveq.l	#0,d0
+	addq.w	#1,a0
+	move.b	(a0)+,d0		;文字列長
+	cmp.b	#OT_STR_WORDLEN,d0
+	bne	@f
+	move.w	(a0)+,d0		;$ffの場合のみ、続くワードが文字列長
+@@:
 	add.w	d0,d7			;文字列長を加算
-	addq.w	#1,d0
+	addq.l	#1,d0
 	and.w	#$FFFE,d0
-	adda.w	d0,a0			;文字列の直後
+	adda.l	d0,a0			;文字列の直後
 	cmpi.b	#OT_STR>>8,(a0)
 	beq	convrpnnum_sizeof11
 	bra	convrpnnum_sizeof7

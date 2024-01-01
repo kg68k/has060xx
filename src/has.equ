@@ -6,7 +6,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
-;			  2023       by TcbnErik
+;			  2023-2024  by TcbnErik
 ;----------------------------------------------------------------
 
   .ifndef __HAS_EQU__
@@ -18,9 +18,9 @@ verno		equ	309		;(@VERSIONの値)
 verno060	equ	91		;__HAS060__の値
 copyright	reg	'(C) 1990-1994/1996-2023 Y.Nakamura/M.Kamada'	;title_msgの著作権表示
 
-version_x	reg	'1.0.1'		;バージョンNo.
-verno_x		equ	$01_00_01	;__HAS060X__の値
-copyright_x	reg	'(C) 2023 TcbnErik'
+version_x	reg	'1.1.0'		;バージョンNo.
+verno_x		equ	$01_01_00	;__HAS060X__の値
+copyright_x	reg	'(C) 2023-2024 TcbnErik'
 
   .ifndef EUCSRC
 EUCSRC		equ	0		;ソースの文字コード(0=SJIS,1=EUC)

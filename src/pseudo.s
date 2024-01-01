@@ -5,6 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
+;			  2024       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -213,6 +214,11 @@ dodcparam01:
 	movea.l	a0,a1
 	moveq.l	#0,d0
 	move.b	(1,a0),d0		;文字列長
+	cmpi.b	#OT_STR_WORDLEN,d0
+	bne	@f
+	move.w	(2,a0),d0		;$ffの場合のみ、続くワードが文字列長
+	addq.l	#2,d0
+@@:
 	addq.l	#3,d0
 	bclr.l	#0,d0
 	adda.l	d0,a1			;文字列の終了アドレス
@@ -277,6 +283,10 @@ dodcstr:				;パラメータ文字列
 	move.w	(a0)+,d1		;d1.b=文字列長
 	and.w	#$00FF,d1
 	beq	dodcstrlw9		;ヌルストリング
+	cmp.w	#OT_STR_WORDLEN,d1
+	bne	@f
+	move.w	(a0)+,d1		;$ffの場合のみ、続くワードが文字列長
+@@:
 	move.b	(CMDOPSIZE,a6),d2
 	cmp.b	#SZ_SHORT,d2
 	beq	dodcstrb
@@ -289,7 +299,7 @@ dodcstrlw:
 dodcstrlw1:
 	lsl.l	#8,d0
 	move.b	(a0)+,d0
-	subq.b	#1,d1
+	subq.w	#1,d1
 	dbeq	d3,dodcstrlw1
 	cmpi.b	#SZ_WORD,(CMDOPSIZE,a6)
 	beq	dodcstrlw2
@@ -299,7 +309,7 @@ dodcstrlw1:
 dodcstrlw2:
 	bsr	wrt1wobj
 dodcstrlw3:
-	tst.b	d1
+	tst.w	d1
 	bne	dodcstrlw
 dodcstrlw9:
 	move.l	a0,d0
@@ -311,7 +321,7 @@ dodcparam9
 dodcstrb:				;.bでの文字列書き込み
 	move.b	(a0)+,d0
 	bsr	wrt1bobj
-	subq.b	#1,d1
+	subq.w	#1,d1
 	bne	dodcstrb
 	bra	dodcstrlw9
 
@@ -730,8 +740,9 @@ pseudo_redeferr_a1:
 	move.w	d0,(a0)+
 	beq	~~reg9			;中間コードが終了
 	addq.w	#1,d1
+	moveq.l	#0,d2
 	move.b	d0,d2
-	and.w	#$FF00,d0
+	clr.b	d0
 	cmp.w	#OT_VALUEW,d0
 	beq	~~reg5
 	cmp.w	#OT_LOCALREF,d0
@@ -748,10 +759,15 @@ pseudo_redeferr_a1:
 	bne	~~reg3
 	tst.b	d2			;文字列
 	beq	~~reg3			;ヌルストリング
+	cmp.b	#OT_STR_WORDLEN,d2
+	bne	~~reg4
+	move.w	(a2)+,d2		;$ffの場合のみ、続くワードが文字列長
+	move.w	d2,(a0)+
+	addq.w	#1,d1
 ~~reg4:
 	move.w	(a2)+,(a0)+		;文字列の内容を転送
 	addq.w	#1,d1
-	subq.b	#2,d2
+	subq.w	#2,d2
 	bhi	~~reg4
 	bra	~~reg3
 

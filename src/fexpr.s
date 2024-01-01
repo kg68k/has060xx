@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
+;		          2024       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -249,7 +250,7 @@ calcfex_prime:				;一次式
 	tst.w	d7
 	beq	exprerr			;ヌルストリング→エラー
 	cmp.w	#4,d7
-	bhi	exprerr			;4文字以上→エラー
+	bhi	exprerr			;4文字より長い→エラー
 	subq.w	#1,d7
 	moveq.l	#0,d0			;文字列
 calcfex_str:
