@@ -262,27 +262,18 @@ meminit:					;lea.l $10(a0),a0
 	addq.l	#1,a2
 	move.l	a2,(CMDLINEPTR,a6)	;コマンドライン文字列へのポインタ
 
-	moveq.l	#1,d0
-	.cpu	68020
-	and.b	*-3(pc,d0.w*2),d0	;0=68000,1=68020以上
-	.cpu	68000
-	beq	meminit2
-	move.w	#$8000,d1		;_SYS_STATのバージョンを確認する
-	moveq.l	#$AC,d0			;_SYS_STAT
-	trap	#15
-	cmpa.l	#'060T',a1
-	beq	meminit3		;060turboのとき
-meminit2:
+	move.l	#$7FFFFFFF,-(sp)	;試しに060turbo.sysで拡張された
+	DOS	_MALLOC3		;DOSコールで確保してみる
+	and.l	d0,(sp)
+	DOS	_MALLOC3
+	move.l	d0,(sp)+
+	bpl	meminit1		;確保できたならそれを使う
+
 	move.l	#$FFFFFF,-(sp)
 	DOS	_MALLOC			;メモリを最大限確保
-	addq.l	#4,sp
-	tst.l	d0
-	bpl	meminit1		;(こんなことはありえないが…)
-	and.l	#$FFFFFF,d0
-	move.l	d0,-(sp)
+	and.l	d0,(sp)
 	DOS	_MALLOC			;あるだけのメモリを確保
-	addq.l	#4,sp
-	tst.l	d0
+	move.l	d0,(sp)+
 	bmi	nomemabort		;メモリが全く確保出来ない
 meminit1:
 	move.l	d0,(MEMPTR,a6)		;未使用領域の開始アドレス
@@ -291,21 +282,6 @@ meminit1:
 	sub.l	#$400,d0
 	move.l	d0,(MEMLIMIT,a6)
 	rts
-
-;060turboのとき16MBを超えるメモリを確保できる
-meminit3:
-	move.l	#$7FFFFFFF,-(sp)
-	DOS	_MALLOC3
-	addq.l	#4,sp
-	tst.l	d0
-	bpl	meminit1
-	and.l	#$7FFFFFFF,d0
-	move.l	d0,-(sp)
-	DOS	_MALLOC3
-	addq.l	#4,sp
-	tst.l	d0
-	bmi	nomemabort
-	bra	meminit1
 
 
 ;----------------------------------------------------------------
