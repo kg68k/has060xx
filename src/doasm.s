@@ -5,7 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
-;			  2023       by TcbnErik
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -2180,18 +2180,6 @@ f43g_second1:
 	OPOUTrts
 
 ~clr99:
-	cmp.w	#EA_AN,d0
-;ColdFireでもclrはdnのみではない
-	bne	~clr_negnot1
-	move.w	#$90C0,d7		;clr An → suba An,An
-	tst.b	(CMDOPSIZE,a6)		;cmpi.b #SZ_BYTE,(CMDOPSIZE,a6)
-	beq	ilsizeerr_an		;.bならエラー
-	move.w	(EACODE,a1),d1
-	andi.w	#$0007,d1
-	bra	~sbadcpa1
-
-;ColdFireでもclrはdnのみではない
-~clr_negnot1:
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
 	bra	~negnot11
