@@ -5,7 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
-;			  2023       by TcbnErik
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	doscall.mac
@@ -14,6 +14,7 @@
 	.include	register.equ
 	.include	cputype.equ
 	.include	error2.equ
+	.include	version.equ
 
 	.cpu	68000
 	.text

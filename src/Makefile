@@ -83,7 +83,7 @@ hupair.o:	hupair.s
 macro.o:	has.equ cputype.equ register.equ tmpcode.equ \
 		symbol.equ macro.s
 main.o:		doscall.mac has.equ symbol.equ register.equ \
-		cputype.equ error2.equ main.s
+		cputype.equ error2.equ version.equ main.s
 misc.o:		doscall.mac has.equ register.equ misc.s
 objgen.o:	has.equ symbol.equ register.equ tmpcode.equ \
 		cputype.equ eamode.equ objgen.s
