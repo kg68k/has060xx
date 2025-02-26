@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;		          1997-99  by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -286,8 +287,7 @@ defmacro2:
 ;----------------------------------------------------------------
 ;	定義中にソースが終了してしまった
 defmacro9:
-	st.b	(ISASMEND,a6)		;処理を強制終了させる
-defmacro99:
+					;処理を強制終了させる
 	move.w	#T_MDEFEND,d0		;マクロ等定義終了
 	bsr	wrtobjd0w
 	sf.b	(ISIFSKIP,a6)

@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	doscall.mac
@@ -692,13 +693,20 @@ getline0:
 	tst.w	(MACREPTNEST,a6)
 	bne	getline2
 	addq.l	#1,(LINENUM,a6)
-	tst.w	(INCLDNEST,a6)
-	beq	readline
-
-	bsr	readline		;インクルードファイルからの読み込み
+	bsr	readline
 	tst.w	d0
-	bmi	getline1
-	moveq.l	#1,d0
+	bmi	@f
+
+	tst.w	(INCLDNEST,a6)
+	sne.b	d0
+	neg.b	d0			;インクルードファイルからの読み込みならd0.w=1
+	rts
+@@:
+	tst.w	(INCLDNEST,a6)
+	bne	getline1
+	st.b	(ISASMEND,a6)		;ソースファイルが終了した
+getline9:
+	moveq.l	#-1,d0
 	rts
 
 getline1:				;インクルードファイルが終了した
@@ -714,10 +722,6 @@ getline2:				;マクロ定義行/rept繰り返し部の読み込み
 	tst.w	d0
 	bmi	getline0
 	moveq.l	#2,d0
-	rts
-
-getline9:
-	moveq.l	#-1,d0
 	rts
 
 ;----------------------------------------------------------------

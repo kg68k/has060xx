@@ -5,7 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
-;			  2024       by TcbnErik
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -1193,8 +1193,7 @@ skipfault1:
 	bra	skipfault1
 
 skipfault9:
-	st.b	(ISASMEND,a6)		;処理を強制終了させる
-	clr.w	(IFNEST,a6)
+	clr.w	(IFNEST,a6)		;処理を強制終了させる
 	sf.b	(ISIFSKIP,a6)
 	bra	misiferr_eof
 
