@@ -5,6 +5,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;		          1996-99  by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -286,30 +287,26 @@ dscmd:					;12xx .ds
 
 ;----------------------------------------------------------------
 dcbcmd:					;13xx .dcb
-	bsr	tmpreadd0w		;長さを読み出す
-	move.w	d0,d1
+	bsr	tmpreadd0l		;長さを読み出す
+	move.l	d0,d1
 	bsr	tmpreadd0w
 	move.w	d0,d2
 	bsr	getdtsize
-	addq.w	#1,d1
-	mulu.w	d0,d1			;生成するデータのサイズ
-	add.l	d1,a5
+@@:
+	adda.l	d1,a5
+	subq	#1,d0
+	bne	@b
 	move.w	d2,d0
 	bra	skipexpr1
 
 ;----------------------------------------------------------------
 fdcbcmd:				;30xx .dcb(浮動小数点実数)
-	move.w	d0,d1			;データ長
-	bsr	tmpreadd0w		;長さを読み出す
-	ext.l	d0
-	addq.l	#1,d0
-	add.l	d0,d0
-	add.l	d0,d0
-	moveq.l	#0,d2
+	move.w	d0,d1			;データ長-1
+	bsr	tmpreadd0l		;長さを読み出す
+	lsl.l	#2,d0
 fdcbcmd1:
-	add.l	d0,d2
+	add.l	d0,a5
 	dbra	d1,fdcbcmd1
-	add.l	d2,a5
 	moveq.l	#6*2,d0
 	bra	tempskip		;6ワード読み飛ばす
 

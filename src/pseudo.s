@@ -387,6 +387,7 @@ getdcreal6:
 	bne	iloprerr_not_fixed	;式が定数でない
 	move.l	d1,(a4)+
 	dbra	d3,getdcreal5
+~~dcb9:
 	rts
 
 ;----------------------------------------------------------------
@@ -402,11 +403,11 @@ getdcreal6:
 	bsr	calcopr
 	tst.w	d0
 	bne	ilvalueerr		;<長さ>が定数でない
-	subq.l	#1,d1
-	bcs	~~dcb9			;<長さ>が0の場合は何もしない
-	cmp.l	#$FFFF,d1
-	bcc	ilvalueerr		;<長さ>は1～65535
-	move.w	d1,-(sp)
+	tst.l	d1
+	beq.s	~~dcb9			;<長さ>が0の場合は何もしない
+	cmp.l	#$01000000,d1
+	bhi	ilvalueerr		;<長さ>は1～16M
+	move.l	d1,-(sp)
 	cmpi.w	#','|OT_CHAR,(a0)+
 	bne	iloprerr		;,<式>がない
 	cmpi.b	#SZ_SINGLE,(CMDOPSIZE,a6)
@@ -417,9 +418,7 @@ getdcreal6:
 	bmi	exprerr			;式変換に失敗
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
-	moveq.l	#0,d0
-	move.w	(sp),d0			;<長さ>-1
-	addq.w	#1,d0
+	move.l	(sp),d0			;<長さ>
 	move.b	(CMDOPSIZE,a6),d2
 	bmi	~~dcb2
 	bne	~~dcb3
@@ -440,33 +439,25 @@ getdcreal6:
 	add.l	d0,(LOCATION,a6)
 	move.w	#T_DCB,d0
 	bsr	wrtobjd0w
-	move.w	(sp)+,d0
-	bsr	wrtd0w			;長さ-1
+	move.l	(sp)+,d0
+	bsr	wrtd0l			;長さ
 	move.b	(CMDOPSIZE,a6),d0
 	bra	wrtrpn
-
-~~dcb9:
-	rts
 
 ~~dcb10:				;浮動小数点実数の.dcb
 	lea.l	(RPNBUFEX,a6),a3	;オペランド用バッファ
 	bsr	getdcreal		;浮動小数点実数オペランドを得る
 	move.w	d5,d4
-	moveq.l	#0,d0
-	move.w	(sp),d0			;<長さ>-1
-	addq.w	#1,d0
-	add.l	d0,d0
-	add.l	d0,d0
-	moveq.l	#0,d1
+	move.l	(sp),d0			;<長さ>
+	lsl.l	#2,d0
 ~~dcb11:
-	add.l	d1,d0
+	add.l	d0,(LOCATION,a6)
 	dbra	d5,~~dcb11
-	add.l	d1,(LOCATION,a6)
 	move.w	#T_FDCB,d0
 	move.b	d4,d0			;データ長-1
 	bsr	wrtobjd0w
-	move.w	(sp)+,d0
-	bsr	wrtd0w			;長さ-1
+	move.l	(sp)+,d0
+	bsr	wrtd0l			;長さ
 	moveq.l	#3-1,d1
 ~~dcb12:
 	move.l	(a3)+,d0

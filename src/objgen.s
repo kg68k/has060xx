@@ -5,6 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2015  by M.Kamada
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -1146,19 +1147,21 @@ dscmd1:
 
 ;----------------------------------------------------------------
 dcbcmd:					;13xx .dcb
-	bsr	tmpreadd0w		;データの個数
-	move.w	d0,d3
+	bsr	tmpreadd0l		;データの個数
+	move.l	d0,d3
 	bsr	tmpreadd0w
 	move.w	d0,d2
 	bsr	getdtsize		;データサイズを得る
-	move.w	d3,d4
-	addq.w	#1,d4
-	mulu.w	d4,d0			;生成するデータのサイズ
-	add.l	d0,(LOCATION,a6)	;必要なサイズだけカウンタを進める
-	move.l	d0,d5
+	moveq	#0,d5
+@@:
+	add.l	d3,d5			;生成するデータのサイズ
+	subq	#1,d0
+	bne	@b
+	add.l	d5,(LOCATION,a6)	;必要なサイズだけカウンタを進める
 	move.w	d2,d0
 	bsr	tmpreadsymex1
 
+	subq.l	#1,d3			;データの個数-1 (dbra用)
 	tst.b	(MAKEPRN,a6)
 	beq	dcbcmd1
 	cmp.l	#128,d5
@@ -1168,6 +1171,9 @@ dcbcmd1:
 	bsr	outobjexpr		;データを出力
 	movem.l	(sp)+,d0-d3
 	dbra	d3,dcbcmd1
+	clr	d3
+	subq.l	#1,d3
+	bcc	dcbcmd1
 	rts
 
 dcbcmd5:				;PRNファイル出力時、データが128bytes以上の場合
@@ -1181,6 +1187,9 @@ dcbcmd6:
 	sf.b	(MAKEPRN,a6)		;(PRNファイルに出力されるのは最初の1つだけ)
 	movem.l	(sp)+,d0-d3
 	dbra	d3,dcbcmd6
+	clr	d3
+	subq.l	#1,d3
+	bcc	dcbcmd6
 dcbcmd65:
 	st.b	(MAKEPRN,a6)
 	movea.l	(PRNLPTR,a6),a0
@@ -1209,12 +1218,9 @@ dcb_msg2:	.dc.b	'count= ',0,'bytes',0
 fdcbcmd:				;30xx .dcb(浮動小数点実数)
 	move.w	d0,d1			;データ長
 	move.w	d0,d4
-	bsr	tmpreadd0w		;データの個数
-	move.w	d0,d3
-	ext.l	d0
-	addq.l	#1,d0
-	add.l	d0,d0
-	add.l	d0,d0
+	bsr	tmpreadd0l		;データの個数
+	move.l	d0,d3
+	lsl.l	#2,d0
 	moveq.l	#0,d2
 fdcbcmd1:
 	add.l	d0,d2
@@ -1227,6 +1233,8 @@ fdcbcmd2:
 	bsr	tmpreadd0l		;データを読み出す
 	move.l	d0,(a1)+
 	dbra	d1,fdcbcmd2
+
+	subq.l	#1,d3			;データの個数-1 (dbra用)
 	tst.b	(MAKEPRN,a6)
 	beq	fdcbcmd3
 	cmp.l	#128,d2
@@ -1239,6 +1247,9 @@ fdcbcmd4:
 	bsr	out1lobj		;データを出力
 	dbra	d1,fdcbcmd4
 	dbra	d3,fdcbcmd3
+	clr	d3
+	subq.l	#1,d3
+	bcc	fdcbcmd3
 	rts
 
 fdcbcmd5:				;PRNファイル出力時、データが128bytes以上の場合
@@ -1256,6 +1267,9 @@ fdcbcmd7:
 	dbra	d1,fdcbcmd7
 	sf.b	(MAKEPRN,a6)		;(PRNファイルに出力されるのは最初の1つだけ)
 	dbra	d3,fdcbcmd6
+	clr	d3
+	subq.l	#1,d3
+	bcc	fdcbcmd6
 	bra	dcbcmd65
 
 ;----------------------------------------------------------------
