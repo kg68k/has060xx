@@ -1192,7 +1192,7 @@ dcbcmd65:
 	movea.l	(PRNLPTR,a6),a0
 	lea.l	(dcb_msg2,pc),a1
 	move.b	#-1,(a0)+		;(PRNファイルコード部を改行)
-	bsr	strcpy			;'count= '
+	bsr	strcpy			;'bytes= '
 	move.l	d5,d0			;出力バイト数
 	cmp.l	#$FFFF,d0
 	bhi	dcbcmd7
@@ -1202,13 +1202,12 @@ dcbcmd65:
 dcbcmd7:
 	bsr	convhex8
 dcbcmd8:
-	bsr	strcpy			;'bytes'
 	move.b	#-1,(a0)+
 	move.l	a0,(PRNLPTR,a6)
 	rts
 
 dcb_msg:	.dc.b	'value= ',0
-dcb_msg2:	.dc.b	'count= ',0,'bytes',0
+dcb_msg2:	.dc.b	'bytes= ',0
 	.even
 
 ;----------------------------------------------------------------
