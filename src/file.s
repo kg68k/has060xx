@@ -351,6 +351,7 @@ wrt1bobj1:
 	addq.w	#1,(OBJCONCTR,a6)
 	movem.l	(sp)+,d1/a0
 wrt1bobj9:
+wrtobjd0w1:
 	rts
 
 ;----------------------------------------------------------------
@@ -359,12 +360,9 @@ wrt1bobj9:
 ;	out:---
 wrtobjd0w::
 	tst.b	(ISOBJOUT,a6)
-	bne	wrtobjd0w1
+	bne.s	wrtobjd0w1
 	bsr	flushobj
 	bra	tmpwrtd0w
-
-wrtobjd0w1:
-	rts
 
 ;----------------------------------------------------------------
 ;	必要なら出力ファイルへデータを書き込む
@@ -381,7 +379,7 @@ wrtd0l::
 ;	out:---
 wrtd0w::
 	tst.b	(ISOBJOUT,a6)
-	bne	wrtobjd0w1
+	bne.s	wrtobjd0w1
 
 ;----------------------------------------------------------------
 ;	出力ファイルへデータを書き込む

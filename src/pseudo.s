@@ -86,7 +86,7 @@ iloprerr_pseudo_tail:
 	bcc	~~align1
 	bne	ilvalueerr		;2の累乗でないのでエラー
 	cmp.b	#8,d0
-	bhi	ilvalueerr		;2^8(=256)以上ならエラー
+	bhi	ilvalueerr		;2^8(=256)より大きければエラー
 	move.w	(a0)+,d2
 	beq	~~align4		;パディング値の指定がない
 	cmp.w	#','|OT_CHAR,d2
@@ -315,7 +315,7 @@ dodcstrlw9:
 	move.l	a0,d0
 	doeven	d0
 	movea.l	d0,a0
-dodcparam9
+dodcparam9:
 	rts
 
 dodcstrb:				;.bでの文字列書き込み
@@ -343,13 +343,10 @@ dodcreal3:
 	bsr	wrt1lobj		;得られたデータを出力する
 	dbra	d5,dodcreal3
 	move.w	(a0)+,d0
-	beq	dodcreal9
+	beq.s	dodcreal9
 	cmp.w	#','|OT_CHAR,d0
 	beq	dodcreal2
 	bra	iloprerr
-
-dodcreal9:
-	rts
 
 ;----------------------------------------------------------------
 ;	浮動小数点実数オペランドを一つ得る
@@ -366,6 +363,7 @@ getdcreal:
 	bpl	getdcreal7		;内部表現形式の値を得る
 	bsr	calcfexpr		;浮動小数点式を得る
 	movem.l	d0-d2,(a3)
+dodcreal9:
 	rts
 
 getdcreal7:

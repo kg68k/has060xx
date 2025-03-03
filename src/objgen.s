@@ -69,8 +69,7 @@ asmpass319:
 	bsr	prnsymtbl		;シンボル名テーブルの出力
 	bsr	prnundefsym		;未定義シンボルリストの出力
 	bsr	inpclose		;ファイルのクローズ
-	bsr	outclose
-	rts
+	bra	outclose
 
 
 ;----------------------------------------------------------------
@@ -109,6 +108,7 @@ makeobjhead2:
 	move.l	(a1),d0
 	bne	makeobjhead2
 makeobjhead9:
+outaligninfo9:
 	rts
 
 section_name:				;セクション名
@@ -123,7 +123,7 @@ section_name:				;セクション名
 outaligninfo:
 	move.b	(MAKEALIGN,a6),d0
 	or.b	(MAKESYMDEB,a6),d0
-	beq	outaligninfo9		;アラインメント情報もデバッグ情報も不要
+	beq.s	outaligninfo9		;アラインメント情報もデバッグ情報も不要
 	tst.b	(MAKEALIGN,a6)
 	bne	outaligninfo1		;デバッグ情報のみが必要な場合は,
 	move.b	#1,(MAXALIGN,a6)		;アライン値は2^1=2とする。
@@ -141,9 +141,6 @@ outaligninfo1:
 	bsr	wrtd0l
 	movea.l	(LINEBUFPTR,a6),a0
 	bra	wrtstr
-
-outaligninfo9:
-	rts
 
 
 ;----------------------------------------------------------------
@@ -2536,7 +2533,7 @@ prn1line3:
 	bmi	prn1line3
 	bne	prn1line4
 	tst.b	(a2)
-	beq	prn1line9
+	beq.s	prn1line9
 prn1line4:
 	subq.l	#1,a1
 	move.w	#15-1,d0		;2行以上にまたがる場合
@@ -2545,9 +2542,6 @@ prn1line5:
 	move.b	#' ',(a0)+
 	dbra	d0,prn1line5
 	bra	prn1line2
-
-prn1line9:
-	rts
 
 prn1code:				;コード部を出力
 	move.w	(PRNCODEWIDTH,a6),d0	;PRNファイルのコード部の幅
@@ -2562,6 +2556,7 @@ prn1code1:
 prn1code2:
 	move.b	#' ',(a0)+
 	dbra	d0,prn1code2
+prn1line9:
 	rts
 
 prn1code5:				;コード部が次の行に続く
@@ -3010,6 +3005,7 @@ prnextcode1:
 	move.l	a0,(PRNLPTR,a6)
 	move.w	(sp)+,d0
 prnextcode9:
+outobjrpn9:
 	rts
 
 ;----------------------------------------------------------------
@@ -3020,7 +3016,7 @@ outobjrpn:
 	movea.l	(OPRBUFPTR,a6),a1
 outobjrpn1:
 	move.w	(a1)+,d0
-	beq	outobjrpn9		;式が終了(RPN_END)
+	beq.s	outobjrpn9		;式が終了(RPN_END)
 	move.w	d0,d1
 	and.w	#$FF00,d1
 	cmp.w	#RPN_VALUEB,d1
@@ -3039,9 +3035,6 @@ outobjrpn1:
 	or.w	#$A000,d0
 	bsr	outobj1w
 	bra	outobjrpn1
-
-outobjrpn9:
-	rts
 
 outobjrpnb:				;数値データ
 	moveq.l	#0,d1

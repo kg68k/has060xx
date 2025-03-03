@@ -7,7 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
-;		          2024       by TcbnErik
+;		          2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -311,7 +311,7 @@ convrpnnum_sizeof1:
 ;.sizeof.('～')
 convrpnnum_sizeof11:
 	moveq.l	#0,d0
-	addq.w	#1,a0
+	addq.l	#1,a0
 	move.b	(a0)+,d0		;文字列長
 	cmp.b	#OT_STR_WORDLEN,d0
 	bne	@f

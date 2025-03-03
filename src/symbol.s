@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1999     by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -99,8 +100,7 @@ defressym4:
 	bne	defressym3
 
 	move.l	a3,(TEMPPTR,a6)
-	bsr	memcheck
-	rts
+	bra	memcheck
 
 ;----------------------------------------------------------------
 ;	シンボルテーブルチェインの末尾を得る

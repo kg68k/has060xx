@@ -7,7 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
-;		          2024       by TcbnErik
+;		          2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -2143,19 +2143,17 @@ stox::
 	add.w	#$3FFF-$7F,d2
 	move.l	d2,d0			;指数部
 	moveq.l	#0,d2
+stox_z:
 	rts
 
 stox_zn:				;0 or 非正規化数
 	move.l	d2,d0			;指数部
 	tst.l	d1
-	beq	stox_z			;0
+	beq.s	stox_z			;0
 	lsl.l	#8,d1			;非正規化数
 	add.w	#$3FFF-$7F+1,d0
 	moveq.l	#0,d2
 	bra	normalize		;正規化する
-
-stox_z:
-	rts
 
 stox_ni:				;NAN or ±INF
 	or.w	#$7FFF,d2

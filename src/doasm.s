@@ -160,8 +160,7 @@ asm1loop92:
 	clr.w	d0			;move.w #T_EOF,d0
 	bsr	wrtobjd0w		;ファイル終了
 	lea.l	(TEMPFILPTR,a6),a1
-	bsr	fflush			;テンポラリファイルをフラッシュする
-	rts
+	bra	fflush			;テンポラリファイルをフラッシュする
 
 
 ;----------------------------------------------------------------
@@ -387,6 +386,7 @@ ead_bdadr5:				;定数の場合
 	bra	wrt1lobj
 
 ead_bdadr9:
+ead_memadr9:
 	rts
 
 ;----------------------------------------------------------------
@@ -397,7 +397,7 @@ ead_memadr0:
 	movea.l	(sp)+,a1
 	tst.w	(RPNLEN2,a1)
 	bmi	ead_memadr5
-	beq	ead_memadr9		;アウタディスプレースメントがない
+	beq.s	ead_memadr9		;アウタディスプレースメントがない
 	move.w	#T_OD,d0		;式の場合
 	bsr	wrtobjd0w
 	move.b	(RPNSIZE2,a1),d0
@@ -423,9 +423,6 @@ ead_memadr5:				;定数の場合
 	beq	ead_dspadr5		;ワードディスプレースメント
 	move.l	d1,d0
 	bra	wrt1lobj
-
-ead_memadr9:
-	rts
 
 ;----------------------------------------------------------------
 ead_dsppc:				;(d,PC)
@@ -3562,8 +3559,7 @@ getdspadr1:
 	ror.w	#4,d2
 	or.w	d2,d1
 	move.w	d1,d0
-	bsr	wrt1wobj		;特殊オペランドの出力
-	rts
+	bra	wrt1wobj		;特殊オペランドの出力
 
 ;----------------------------------------------------------------
 ;	bra/bsr/b<cc> 	<label>
