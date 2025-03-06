@@ -446,7 +446,7 @@ predefinesymbol1:
 	pea.l	(verno060).w		;69～
 	bsr	def_predefinesymbol
 	pea.l	(symbol_has060x,pc)
-	pea.l	(verno_x)
+	move.l	#verno_x,-(sp)
 	bsr	def_predefinesymbol
 	lea.l	(8+8+8,sp),sp
 
