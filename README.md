@@ -3,6 +3,12 @@ HAS060.X version 3.09+91の改造版です。
 無保証につき各自の責任で使用して下さい。
 
 
+## Known bugs
+* HAS060.X - アセンブラ - プログラミング - ソフトウェアライブラリ - X68000 LIBRARY &gt;
+  [既知の不具合](http://retropc.net/x68000/software/develop/as/has060/knownbug.htm)
+* [KNOWNBUGS.md](KNOWNBUGS.md)
+
+
 ## Build
 PCやネット上での取り扱いを用意にするために、src/内のファイルはUTF-8で記述されています。
 X68000上でビルドする際には、UTF-8からShift_JISへの変換が必要です。
