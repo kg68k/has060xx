@@ -11,7 +11,7 @@ LK = hlk -e4 -x
 U8TOSJ = u8tosj
 
 ARCHIVE_ZIP = hasx.zip
-DOCS = CHANGELOG.txt
+DOCS = CHANGELOG.txt README.txt
 
 BIN = README.DOC HAS060.DOC HAS060.X DEBUGGED.DOC KNOWNBUG.DOC \
 	HISTORY.DOC PROJECTS.DOC \
@@ -104,6 +104,10 @@ $(ARCHIVE_ZIP): $(DOCS) has060x.x
 	zip -9 $@ $^
 
 CHANGELOG.txt: $(SRC_DIR)/../CHANGELOG.md
+	rm -f $@
+	$(U8TOSJ) < $^ > $@
+
+README.txt: $(SRC_DIR)/../README.md
 	rm -f $@
 	$(U8TOSJ) < $^ > $@
 
