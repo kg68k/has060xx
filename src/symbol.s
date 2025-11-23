@@ -449,7 +449,7 @@ getcmdmac2:
 	movea.l	d0,a5
 getcmdmac5:				;テーブルチェインから命令を検索する
 	move.l	(a1),d0			;(SYM_NEXT(a1))
-	beq	getmaccmd80		;シンボルが見つからない
+	beq	getcmdmac9		;シンボルが見つからない
 	movea.l	d0,a1
 	tst.b	(SYM_TYPE,a1)		;シンボルタイプ
 	bpl	getcmdmac5		;マクロ名は無視する
