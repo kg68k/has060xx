@@ -10,9 +10,8 @@ LK = hlk -e4 -x
 
 U8TOSJ = u8tosj
 
-SRCDIR_MK = ../srcdir.mk
-SRC_DIR = ../src
--include $(SRCDIR_MK)
+ARCHIVE_ZIP = hasx.zip
+DOCS = CHANGELOG.txt
 
 BIN = README.DOC HAS060.DOC HAS060.X DEBUGGED.DOC KNOWNBUG.DOC \
 	HISTORY.DOC PROJECTS.DOC \
@@ -49,16 +48,6 @@ OBJ = main.o hupair.o optimize.o doasm.o file.o misc.o symbol.o \
 all:	has060x.x
 
 .PHONY: clean archive
-
-archive: hasx.zip
-
-CHANGELOG.txt: $(SRC_DIR)/../CHANGELOG.md
-	rm -f $@
-	$(U8TOSJ) < $^ > $@
-
-hasx.zip:	has060x.x CHANGELOG.txt
-	rm -f $@
-	zip -9 $@ $^
 
 clean:
 	rm -f $(OBJ) has060x.x CHANGELOG.txt
@@ -98,3 +87,23 @@ work.o:		has.equ work.s
 
 %.o: %.s
 	$(AS) $<
+
+
+ifdef SRC_DIR
+archive: $(ARCHIVE_ZIP)
+else
+archive: ../srcdir.txt
+	$(if $(SRC_DIR_IS_DEFINED),$(error SRC_DIR is empty.))
+	make $@ SRC_DIR_IS_DEFINED=yes SRC_DIR=$(shell cat ../srcdir.txt)
+../srcdir.txt:
+	$(error file 'srcdir.txt' created by src2build is required.)
+endif
+
+$(ARCHIVE_ZIP): $(DOCS) has060x.x
+	rm -f $@
+	zip -9 $@ $^
+
+CHANGELOG.txt: $(SRC_DIR)/../CHANGELOG.md
+	rm -f $@
+	$(U8TOSJ) < $^ > $@
+
