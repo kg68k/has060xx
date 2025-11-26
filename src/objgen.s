@@ -29,6 +29,8 @@ asmpass3::
 	lea.l	(SOURCEPTR,a6),a1
 	bsr	frewind			;ソースファイル先頭に移動
 	move.l	a1,(INPFILPTR,a6)
+	bsr	initprnlptr		;-y -pでT_LINEの処理でPRNLPTRが初期化されるより先に
+					;T_EQUCONSTがくるので、ここで設定しておく
 asmpass31:
 	move.l	(CPUSYMBOL,a6),d0
 	beq	asmpass319
@@ -2460,6 +2462,7 @@ prnline1:
 prnline2:
 	bsr	prn1line
 prnline9:
+initprnlptr:
 	lea.l	(PRNCODE,a6),a0
 	move.l	a0,(PRNLPTR,a6)
 	rts
