@@ -57,7 +57,7 @@ defressym2:
 	tst.b	(a2)+
 	bne	defressym2
 	bsr	getsymchain
-	move.l	a3,(a1)
+	move.l	a3,(BUCKET_OR_SYM_NEXT,a1)
 	clr.l	(a3)+			;$00 SYM_NEXT
 	move.l	a0,(a3)+		;$04 SYM_NAME
 	move.w	#ST_REGISTER<<8,(a3)+	;$08 SYM_TYPE,$09 空き
@@ -81,7 +81,7 @@ defressym4:
 	tst.b	(a2)+
 	bne	defressym4
 	bsr	getsymchain
-	move.l	a3,(a1)
+	move.l	a3,(BUCKET_OR_SYM_NEXT,a1)
 	clr.l	(a3)+			;$00 SYM_NEXT
 	move.l	a0,(a3)+		;$04 SYM_NAME
 	move.b	#ST_OPCODE,(a3)+	;$08 SYM_TYPE
@@ -113,9 +113,9 @@ getsymchain:
 	add.l	a5,d0			;シンボルハッシュテーブルアドレス
 	movea.l	d0,a1
 getsymchain1:
-	tst.l	(a1)			;(SYM_NEXT(a1))
+	tst.l	(BUCKET_OR_SYM_NEXT,a1)
 	beq	getsymchain2
-	movea.l	(a1),a1
+	movea.l	(BUCKET_OR_SYM_NEXT,a1),a1
 	bra	getsymchain1
 
 getsymchain2:
@@ -148,7 +148,7 @@ isdefdsym1:
 	add.l	(SYMHASHPTR,a6),d0	;シンボルハッシュテーブルアドレス
 	movea.l	d0,a1
 isdefdsym3:
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(BUCKET_OR_SYM_NEXT,a1),d0
 	beq	isdefdsym9		;未登録だった
 	movea.l	d0,a1
 	move.b	(SYM_TYPE,a1),d3	;シンボルタイプ
@@ -216,7 +216,7 @@ isdefdmac1:
 	movea.l	d0,a1
 	movea.l	d0,a4			;シンボルテーブルチェインの先頭
 isdefdmac3:
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(BUCKET_OR_SYM_NEXT,a1),d0
 	beq	isdefdmac9		;未登録だった
 	movea.l	d0,a1
 	cmpi.b	#ST_MACRO,(SYM_TYPE,a1)	;シンボルタイプ
@@ -275,7 +275,7 @@ isdefdlocsym::
 	add.l	(SYMHASHPTR,a6),d0	;シンボルのハッシュテーブルアドレス
 	movea.l	d0,a1
 isdefdlocsym1:
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(BUCKET_OR_SYM_NEXT,a1),d0
 	beq	isdefdlocsym9		;未登録だった
 	movea.l	d0,a1
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a1)	;シンボルタイプ
@@ -327,7 +327,7 @@ getmaccmd2:
 	add.l	(CMDHASHPTR,a6),d0	;命令ハッシュテーブルアドレス
 	movea.l	d0,a1
 getmaccmd5:
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(BUCKET_OR_SYM_NEXT,a1),d0
 	beq	getmaccmd80		;シンボルが見つからない
 	movea.l	d0,a1
 	tst.b	(SYM_TYPE,a1)		;シンボルタイプ
@@ -371,7 +371,7 @@ getmaccmd11:				;2バイト文字
 	bra	getmaccmd7
 
 getmaccmd20:				;テーブルチェインから命令を検索する
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(SYM_NEXT,a1),d0
 	beq	getmaccmd80		;シンボルが見つからない
 	movea.l	d0,a1
 getmaccmd21:
@@ -448,7 +448,7 @@ getcmdmac2:
 	movea.l	d0,a1
 	movea.l	d0,a5
 getcmdmac5:				;テーブルチェインから命令を検索する
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(BUCKET_OR_SYM_NEXT,a1),d0
 	beq	getcmdmac9		;シンボルが見つからない
 	movea.l	d0,a1
 	tst.b	(SYM_TYPE,a1)		;シンボルタイプ
@@ -456,7 +456,7 @@ getcmdmac5:				;テーブルチェインから命令を検索する
 	bra	getcmdmac7
 
 getcmdmac6:
-	move.l	(a1),d0			;(SYM_NEXT(a1))
+	move.l	(SYM_NEXT,a1),d0
 	beq	getcmdmac9		;シンボルが見つからない→マクロとして再検索
 	movea.l	d0,a1
 getcmdmac7:
@@ -504,7 +504,7 @@ defsymbol1:
 	clr.b	(a3)+
 	move.l	a3,(TEMPPTR,a6)
 	bsr	getsymtbl
-	move.l	a0,(a1)			;ハッシュチェインをつなぐ
+	move.l	a0,(BUCKET_OR_SYM_NEXT,a1)	;ハッシュチェインをつなぐ
 	movea.l	a0,a1
 	move.b	d2,(SYM_TYPE,a1)
 	move.l	a2,(SYM_NAME,a1)
@@ -569,7 +569,7 @@ defmacsymbol3:
 	move.l	(a1),d0
 	move.l	a0,(a1)			;ポインタチェインの先頭になる
 	move.l	a0,a1
-	move.l	d0,(a1)			;(SYM_NEXT(a1))
+	move.l	d0,SYM_NEXT(a1)
 	move.b	#ST_MACRO,(SYM_TYPE,a1)
 	move.l	a2,(SYM_NAME,a1)
 	movem.l	(sp)+,a2-a3
@@ -598,7 +598,7 @@ defmacsymbol6:				;2バイト文字
 ;	out:a1=シンボルテーブルへのポインタ
 deflocsymbol::
 	bsr	getsymtbl
-	move.l	a0,(a1)
+	move.l	a0,(BUCKET_OR_SYM_NEXT,a1)
 	movea.l	a0,a1
 	move.b	#ST_LOCAL,(SYM_TYPE,a1)
 	move.l	d1,(SYM_LOCALNO,a1)	;ローカルシンボル番号
@@ -618,7 +618,7 @@ defstrsymbol::
 	beq	defstrsymbol9		;すでに登録済だった
 	clr.b	(1,a2,d1.l)		;(/8が指定された場合のため)
 	bsr	getsymtbl
-	move.l	a0,(a1)
+	move.l	a0,(BUCKET_OR_SYM_NEXT,a1)
 	movea.l	a0,a1
 	move.b	d2,(SYM_TYPE,a1)
 	move.l	a2,(SYM_NAME,a1)
