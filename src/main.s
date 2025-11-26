@@ -445,11 +445,15 @@ predefinesymbol1:
 	pea.l	(symbol_has060,pc)
 	pea.l	(verno060).w		;69～
 	bsr	def_predefinesymbol
-	pea.l	(symbol_has060x,pc)
+	lea.l	(8+8,sp),sp
+
+	tst.b	(SYMLEN8,a6)		;'__HAS060__'と'__HAS060X__'を8文字にすると
+	bne	@f			;どちらも'__HAS060'になってしまうので
+	pea.l	(symbol_has060x,pc)	;/8指定時に'__HAS060X__'は定義しない
 	move.l	#verno_x,-(sp)
 	bsr	def_predefinesymbol
-	lea.l	(8+8+8,sp),sp
-
+	addq.l	#8,sp
+@@:
 predefinesymbol99:
 	rts
 
