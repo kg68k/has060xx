@@ -132,15 +132,8 @@ getsymchain2:
 ;	in :a0=文字列へのポインタ/d1.w=文字列長-1
 ;	out:d0.l=登録済なら0 /a1=シンボルテーブルへのポインタ
 ;		 未登録なら-1/a1=ハッシュテーブル未使用部へのポインタ
-;	    d1.w=/8が指定されていたら文字列長を修正
 isdefdsym::
 	movem.l	d2-d3/a2-a3,-(sp)
-	tst.b	(SYMLEN8,a6)
-	beq	isdefdsym1
-	cmp.w	#8-1,d1
-	bls	isdefdsym1
-	moveq.l	#8-1,d1			;/8が指定されていた場合8文字目以降は無視
-isdefdsym1:
 	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	hashfnc	#SYMHASHSIZE-1		;シンボルハッシュ関数値を計算
@@ -200,14 +193,7 @@ isdefdsym9:				;未登録だった場合
 ;	in :a0=マクロ名へのポインタ/d1.w=マクロ名長-1
 ;	out:d0.l=登録済なら0 /a1=シンボルテーブルへのポインタ
 ;		 未登録なら-1/a1=新しいシンボル属性テーブルへのポインタ
-;	    d1.w=/8が指定されていたら文字列長を修正
 isdefdmac::
-	tst.b	(SYMLEN8,a6)
-	beq	isdefdmac1
-	cmp.w	#8-1,d1
-	bls	isdefdmac1
-	moveq.l	#8-1,d1			;/8が指定されていた場合8字目以降は無視
-isdefdmac1:
 	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	hashfnc	#CMDHASHSIZE-1		;命令ハッシュ関数値を計算
@@ -314,13 +300,7 @@ getmaccmd0:
 	moveq.l	#3-1,d1
 getmaccmd1:
 	move.w	d1,d4
-	tst.b	(SYMLEN8,a6)
-	beq	getmaccmd2
-	cmp.w	#8-1,d4
-	bls	getmaccmd2
-	moveq.l	#8-1,d4			;/8が指定されていた場合マクロは8字目以降を無視
-getmaccmd2:
-	move.w	d4,d2			;文字列長-1(8文字目まで)
+	move.w	d4,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	hashfnc	#CMDHASHSIZE-1		;命令ハッシュ関数値を計算
 	lsl.l	#2,d0
@@ -332,7 +312,7 @@ getmaccmd5:
 	movea.l	d0,a1
 	tst.b	(SYM_TYPE,a1)		;シンボルタイプ
 	bmi	getmaccmd21		;予約シンボル(命令)
-	move.w	d4,d2			;(/8が指定されていたら8文字目までしか比較しない)
+	move.w	d4,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	movea.l	(SYM_NAME,a1),a3
 getmaccmd6:
@@ -380,7 +360,7 @@ getmaccmd21:
 	and.w	(CPUTYPE,a6),d3
 	beq	getmaccmd20		;現在のCPUタイプと合致しないので無視
 getmaccmd215:
-	move.w	d1,d2			;(/8の指定に関わらず全文字比較する)
+	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	movea.l	(SYM_NAME,a1),a3
 getmaccmd22:
@@ -434,13 +414,7 @@ getcmdmac0:
 	moveq.l	#3-1,d1
 getcmdmac1:
 	move.w	d1,d4
-	tst.b	(SYMLEN8,a6)
-	beq	getcmdmac2
-	cmp.w	#8-1,d4
-	bls	getcmdmac2
-	moveq.l	#8-1,d4			;/8が指定されていた場合マクロは8字目以降を無視
-getcmdmac2:
-	move.w	d4,d2			;文字列長-1(8文字目まで)
+	move.w	d4,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	hashfnc	#CMDHASHSIZE-1		;命令ハッシュ関数値を計算
 	lsl.l	#2,d0
@@ -465,7 +439,7 @@ getcmdmac7:
 	and.w	(CPUTYPE,a6),d3
 	beq	getcmdmac6		;現在のCPUタイプと合致しないので無視
 getcmdmac75:
-	move.w	d1,d2			;(/8の指定に関わらず全文字比較する)
+	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	movea.l	(SYM_NAME,a1),a3
 getcmdmac8:
@@ -616,7 +590,6 @@ defstrsymbol::
 	bsr	isdefdsym
 	tst.w	d0
 	beq	defstrsymbol9		;すでに登録済だった
-	clr.b	(1,a2,d1.l)		;(/8が指定された場合のため)
 	bsr	getsymtbl
 	move.l	a0,(BUCKET_OR_SYM_NEXT,a1)
 	movea.l	a0,a1

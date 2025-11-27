@@ -150,9 +150,7 @@ usage_msg:
 	.dc.b	TAB,'-1',TAB,TAB
 	mes	'絶対ロング→PC間接(-b1と-eを伴う)'
 	.dc.b	CRLF
-	.dc.b	TAB,'-8',TAB,TAB
-	mes	'シンボルの識別長を8バイトにする'
-	.dc.b	CRLF
+;-8 シンボルの識別長を8バイトにする(廃止)
 ;-a 絶対ショートアドレス形式対応(-c2時のみ有効)
 	.dc.b	TAB,'-b[n]',TAB,TAB
 	mes	'PC間接→絶対ロング(0=[禁止],[1]=68000,2=MEM,3=1+2,4=ALL,5=1+4)'
@@ -448,15 +446,10 @@ predefinesymbol1:
 	pea.l	(symbol_has060,pc)
 	pea.l	(verno060).w		;69～
 	bsr	def_predefinesymbol
-	lea.l	(8+8,sp),sp
-
-	tst.b	(SYMLEN8,a6)		;'__HAS060__'と'__HAS060X__'を8文字にすると
-	bne	@f			;どちらも'__HAS060'になってしまうので
-	pea.l	(symbol_has060x,pc)	;/8指定時に'__HAS060X__'は定義しない
+	pea.l	(symbol_has060x,pc)
 	move.l	#verno_x,-(sp)
 	bsr	def_predefinesymbol
-	addq.l	#8,sp
-@@:
+	lea.l	(8+8+8,sp),sp
 predefinesymbol99:
 	rts
 
@@ -662,14 +655,14 @@ optionsw0:
 ;----------------------------------------------------------------
 ;	オプションスイッチのジャンプテーブル
 opt_switch:
-	.dc.b	'toipnwud8msxaqflzregcb1ykj',0
+	.dc.b	'toipnwudmsxaqflzregcb1ykj',0
 	.even
 optjp_tbl:
 	.dc.w	option_t-optjp_tbl,option_o-optjp_tbl
 	.dc.w	option_i-optjp_tbl,option_p-optjp_tbl
 	.dc.w	option_n-optjp_tbl,option_w-optjp_tbl
 	.dc.w	option_u-optjp_tbl,option_d-optjp_tbl
-	.dc.w	option_8-optjp_tbl,option_m-optjp_tbl
+	.dc.w	option_m-optjp_tbl
 	.dc.w	option_s-optjp_tbl,option_x-optjp_tbl
 	.dc.w	option_a-optjp_tbl,option_q-optjp_tbl
 	.dc.w	option_f-optjp_tbl,option_l-optjp_tbl
@@ -967,12 +960,6 @@ option_u:
 ;	-d		すべてのシンボルを外部定義にする
 option_d:
 	st.b	(ALLXDEF,a6)
-	rts
-
-;----------------------------------------------------------------
-;	-8		シンボルの識別長を8バイトにする
-option_8:
-	st.b	(SYMLEN8,a6)
 	rts
 
 ;----------------------------------------------------------------
