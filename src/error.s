@@ -76,11 +76,11 @@ warnout1:
 	bsr	printerr
 	cmpi.b	#3,(ASMPASS,a6)
 	bne	warnout2
-	tst.b	(MAKEPRN,a6)
-	beq	warnout8
-warnout2:				;パス1/パス3でPRNファイルを作成する場合は
+	tst.b	(MAKEPRN,a6)		;パス3でPRNファイルを作成する場合は行の内容も表示する
+	beq	warnout8		;(作成しない場合は行が読み込まれないので表示できない)
+warnout2:
 	move.w	#STDOUT,-(sp)
-	move.l	(LINEBUFPTR,a6),-(sp)	;行の内容も表示する
+	move.l	(LINEBUFPTR,a6),-(sp)
 	DOS	_FPUTS
 	pea.l	(crlf_msg,pc)
 	DOS	_PRINT
