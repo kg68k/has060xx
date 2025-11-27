@@ -173,7 +173,7 @@ usage_msg:
 	mes	'リストファイルのフォーマット'
 	.dc.b	CRLF
 	.dc.b	TAB,TAB,TAB
-	mes	'(改ページ[1],マクロ展開[0],幅[136],ページ行数[58],コード幅[16])'
+	mes	'(改ページ[0],マクロ展開[0],幅[96],ページ行数[58],コード幅[16])'
 	.dc.b	CRLF
 	.dc.b	TAB,'-g',TAB,TAB
 	mes	'SCD用デバッグ情報の出力'
@@ -182,7 +182,7 @@ usage_msg:
 	mes	'インクルードパス指定'
 	.dc.b	CRLF
 	.dc.b	TAB,'-j[n]',TAB,TAB
-	mes	'シンボルの上書き禁止条件の強化(bit0:[1]=SET,bit1:[1]=OFFSYM)'
+	mes	'シンボルの上書き禁止条件の強化(0=しない,1=SET,2=OFFSYM,[3]=[1+2])'
 	.dc.b	CRLF
 	.dc.b	TAB,'-k[n]',TAB,TAB
 	mes	'68060のエラッタ対策(0=[する](-nは無効),[1]=しない)'
@@ -295,7 +295,8 @@ workinit:
 	move.l	a0,(PRNTITLE,a6)
 	move.l	a0,(PRNSUBTTL,a6)
 
-	move.w	#136,(PRNWIDTH,a6)
+	st.b	(NOPAGEFF,a6)
+	move.w	#96,(PRNWIDTH,a6)
 	move.w	#58,(PRNPAGEL,a6)
 	move.w	#16,(PRNCODEWIDTH,a6)
 	move.w	#1,(PRNMPAGE,a6)
@@ -303,6 +304,8 @@ workinit:
 	move.l	a0,(REQFILEND,a6)
 	move.l	#6,(NUMOFSECT,a6)
 	move.b	#-1,(WARNLEVEL,a6)
+
+	bsr	option_j_all
 
 	move.w	#1<<9,(FPCPID,a6)
 
@@ -1262,6 +1265,7 @@ option_m:
 option_j:
 	bsr	getcmdnum
 	bpl	option_j_1
+option_j_all:
 	moveq.l	#-1,d1
 option_j_1:
 	lsr.l	#1,d1
