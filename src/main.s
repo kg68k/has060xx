@@ -632,47 +632,26 @@ optionsw:
 optionsw1:
 	move.b	(a0)+,d0
 	beq	optionsw0
-	lea.l	(opt_switch,pc),a1
-	moveq.l	#-1,d2
-	cmp.b	#'Z',d0
-	bhi	optionsw2
-	cmp.b	#'A',d0
-	bcs	optionsw2
-	or.b	#$20,d0			;小文字化
-optionsw2:
-	move.b	(a1)+,d1
-	beq	usage			;該当するオプションスイッチがない
-	addq.w	#1,d2
-	cmp.b	d1,d0
-	bne	optionsw2
-	add.w	d2,d2
-	move.w	(optjp_tbl,pc,d2.w),d2
-	jsr	(optjp_tbl,pc,d2.w)
+	cmpi.b	#'1',d0			;アルファベット以外を先に判別
+	beq	option_1
+	andi	#$00df,d0		;大文字化
+	subi	#'A',d0
+	cmpi	#'Z'-'A',d0
+	bhi	usage			;該当するオプションスイッチがない
+
+	add	d0,d0
+	move	(optjp_tbl,pc,d0.w),d0
+	jsr	(optjp_tbl,pc,d0.w)
 	bra	optionsw1
 optionsw0:
 	rts
 
 ;----------------------------------------------------------------
 ;	オプションスイッチのジャンプテーブル
-opt_switch:
-	.dc.b	'toipnwudmsxaqflzregcb1ykj',0
-	.even
 optjp_tbl:
-	.dc.w	option_t-optjp_tbl,option_o-optjp_tbl
-	.dc.w	option_i-optjp_tbl,option_p-optjp_tbl
-	.dc.w	option_n-optjp_tbl,option_w-optjp_tbl
-	.dc.w	option_u-optjp_tbl,option_d-optjp_tbl
-	.dc.w	option_m-optjp_tbl
-	.dc.w	option_s-optjp_tbl,option_x-optjp_tbl
-	.dc.w	option_a-optjp_tbl,option_q-optjp_tbl
-	.dc.w	option_f-optjp_tbl,option_l-optjp_tbl
-	.dc.w	option_z-optjp_tbl,option_r-optjp_tbl
-	.dc.w	option_e-optjp_tbl,option_g-optjp_tbl
-	.dc.w	option_c-optjp_tbl,option_b-optjp_tbl
-	.dc.w	option_1-optjp_tbl
-	.dc.w	option_y-optjp_tbl
-	.dc.w	option_k-optjp_tbl
-	.dc.w	option_j-optjp_tbl
+	.irpc	ch,abcdefghijklmnopqrstuvwxyz
+	.dc.w	option_&ch-optjp_tbl
+	.endm
 
 ;----------------------------------------------------------------
 ;	-t path		テンポラリパス指定
@@ -1379,6 +1358,13 @@ tfrfilename9:
 multifile:
 	pea	(multifile_msg,pc)
 	bra	error
+
+;----------------------------------------------------------------
+;	オプションスイッチで割り当てられていない文字
+
+option_h:
+option_v:
+	bra	usage
 
 ;----------------------------------------------------------------
 ;	使用法を表示して終了する
