@@ -2327,21 +2327,18 @@ prnsymout1:
 	dbra	d0,prnsymout1
 	rts
 
-seg1_msg:	mes	'セグメントテーブル'
-		.dc.b	CRLF,0
+seg1_msg:	.dc.b	'セグメントテーブル',CRLF,0
 seg2_msg:	.dc.b	' 01 text     02 data     03 bss      04 stack   ',0
 seg21_msg:	.dc.b	CRLF
 		.dc.b	'             05 rdata    06 rbss     07 rstack  ',CRLF
 		.dc.b	'             08 rldata   09 rlbss    0A rlstack ',0
-seg3_msg:	mes	'シンボルテーブル'
-		.dc.b	CRLF,0
+seg3_msg:	.dc.b	'シンボルテーブル',CRLF,0
 abs_msg:	.dc.b	' abs'
 ext_msg:	.dc.b	' ext'
 com_msg:	.dc.b	' com'
 rcom_msg:	.dc.b	' rcm'
 rlcom_msg:	.dc.b	' rlc'
-undef_msg:	mes	'未定義シンボル'
-		.dc.b	CRLF,0
+undef_msg:	.dc.b	'未定義シンボル',CRLF,0
 	.even
 
 
@@ -2588,14 +2585,10 @@ prn1srce1:
 	bra	prn1srce6
 
 prn1srce2:
-  .if EUCSRC=0
 	cmp.b	#$A0,d1
 	bcs	prn1srce3
 	cmp.b	#$E0,d1
 	bcs	prn1srce5
-  .else
-	bra	prn1srce5		;EUC
-  .endif
 prn1srce3:				;漢字コードの場合
 	addq.w	#2,d0
 	cmp.w	d2,d0

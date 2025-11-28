@@ -3,8 +3,6 @@
 
 AS = has060 -c4 -u
 # -sUNIX_NEWLINE=1 …メッセージの改行コードを$0Aにする
-# -sEUCMES=1 …メッセージをEUCで出力する
-# -sEUCSRC=1 …ソースをEUCで受け付ける
 
 LK = hlk -e4 -x
 

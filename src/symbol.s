@@ -230,14 +230,10 @@ isdefdmac9:				;未登録だった場合
 	rts
 
 isdefdmac10:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	isdefdmac11
 	cmp.b	#$A0,d0
 	bcc	isdefdmac5		;半角カタカナ
-  .else
-	bra	isdefdmac5		;EUC
-  .endif
 isdefdmac11:				;2バイト文字
 	cmp.b	(a3)+,d0
 	bne	isdefdmac3
@@ -334,14 +330,10 @@ getmaccmd70:				;マクロ名を見つけた
 	rts
 
 getmaccmd10:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	getmaccmd11
 	cmp.b	#$A0,d0
 	bcc	getmaccmd7		;半角カタカナ
-  .else
-	bra	getmaccmd7		;EUC
-  .endif
 getmaccmd11:				;2バイト文字
 	cmp.b	(a3)+,d0
 	bne	getmaccmd5
@@ -550,14 +542,10 @@ defmacsymbol3:
 	bra	memcheck
 
 defmacsymbol5:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	defmacsymbol6
 	cmp.b	#$A0,d0
 	bcc	defmacsymbol2		;半角カタカナ
-  .else
-	bra	defmacsymbol2		;EUC
-  .endif
 defmacsymbol6:				;2バイト文字
 	move.b	d0,(a3)+
 	subq.w	#1,d1

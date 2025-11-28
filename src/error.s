@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
+;		          2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	doscall.mac
@@ -104,8 +105,7 @@ warn_msg_tbl:
 warn	.macro	cnt,lvl,lab,str
   .if cnt+0
 m_&lab:
-	mes	str
-	.dc.b	0
+	.dc.b	str,0
   .endif
 	.endm
 

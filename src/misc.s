@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	doscall.mac
@@ -176,14 +177,10 @@ pathcpy1:
 	move.b	(a1)+,d0
 	move.b	d0,(a0)+
 	bpl	pathcpy1
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	pathcpy2
 	cmp.b	#$A0,d0
 	bcc	pathcpy1		;半角カナの場合
-  .else
-	bra	pathcpy1		;EUC
-  .endif
 pathcpy2:
 	lsl.w	#8,d0
 	move.b	(a1)+,d0		;2バイト文字の2バイト目
@@ -233,14 +230,10 @@ getfilename3:
 	rts
 
 getfilename4:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	getfilename5
 	cmp.b	#$A0,d0
 	bcc	getfilename25		;半角カナの場合
-  .else
-	bra	getfilename25		;EUC
-  .endif
 getfilename5:
 	tst.b	(a0)+
 	bne	getfilename25
@@ -299,16 +292,11 @@ abort:					;プログラム中断
 	move.w	#1,-(sp)
 	DOS	_EXIT2
 
-nomem_msg:	mes	'Abort: メモリが不足しています'
-		.dc.b	CRLF,0
-devful_msg:	mes	'Abort: ディスクがいっぱいです'
-		.dc.b	CRLF,0
-toomanyex_msg:	mes	'Abort: 外部シンボルが多すぎます'
-		.dc.b	CRLF,0
-temp_msg:	mes	'テンポラリファイル'
-		.dc.b	0
-openerr_msg:	mes	'がオープンできません'
-		.dc.b	CRLF,0
+nomem_msg:	.dc.b	'Abort: メモリが不足しています',CRLF,0
+devful_msg:	.dc.b	'Abort: ディスクがいっぱいです',CRLF,0
+toomanyex_msg:	.dc.b	'Abort: 外部シンボルが多すぎます',CRLF,0
+temp_msg:	.dc.b	'テンポラリファイル',0
+openerr_msg:	.dc.b	'がオープンできません',CRLF,0
 beep_msg::	.dc.b	BELL,0
 	.even
 

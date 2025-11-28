@@ -201,14 +201,10 @@
 	bra	~~irpc1
 
 ~~irpc3:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	~~irpc4
 	cmp.b	#$A0,d0
 	bcc	~~irpc2			;半角カタカナ
-  .else
-	bra	~~irpc2			;EUC
-  .endif
 ~~irpc4:				;2バイト文字
 	addq.w	#1,d1
 	move.b	d0,(a1)+
@@ -560,14 +556,10 @@ defmacstr9:				;置換すべき仮引数が見つかった
 
 defmacstr10:
 	move.b	d0,(a2)+
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	defmacstr11
 	cmp.b	#$A0,d0
 	bcc	defmacstr1		;半角カナの場合
-  .else
-	bra	defmacstr1		;EUC
-  .endif
 defmacstr11:
 	move.b	(a0)+,d0		;2バイト文字の2バイト目
 	beq	defmacline9		;2バイト目が$00の場合
@@ -738,14 +730,10 @@ macexline5:
 	cmp.b	#$FE,d0
 	beq	macexllocs		;ローカルシンボル
 	move.b	d0,(a0)+
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	macexline6
 	cmp.b	#$A0,d0
 	bcc	macexline1
-  .else
-	bra	macexline1		;EUC
-  .endif
 macexline6:				;2バイト文字の場合
 	move.b	(a2)+,(a0)+
 	bne	macexline1
@@ -966,14 +954,10 @@ getmacpara1:
 	bra	getmacpara0
 
 getmacpara2:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	getmacpara3
 	cmp.b	#$A0,d0
 	bcc	getmacpara0		;半角カナの場合
-  .else
-	bra	getmacpara0		;EUC
-  .endif
 getmacpara3:
 	move.b	(a0)+,d0		;2バイト文字の2バイト目
 	move.b	d0,(a1)+
@@ -990,14 +974,10 @@ getmacparastr:				;文字列の処理
 	bra	getmacpara0
 
 getmacparastr1:
-  .if EUCSRC=0
 	cmp.b	#$E0,d2
 	bcc	getmacparastr2
 	cmp.b	#$A0,d2
 	bcc	getmacparastr		;半角カナの場合
-  .else
-	bra	getmacparastr		;EUC
-  .endif
 getmacparastr2:
 	move.b	(a0)+,d2		;2バイト文字の2バイト目
 	move.b	d2,(a1)+
@@ -1024,14 +1004,10 @@ getmacpararc:
 	move.b	d0,(-1,a1)
 	beq	iloprerr		;'!'で行が終了した
 	bpl	getmacpara0
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	getmacpararc1
 	cmp.b	#$A0,d0
 	bcc	getmacpara0		;半角カナの場合
-  .else
-	bra	getmacpara0		;EUC
-  .endif
 getmacpararc1:
 	move.b	(a0)+,d0		;2バイト文字の2バイト目
 	move.b	d0,(a1)+
@@ -1085,14 +1061,10 @@ getmacparars2:
 	bra	getpara1
 
 getmacparars3:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	getmacparars4
 	cmp.b	#$A0,d0
 	bcc	getmacparars1		;半角カナの場合
-  .else
-	bra	getmacparars1		;EUC
-  .endif
 getmacparars4:
 	move.b	(a0)+,d0		;2バイト文字の2バイト目
 	move.b	d0,(a1)+
@@ -1149,14 +1121,10 @@ getpara9:
 	rts
 
 getpara2:
-  .if EUCSRC=0
 	cmp.b	#$E0,d0
 	bcc	getpara3
 	cmp.b	#$A0,d0
 	bcc	getpara			;半角カナの場合
-  .else
-	bra	getpara			;EUC
-  .endif
 getpara3:
 	move.b	(a0)+,d0		;2バイト文字の2バイト目
 	move.b	d0,(a1)+

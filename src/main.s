@@ -145,101 +145,70 @@ title_msg::
 	.dc.b	'X68k High-speed Assembler v',version,' ',copyright,CRLF,0
 
 usage_msg:
-	mes	'使用法: has060x [スイッチ] ファイル名'
-	.dc.b	CRLF
+	.dc.b	'使用法: has060x [スイッチ] ファイル名',CRLF
 	.dc.b	TAB,'-1',TAB,TAB
-	mes	'絶対ロング→PC間接(-b1と-eを伴う)'
-	.dc.b	CRLF
+	.dc.b	'絶対ロング→PC間接(-b1と-eを伴う)',CRLF
 ;-8 シンボルの識別長を8バイトにする(廃止)
 ;-a 絶対ショートアドレス形式対応(-c2時のみ有効)
 	.dc.b	TAB,'-b[n]',TAB,TAB
-	mes	'PC間接→絶対ロング(0=[禁止],[1]=68000,2=MEM,3=1+2,4=ALL,5=1+4)'
-	.dc.b	CRLF
+	.dc.b	'PC間接→絶対ロング(0=[禁止],[1]=68000,2=MEM,3=1+2,4=ALL,5=1+4)',CRLF
 	.dc.b	TAB,'-c[n]',TAB,TAB
-	mes	'最適化(0=禁止(-k1を伴う),1=(d,An)を禁止,[2]=v2互換,3=[v3互換],4=許可)'
-	.dc.b	CRLF
+	.dc.b	'最適化(0=禁止(-k1を伴う),1=(d,An)を禁止,[2]=v2互換,3=[v3互換],4=許可)',CRLF
 	.dc.b	TAB,'-c<mnemonic>',TAB
-	mes	'software emulationの命令を展開する(FScc/MOVEP)'
-	.dc.b	CRLF
+	.dc.b	'software emulationの命令を展開する(FScc/MOVEP)',CRLF
 	.dc.b	TAB,'-d',TAB,TAB
-	mes	'すべてのシンボルを外部定義にする'
-	.dc.b	CRLF
+	.dc.b	'すべてのシンボルを外部定義にする',CRLF
 	.dc.b	TAB,'-e',TAB,TAB
-	mes	'外部参照オフセットのデフォルトをロングワードにする'
-	.dc.b	CRLF
+	.dc.b	'外部参照オフセットのデフォルトをロングワードにする',CRLF
 	.dc.b	TAB,'-f[f,m,w,p,c]',TAB
-	mes	'リストファイルのフォーマット'
-	.dc.b	CRLF
+	.dc.b	'リストファイルのフォーマット',CRLF
 	.dc.b	TAB,TAB,TAB
-	mes	'(改ページ[0],マクロ展開[0],幅[96],ページ行数[58],コード幅[16])'
-	.dc.b	CRLF
+	.dc.b	'(改ページ[0],マクロ展開[0],幅[96],ページ行数[58],コード幅[16])',CRLF
 	.dc.b	TAB,'-g',TAB,TAB
-	mes	'SCD用デバッグ情報の出力'
-	.dc.b	CRLF
+	.dc.b	'SCD用デバッグ情報の出力',CRLF
 	.dc.b	TAB,'-i <path>',TAB
-	mes	'インクルードパス指定'
-	.dc.b	CRLF
+	.dc.b	'インクルードパス指定',CRLF
 	.dc.b	TAB,'-j[n]',TAB,TAB
-	mes	'シンボルの上書き禁止条件の強化(0=しない,1=SET,2=OFFSYM,[3]=[1+2])'
-	.dc.b	CRLF
+	.dc.b	'シンボルの上書き禁止条件の強化(0=しない,1=SET,2=OFFSYM,[3]=[1+2])',CRLF
 	.dc.b	TAB,'-k[n]',TAB,TAB
-	mes	'68060のエラッタ対策(0=[する](-nは無効),[1]=しない)'
-	.dc.b	CRLF
+	.dc.b	'68060のエラッタ対策(0=[する](-nは無効),[1]=しない)',CRLF
 	.dc.b	TAB,'-l',TAB,TAB
-	mes	'起動時にタイトルを表示する'
-	.dc.b	CRLF
+	.dc.b	'起動時にタイトルを表示する',CRLF
 	.dc.b	TAB,'-m <680x0|5x00>',TAB
-	mes	'アセンブル対象CPUの指定([68000]～68060/5200～5400)'
-	.dc.b	CRLF
+	.dc.b	'アセンブル対象CPUの指定([68000]～68060/5200～5400)',CRLF
 	.dc.b	TAB,'-n',TAB,TAB
-	mes	'パス1で確定できないサイズの最適化を省略する(-k1を伴う)'
-	.dc.b	CRLF
+	.dc.b	'パス1で確定できないサイズの最適化を省略する(-k1を伴う)',CRLF
 	.dc.b	TAB,'-o <name>',TAB
-	mes	'オブジェクトファイル名'
-	.dc.b	CRLF
+	.dc.b	'オブジェクトファイル名',CRLF
 	.dc.b	TAB,'-p [file]',TAB
-	mes	'リストファイル作成'
-	.dc.b	CRLF
+	.dc.b	'リストファイル作成',CRLF
 ;-q クイックイミディエイト形式への変換禁止(-c2時のみ有効)
 ;-r 相対セクション命令の許可(廃止)
 	.dc.b	TAB,'-s <n>',TAB,TAB
-	mes	'数字ローカルラベルの最大桁数の指定(1～[4])'
-	.dc.b	CRLF
+	.dc.b	'数字ローカルラベルの最大桁数の指定(1～[4])',CRLF
 	.dc.b	TAB,'-s <symbol>[=n]',TAB
-	mes	'シンボルの定義'
-	.dc.b	CRLF
+	.dc.b	'シンボルの定義',CRLF
 	.dc.b	TAB,'-t <path>',TAB
-	mes	'テンポラリパス指定'
-	.dc.b	CRLF
+	.dc.b	'テンポラリパス指定',CRLF
 	.dc.b	TAB,'-u',TAB,TAB
-	mes	'未定義シンボルを外部参照にする'
-	.dc.b	CRLF
+	.dc.b	'未定義シンボルを外部参照にする',CRLF
 	.dc.b	TAB,'-w[n]',TAB,TAB
-	mes	'ワーニングレベルの指定(0=全抑制,1,[2],3,4=[全通知])'
-	.dc.b	CRLF
+	.dc.b	'ワーニングレベルの指定(0=全抑制,1,[2],3,4=[全通知])',CRLF
 	.dc.b	TAB,'-x [file]',TAB
-	mes	'シンボルの出力'
-	.dc.b	CRLF
+	.dc.b	'シンボルの出力',CRLF
 	.dc.b	TAB,'-y[n]',TAB,TAB
-	mes	'プレデファインシンボル(0=[禁止],[1]=許可)'
-	.dc.b	CRLF
+	.dc.b	'プレデファインシンボル(0=[禁止],[1]=許可)',CRLF
 ;-z HAS拡張機能のワーニング禁止(廃止)
-	mes	'    環境変数 HAS の内容がコマンドラインの手前(-iは後ろ)に挿入されます'
-	.dc.b	CRLF
+	.dc.b	'    環境変数 HAS の内容がコマンドラインの手前(-iは後ろ)に挿入されます',CRLF
 	.dc.b	0
 
-multifile_msg:	mes	'複数のファイル名は指定できません'
-		.dc.b	CRLF
+multifile_msg:	.dc.b	'複数のファイル名は指定できません',CRLF
 		.dc.b	0
 
-no_msg:		mes	'エラーはありません'
-		.dc.b	CRLF
-		.dc.b	0
-fatal_msg1:	mes	'エラーが '
-		.dc.b	0
-fatal_msg2:	mes	' 個ありました．アセンブルを中止します'
-		.dc.b	CRLF
-		.dc.b	0
+no_msg:		.dc.b	'エラーはありません',CRLF,0
+fatal_msg1:	.dc.b	'エラーが ',0
+fatal_msg2:	.dc.b	' 個ありました．アセンブルを中止します',CRLF,0
+
 env_has:	.dc.b	'HAS',0		;コマンドラインに追加する環境変数名
 env_g2as:	.dc.b	'G2AS',0
 nulstr:		.dc.b	0

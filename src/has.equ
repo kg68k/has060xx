@@ -13,12 +13,6 @@
 __HAS_EQU__	equ	1
 
 ;----------------------------------------------------------------
-  .ifndef EUCSRC
-EUCSRC		equ	0		;ソースの文字コード(0=SJIS,1=EUC)
-  .endif
-  .ifndef EUCMES
-EUCMES		equ	0		;メッセージの文字コード(0=SJIS,1=EUC)
-  .endif
   .ifndef UNIX_NEWLINE
 UNIX_NEWLINE	equ	0		;メッセージの改行コード(0=$0D0A,1=$0A)
   .endif
@@ -126,62 +120,6 @@ GETFPTR	.macro	adr,reg
 	add.l	(F_PTROFST+adr,a6),reg
 	.endm
 
-;----------------------------------------------------------------
-;	EUC対応
-jissft	.macro	h,l
-	l:=l+$1F
-	h:=h+1
-  .if h.and.1
-	l:=l+$5E
-  .endif
-	h:=h/2
-  .if l>=$7F
-	l:=l+1
-  .endif
-	h:=h+$70
-  .if h>=$A0
-	h:=h+$40
-  .endif
-	.endm
-
-sftjis	.macro	h,l
-  .if h>=$E0
-	h:=h-$40
-  .endif
-	h:=h-$70
-  .if l>=$80
-	l:=l-1
-  .endif
-	h:=h*2
-  .if l>=$9E
-	l:=l-$5E
-	h:=h+1
-  .endif
-	h:=h-1
-	l:=l-$1F
-	.endm
-
-;シフトJISコードで書かれた文字列をEUCコードで埋め込む
-eucstr	.macro	str
-  .irpc c,str
-    .if '&c'<=$FF
-	.dc.b	'&c'
-    .else
-	h:=('&c'>>8).and.$FF
-	l:='&c'.and.$FF
-	sftjis	h,l
-	.dc.b	$80+h,$80+l
-    .endif
-  .endm
-	.endm
-
-mes	.macro	str
-  .if EUCMES=0
-	.dc.b	str
-  .else
-	eucstr	str
-  .endif
-	.endm
 
 ;----------------------------------------------------------------
 ;	シンボル定義属性
