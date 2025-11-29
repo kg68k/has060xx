@@ -173,7 +173,6 @@ pathcpy::
 pathcpy1:
 	tst.b	(a1)
 	beq	pathcpy5
-	moveq.l	#0,d0
 	move.b	(a1)+,d0
 	move.b	d0,(a0)+
 	bpl	pathcpy1
@@ -182,18 +181,17 @@ pathcpy1:
 	cmp.b	#$A0,d0
 	bcc	pathcpy1		;半角カナの場合
 pathcpy2:
-	lsl.w	#8,d0
-	move.b	(a1)+,d0		;2バイト文字の2バイト目
-	beq	pathcpy5
-	move.b	d0,(a0)+
-	bra	pathcpy1
+	move.b	(a1)+,(a0)+		;2バイト文字の2バイト目
+	bne	pathcpy1		;d0.b(1バイト目)は\/:ではないのでそのままで問題ない
 
+	subq.l	#1,a0			;2バイト目がない場合、2バイト目が\になるが
+	bra	pathcpy8		;通常ありえない状況なので気にしない
 pathcpy5:
-	cmp.w	#'\',d0
+	cmp.b	#'\',d0
 	beq	pathcpy9
-	cmp.w	#'/',d0
+	cmp.b	#'/',d0
 	beq	pathcpy9
-	cmp.w	#':',d0
+	cmp.b	#':',d0
 	beq	pathcpy9
 pathcpy8:
 	move.b	#'\',(a0)+		;パスの区切を追加する
