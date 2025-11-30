@@ -498,13 +498,6 @@ tablebody	.macro
 	pstbl	'rlstack',  ~~rlstack
 	pstbl	'rlcomm',   ~~rlcomm
 
-	pstbl	'68000',    ~~cpu_68000
-	pstbl	'68010',    ~~cpu_68010
-	pstbl	'68020',    ~~cpu_68020
-	pstbl	'68030',    ~~cpu_68030
-	pstbl	'68040',    ~~cpu_68040
-	pstbl	'68060',    ~~cpu_68060
-
 	pstbl	'fpid',	    ~~fpid
 	pstbl	'pragma',   ~~pragma
 	pstbls	'fequ',     ~~fequ,		    SZS|SZD|SZX|SZP

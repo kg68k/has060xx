@@ -1617,24 +1617,6 @@ skipfend:
 	bsr	cputype_update
 	bmi	featureerr_cpu
 	rts
-~~cpu_68000::
-	move.l	#68000,d1
-	bra	cputype_update
-~~cpu_68010::
-	move.l	#68010,d1
-	bra	cputype_update
-~~cpu_68020::
-	move.l	#68020,d1
-	bra	cputype_update
-~~cpu_68030::
-	move.l	#68030,d1
-	bra	cputype_update
-~~cpu_68040::
-	move.l	#68040,d1
-	bra	cputype_update
-~~cpu_68060::
-	move.l	#68060,d1
-	bra	cputype_update
 
 
 ;---------------------------------------------------------------
