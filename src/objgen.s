@@ -25,18 +25,13 @@
 asmpass3::
 	move.b	#3,(ASMPASS,a6)
 	tst.b	(MAKEPRN,a6)
-	beq	asmpass31
+	beq	@f
 	lea.l	(SOURCEPTR,a6),a1
 	bsr	frewind			;ソースファイル先頭に移動
 	move.l	a1,(INPFILPTR,a6)
-	bsr	initprnlptr		;-y -pでT_LINEの処理でPRNLPTRが初期化されるより先に
-					;T_EQUCONSTがくるので、ここで設定しておく
-asmpass31:
-	move.l	(CPUSYMBOL,a6),d0
-	beq	asmpass319
-	movea.l	d0,a1
-	move.l	(STARTCPU,a6),(SYM_VALUE,a1)
-asmpass319:
+	;PRNLPTRの初期化より先にT_EQUCONSTがくる場合は、ここでinitprnlptrを呼ぶこと。
+	;現在はプレデファインシンボルCPUのためのT_EQUCONST出力をやめたので不要。
+@@:
 	lea.l	(TEMPFILPTR,a6),a1
 	bsr	frewind			;テンポラリファイル先頭に移動
 	lea.l	(OBJFILPTR,a6),a0
@@ -60,7 +55,8 @@ asmpass319:
 	clr.w	(PAGEFLG,a6)
 	sf.b	(ISMACDEF,a6)
 
-	move.w	(ICPUTYPE,a6),(CPUTYPE,a6)	;CPUTYPE,CPUTYPE2
+	move.l	(ICPUNUMBER,a6),d1
+	bsr	cputype_set		;CPUTYPEとCPUSYMBOLの値を初期化
 
 	bsr	makeobjhead		;オブジェクトヘッダの作成
 	bsr	resetlocctr		;ロケーションカウンタの初期化
@@ -431,7 +427,14 @@ pass3_tbl:
 
 	bra.w	error		;38	エラー発生
 
-	bra.w	cputype		;39	.cpu
+	bra	cputype		;39	.cpu
+	;末尾のみ最適化可なのでbraでもよい。それ以外はbra.wにすること
+
+;----------------------------------------------------------------
+cputype:				;39xx .cpu
+	bsr	tmpreadd0l
+	move.l	d0,d1			;CPU番号(68000など)
+	bra	cputype_set
 
 ;----------------------------------------------------------------
 error:
@@ -449,12 +452,6 @@ nopdeath:				;34xx 削除すべきNOP
 nopalive:				;35xx 挿入されたNOP
 	bsr	f43gwarn
 	bra	constdata
-
-;----------------------------------------------------------------
-cputype:				;39xx .cpu
-	bsr	tmpreadd0w
-	move.w	d0,(CPUTYPE,a6)		;CPUTYPE,CPUTYPE2
-	rts
 
 ;----------------------------------------------------------------
 symdef:					;2FXX シンボル定義

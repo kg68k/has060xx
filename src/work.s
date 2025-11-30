@@ -136,10 +136,8 @@ MAXALIGN::	.ds.b	1	;ソース中で使用された最大のアライン値(2^n)
 DSPADRCODE::	.ds.b	1	;処理中の実効アドレスが(d,An)/(d,PC)ならtrue
 DSPADRDEST::	.ds.b	1	;処理中の実効アドレスがデスティネーションならtrue
 
-	.align	4
+	.quad
 ICPUNUMBER::	.ds.l	1	;CPU番号の初期値(68000など)
-ICPUTYPE::	.ds.w	1	;CPUタイプの初期値(C000など)
-CPUNUMBER::	.ds.l	1	;現在のCPU番号(68000など)
 	.even
 CPUTYPE::	.ds.b	1	;現在のCPUタイプ
 		.ds.b	1	;(廃止、CPUTYPEのワードアクセス用に存続)
@@ -266,7 +264,6 @@ OWOFFSYM::	.ds.b	1	;-1=offsymの上書き禁止を強化する
 ;プレデファインシンボル
 	.even
 CPUSYMBOL::	.ds.l	1	;プレデファインシンボルCPUのシンボルテーブルへのポインタ
-STARTCPU::	.ds.l	1	;アセンブル開始時のCPU指定
 
 ASSEMBLEDATE::	.ds.l	1	;_GETDATEの返却値
 ASSEMBLETIM2::	.ds.l	1	;_GETTIM2の返却値

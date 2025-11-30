@@ -31,16 +31,14 @@ asmpass2::
 	clr.b	(OPTCOUNT,a6)
 	move.b	#SZ_LONG|ESZ_OPT,(OPTMOREFLG,a6)
 asmpass21:
-	move.l	(CPUSYMBOL,a6),d0
-	beq	asmpass219
-	movea.l	d0,a1
-	move.l	(STARTCPU,a6),(SYM_VALUE,a1)
-asmpass219:
 	addq.b	#1,(OPTCOUNT,a6)
 	sf.b	(OPTFLAG,a6)
 	lea.l	(TEMPFILPTR,a6),a1
 	bsr	frewind			;テンポラリファイル先頭に移動
 	bsr	resetlocctr		;ロケーションカウンタの初期化
+
+	move.l	(ICPUNUMBER,a6),d1
+	bsr	cputype_set		;CPUTYPEとCPUSYMBOLの値を初期化
 
 	suba.l	a5,a5			;(LOCATION,a6)
 	suba.l	a4,a4			;(LOCOFFSET,a6)
@@ -56,20 +54,15 @@ asmpass29:
 	rts
 
 ;----------------------------------------------------------------
-dopass2:
-	move.w	(ICPUTYPE,a6),(CPUTYPE,a6)	;CPUTYPE,CPUTYPE2
-	bsr	tmpreadd0w
-	move.w	d0,d1
-	beq	dopass29		;テンポラリファイル終了
 dopass21:
 	clr.b	d1
 	sub.w	d1,d0
 	ror.w	#6,d1
 	jsr	(pass2_tbl-4,pc,d1.w)
+dopass2:
 	bsr	tmpreadd0w
 	move.w	d0,d1
-	bne	dopass21
-dopass29:
+	bne	dopass21		;テンポラリファイルが終了するまで処理
 	rts
 
 ;----------------------------------------------------------------
@@ -139,7 +132,14 @@ pass2_tbl:
 
 	bra.w	error		;38	エラー発生
 
-	bra.w	cputype		;39	.cpu
+	bra	cputype		;39	.cpu
+	;末尾のみ最適化可なのでbraでもよい。それ以外はbra.wにすること
+
+;----------------------------------------------------------------
+cputype:				;39xx .cpu
+	bsr	tmpreadd0l
+	move.l	d0,d1			;CPU番号(68000など)
+	bra	cputype_set
 
 ;----------------------------------------------------------------
 nopdeath:				;34xx 削除すべきNOP
@@ -160,12 +160,6 @@ nopdeath_nul:
 ;----------------------------------------------------------------
 nopalive:				;35xx 挿入されたNOP
 	bra	constdata
-
-;----------------------------------------------------------------
-cputype:				;39xx .cpu
-	bsr	tmpreadd0w
-	move.w	d0,(CPUTYPE,a6)		;CPUTYPE,CPUTYPE2
-	rts
 
 ;----------------------------------------------------------------
 prnctrl:				;1Axx リスト出力制御

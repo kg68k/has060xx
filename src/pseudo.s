@@ -1612,39 +1612,65 @@ skipfend:
 ;	.cpu	<式>
 ~~cpu::
 	bsr	calcconst
-	pea.l	(pseudo_tail_check,pc)	;最後に行の終了をチェックする
-					;よって以降でa0を破壊してはならない
 	bsr	cputype_update
 	bmi	featureerr_cpu
-	rts
-
+	bra	pseudo_tail_check
 
 ;---------------------------------------------------------------
 ;CPU番号をCPUタイプに変換する
 ;<d1.l:CPU番号(68000など)
 ;>d0.l:CPUタイプ(C000など,-1=エラー)
 cputype_convert::
+	move.l	a0,-(sp)
+	lea.l	(cputable,pc),a0
 	moveq.l	#0,d0
-	move.w	#C000,d0
-	cmp.l	#68000,d1
-	beq	8f
-	move.w	#C010,d0
-	cmp.l	#68010,d1
-	beq	8f
-	move.w	#C020|CFPP|CMMU,d0
-	cmp.l	#68020,d1
-	beq	8f
-	move.w	#C030|CFPP,d0
-	cmp.l	#68030,d1
-	beq	8f
-	move.w	#C040,d0
-	cmp.l	#68040,d1
-	beq	8f
-	move.w	#C060,d0
-	cmp.l	#68060,d1
-	beq	8f
+@@:	move.w	(a0)+,d0
+	cmp.l	(a0)+,d1
+	beq	@f
+	tst.w	(a0)
+	bne	@b
 	moveq.l	#-1,d0
-8:	tst.l	d0
+@@:	movea.l	(sp)+,a0
+	tst.l	d0
+	rts
+
+cputable:
+	.dc.w	C000,          68000.l
+	.dc.w	C010,          68010.l
+	.dc.w	C020|CFPP|CMMU,68020.l
+	.dc.w	C030|CFPP,     68030.l
+	.dc.w	C040,          68040.l
+	.dc.w	C060,          68060.l
+	.dc.w	0
+
+;---------------------------------------------------------------
+;CPU番号を受け取ってCPUTYPEとプレデファインシンボルCPUを更新する
+;	パス2以降の開始時にd1=ICPUNUMBERで呼び出す
+;	パス2以降のT_CPUで呼び出す
+;
+;	CPUTYPEを設定する
+;	プレデファインシンボルCPUを更新する
+;
+;<d1.l:CPU番号(68000など)
+;>d0.l:CPUタイプ(C000など,-1=エラー)
+cputype_set::
+	bsr	cputype_convert
+	bmi	cputype_set9
+
+	move.w	d0,(CPUTYPE,a6)
+	bra	~~cpu_setsymbol
+
+;---------------------------------------------------------------
+;<d1.l:CPU番号(68000など)
+~~cpu_setsymbol:
+	tst.l	(CPUSYMBOL,a6)
+	beq	~~cpu_setsymbol9
+	move.l	a1,-(sp)
+	movea.l	(CPUSYMBOL,a6),a1
+	move.l	d1,(SYM_VALUE,a1)
+	movea.l	(sp)+,a1
+~~cpu_setsymbol9:
+cputype_set9:
 	rts
 
 ;---------------------------------------------------------------
@@ -1652,12 +1678,9 @@ cputype_convert::
 ;	アセンブル開始時にCPU番号の初期値(-mまたはデフォルト)をICPUNUMBERに保存しておく
 ;	パス1の開始時にd1=ICPUNUMBERで呼び出す
 ;	パス1の.cpuでd1=引数で呼び出す
-;	パス2以降はT_CPUでCPUTYPEだけ更新する
 ;
-;	CPUNUMBERを設定する
-;	CPUTYPEを設定する
-;	プレデファインシンボルCPUを更新するためのオブジェクトを出力する
-;	プレデファインシンボルCPUを更新する
+;	CPUTYPEとプレデファインシンボルCPUを更新する
+;	CPUTYPEを更新するためのオブジェクト(T_CPU)を出力する
 ;	68000/68010または外部参照のデフォルトがワードのとき
 ;		ディスプレースメントのサイズをワードにする
 ;	68000/68010以外で外部参照のデフォルトがロングのとき
@@ -1668,36 +1691,20 @@ cputype_convert::
 ;		浮動小数点命令を書けないのでF43G対策を終了する
 ;	68030/68040/68060のとき
 ;		浮動小数点命令を書けるのでF43G対策を開始する
-;	CPUTYPEを出力する
 ;
 ;<d1.l:CPU番号(68000など)
 ;>d0.l:0=正常終了,-1=エラー
 cputype_update::
 	movem.l	d1-d2,-(sp)
-	bsr	cputype_convert
+	bsr	cputype_set
+	move.l	d0,d2			;CPUタイプ(C000など)
 	bmi	98f			;エラー
-;<d0.l:CPUタイプ(C000など)
-;--------------------------------
-;CPUNUMBERを設定する
-	move.l	d1,(CPUNUMBER,a6)	;CPUNUMBER
-;--------------------------------
-;CPUTYPEを設定する
-	move.l	d0,d2			;CPUTYPE
-	move.w	d2,(CPUTYPE,a6)
 ;--------------------------------
 ;CPUTYPEを出力する
-	move.w	#T_CPU+1,d0
+	move.w	#T_CPU,d0
 	bsr	wrtobjd0w
-	move.w	d2,d0			;CPUTYPE
-	bsr	wrtd0w
-;--------------------------------
-;プレデファインシンボルCPUを更新するためのオブジェクトを出力する
-	bsr	~~cpu_changesymbol
-;--------------------------------
-;プレデファインシンボルCPUを更新する
-	move.l	d1,-(sp)		;CPUNUMBER
-	bsr	~~cpu_setsymbol
-	addq.l	#4,sp
+	move.l	d1,d0			;CPU番号(68000など)
+	bsr	wrtd0l
 ;--------------------------------
 	move.l	d2,d0			;CPUTYPE
 	and.w	#C000|C010,d0
@@ -1770,33 +1777,6 @@ cputype_update::
 	movem.l	(sp)+,d1-d2
 	rts
 
-;---------------------------------------------------------------
-;<d1.l:CPU
-~~cpu_changesymbol:
-	tst.l	(CPUSYMBOL,a6)
-	beq	~~cpu_changesymbol9
-	move.l	d0,-(sp)
-	move.w	#T_EQUCONST,d0
-	bsr	wrtobjd0w
-	move.l	(CPUSYMBOL,a6),d0
-	bsr	wrtd0l
-	move.l	d1,d0
-	bsr	wrtd0l
-	move.l	(sp)+,d0
-~~cpu_changesymbol9:
-	rts
-
-;---------------------------------------------------------------
-;<4(sp).l:CPU
-~~cpu_setsymbol:
-	tst.l	(CPUSYMBOL,a6)
-	beq	~~cpu_setsymbol9
-	move.l	a1,-(sp)
-	movea.l	(CPUSYMBOL,a6),a1
-	move.l	(4+4,sp),(SYM_VALUE,a1)
-	movea.l	(sp)+,a1
-~~cpu_setsymbol9:
-	rts
 
 ;---------------------------------------------------------------
 ;	.org	<式>

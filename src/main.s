@@ -349,39 +349,17 @@ predefinesymbol:
 	tst.b	(PREDEFINE,a6)
 	beq	predefinesymbol99
 
+	;現時点でCPUTYPEは設定されておらず0なので参照しないこと
+	;値は各パスの開始時に設定するので、ここでは仮の値でよい
+	moveq.l	#0,d0
 	lea.l	(symbol_cpu,pc),a0
-	moveq.l	#ST_VALUE,d2		;数値シンボル
-	bsr	defstrsymbol		;新しく登録する
+	bsr	def_predefinesymbol
 	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
 					;シンボルのタイプ
-	bne	predefinesymbol1	;定義できなかった(念のため)
+	bne	@f			;定義できなかった(念のため)
 	move.l	a1,(CPUSYMBOL,a6)
-	move.b	#SA_PREDEFINE,(SYM_ATTRIB,a1)	;プレデファインシンボル
-	clr.b	(SYM_SECTION,a1)	;セクション番号
-
-	move.b	(CPUTYPE,a6),d0		;CPUTYPEから初期値を決定する
-	movea.l	#68000,a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(68010-68000,a0),a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(68020-68010,a0),a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(68030-68020,a0),a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(68040-68030,a0),a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(68060-68040,a0),a0
-predefinesymbol0:
-	move.l	a0,(SYM_VALUE,a1)	;CPU
-	move.l	a0,(STARTCPU,a6)
-predefinesymbol1:
-
-	pea.l	(symbol_date,pc)
+@@:
+	lea.l	(symbol_date,pc),a0
 	moveq.l	#$07,d0
 	and.w	(ASSEMBLEDATE,a6),d0	;|........|........|........|.....www|
 	lsl.w	#5,d0			;|........|........|........|www.....|
@@ -391,39 +369,38 @@ predefinesymbol1:
 	lsl.l	#7,d0			;|.wwwYYYY|YYYYYYYY|mmmmdddd|d.......|
 	lsr.w	#4,d0			;|.wwwYYYY|YYYYYYYY|....mmmm|ddddd...|
 	lsr.b	#3,d0			;|.wwwYYYY|YYYYYYYY|....mmmm|...ddddd|
-	move.l	d0,-(sp)
 	bsr	def_predefinesymbol
-	pea.l	(symbol_time,pc)
-	move.l	(ASSEMBLETIM2,a6),-(sp)
+	lea.l	(symbol_time,pc),a0
+	move.l	(ASSEMBLETIM2,a6),d0
 	bsr	def_predefinesymbol
-	lea.l	(8+8,sp),sp
 
-	pea.l	(symbol_has,pc)
-	pea.l	(verno).w		;309
+	lea.l	(symbol_has,pc),a0
+	move.l	#verno,d0		;309
 	bsr	def_predefinesymbol
-	pea.l	(symbol_has060,pc)
-	pea.l	(verno060).w		;69～
+	lea.l	(symbol_has060,pc),a0
+	move.l	#verno060,d0		;69～
 	bsr	def_predefinesymbol
-	pea.l	(symbol_has060x,pc)
-	move.l	#verno_x,-(sp)
+	lea.l	(symbol_has060x,pc),a0
+	move.l	#verno_x,d0
 	bsr	def_predefinesymbol
-	lea.l	(8+8+8,sp),sp
 predefinesymbol99:
 	rts
 
-;<4(sp).l:値
-;<8(sp).l:文字列
+;<d0.l:値
+;<a0.l:文字列
+;>a1.l:シンボルテーブル
 def_predefinesymbol:
-	movea.l	(8,sp),a0		;文字列
+	move.l	d0,-(sp)
 	moveq.l	#ST_VALUE,d2		;数値シンボル
 	bsr	defstrsymbol		;新しく登録する
 	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
 					;シンボルのタイプ
-	bne	def_predefinesymbol_9	;定義できなかった(念のため)
+	bne	@f			;定義できなかった(念のため)
+
 	move.b	#SA_PREDEFINE,(SYM_ATTRIB,a1)	;プレデファインシンボル
 	clr.b	(SYM_SECTION,a1)	;セクション番号
-	move.l	(4,sp),(SYM_VALUE,a1)	;値
-def_predefinesymbol_9:
+	move.l	(sp),(SYM_VALUE,a1)	;値
+@@:	addq.l	#4,sp
 	rts
 
 symbol_cpu:	.dc.b	'CPU',0
@@ -440,7 +417,6 @@ symbol_has060x:	.dc.b	'__HAS060X__',0
 ;----------------------------------------------------------------
 cpuinit:
 	move.l	#68000,(ICPUNUMBER,a6)
-	move.w	#C000,(ICPUTYPE,a6)
 	rts
 
 
@@ -1187,7 +1163,6 @@ option_m:
 	bsr	cputype_convert
 	bmi	usage			;その他の数値はエラーにする
 	move.l	d1,(ICPUNUMBER,a6)
-	move.w	d0,(ICPUTYPE,a6)
 	rts
 
 ;----------------------------------------------------------------

@@ -125,8 +125,8 @@ asmpass101:
 	lea.l	(asm1loop9,pc),a0
 	move.l	a0,(ERRRET,a6)
 
-	move.l	(ICPUNUMBER,a6),d1
-	bsr	cputype_update
+	move.l	(ICPUNUMBER,a6),d1	;最適化に必要なフラグ類と
+	bsr	cputype_update		;CPUTYPEとCPUSYMBOLの値を初期化
 	bra	asm1loop9
 
 asm1loop:
