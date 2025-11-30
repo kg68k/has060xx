@@ -1185,16 +1185,10 @@ option_m:
 	bmi	usage
 
 	bsr	cputype_convert
-	bmi	@f
+	bmi	usage			;その他の数値はエラーにする
 	move.l	d1,(ICPUNUMBER,a6)
 	move.w	d0,(ICPUTYPE,a6)
 	rts
-@@:
-	cmp.l	#1000,d1
-	bls	usage
-	cmp.l	#32768,d1
-	bcc	usage
-	rts				;その他の数値(最大シンボル数指定)は何もしない
 
 ;----------------------------------------------------------------
 ;	-j[n]
