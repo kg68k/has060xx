@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -258,30 +259,24 @@ cregtbl	.macro	num,code,mpu
 	.endm
 
 getctbl:
-;ColdFireに標準で実装されている制御レジスタはVBRのみ
 	cregtbl	REG_SFC,	$0000,	C010|C020|C030|C040|C060
 	cregtbl	REG_DFC,	$0001,	C010|C020|C030|C040|C060
-	cregtbl	REG_CACR,	$0002,	     C020|C030|C040|C060|C520|C530|C540
+	cregtbl	REG_CACR,	$0002,	     C020|C030|C040|C060
 	cregtbl	REG_USP,	$0800,	C010|C020|C030|C040|C060
-	cregtbl	REG_VBR,	$0801,	C010|C020|C030|C040|C060|C520|C530|C540
+	cregtbl	REG_VBR,	$0801,	C010|C020|C030|C040|C060
 	cregtbl	REG_CAAR,	$0802,	     C020|C030
 	cregtbl	REG_MSP,	$0803,	     C020|C030|C040
 	cregtbl	REG_ISP,	$0804,	     C020|C030|C040
-	cregtbl	REG_TC,		$0003,		       C040|C060|C520|C530|C540
-	cregtbl	REG_ITT0,	$0004,		       C040|C060|C520|C530|C540
-	cregtbl	REG_ITT1,	$0005,		       C040|C060|C520|C530|C540
-	cregtbl	REG_DTT0,	$0006,		       C040|C060|C520|C530|C540
-	cregtbl	REG_DTT1,	$0007,		       C040|C060|C520|C530|C540
+	cregtbl	REG_TC,		$0003,		       C040|C060
+	cregtbl	REG_ITT0,	$0004,		       C040|C060
+	cregtbl	REG_ITT1,	$0005,		       C040|C060
+	cregtbl	REG_DTT0,	$0006,		       C040|C060
+	cregtbl	REG_DTT1,	$0007,		       C040|C060
 	cregtbl	REG_MMUSR,	$0805,		       C040
 	cregtbl	REG_URP,	$0806,		       C040|C060
 	cregtbl	REG_SRP,	$0807,		       C040|C060
 	cregtbl	REG_BUSCR,	$0008,			    C060
 	cregtbl	REG_PCR,	$0808,			    C060
-	cregtbl	REG_PC,		$080F,				 C520|C530|C540
-	cregtbl	REG_ROMBAR,	$0C00,				 C520|C530|C540
-	cregtbl	REG_RAMBAR0,	$0C04,				 C520|C530|C540
-	cregtbl	REG_RAMBAR1,	$0C05,				 C520|C530|C540
-	cregtbl	REG_MBAR,	$0C0F,				 C520|C530|C540
 	.dc.w	0
 
 ;----------------------------------------------------------------
@@ -904,12 +899,6 @@ geteapar_idxreg4:
 	moveq.l	#8,d1
 	cmp.l	d1,d0
 	bhi	exprerr_scalefactor	;1～8でなければエラー
-	tst.b	(CPUTYPE2,a6)
-	beq	geteapar_idxreg41
-	moveq.l	#4,d1
-	cmp.l	d1,d0
-	bhi	exprerr_scalefactor	;ColdFireは1～4でなければエラー
-geteapar_idxreg41:
 	add.w	d0,d0
 	move.w	(geteaindex_tbl,pc,d0.w),d0
 	bmi	exprerr_scalefactor
@@ -973,8 +962,6 @@ geteapm5:				;サイズ指定が省略された場合
 	bpl	geteapm99		;式の値が得られない場合
 	sf.b	(OPTIONALPC,a1)		;定数の場合はOPCは無効
 	bra68	d1,geteapm8		;68000/68010は常に.w(確定)
-	tst.b	(CPUTYPE2,a6)
-	bne	geteapm8		;ColdFireは常に.w(確定)
 	move.l	(RPNBUF1,a1),d0
 	move.w	d0,d1
 	ext.l	d1
@@ -1005,8 +992,6 @@ geteapm99pc:				;PC間接の場合
 	tst.b	(PCTOABSL,a6)
 	bne	geteapm99pc2
 	bra68	d1,getea_dsppcw		;68000/68010なら常に.w
-	tst.b	(CPUTYPE2,a6)
-	bne	getea_dsppcw		;ColdFireなら常に.w
 	st.b	(DSPADRCODE,a6)		;(実効アドレス変更のため命令コードを保存させる)
 	tst.b	(EXTSIZEFLG,a6)
 	beq	getea_dsppc		;デフォルトサイズは.w
@@ -1068,8 +1053,6 @@ geteapm_idx3:
 
 geteapm_idx5:				;サイズ指定が省略された場合
 	bra68	d1,geteapm_idx8		;68000/68010なら常に.s
-	tst.b	(CPUTYPE2,a6)
-	bne	geteapm_idx8		;ColdFireなら常に.s
 	tst.w	d0
 	bpl	geteapm_idx9		;式の値が得られない場合
 	move.l	(RPNBUF1,a1),d0
@@ -1087,8 +1070,6 @@ geteapm_idx9:
 
 geteapm_bd:
 	bra68	d0,exprerr_fullformat	;68000/68010にはフルフォーマットはない
-	tst.b	(CPUTYPE2,a6)
-	bne	exprerr_fullformat	;ColdFireにはフルフォーマットはない
 	ori.w	#EXW_FULL,d3		;フルフォーマット
 	move.w	(RPNLEN1,a1),d0
 	beq	geteapm_bdnul		;ベースディスプレースメントがない
@@ -1143,8 +1124,6 @@ geteapm_bd99:				;ディスプレースメントサイズが未確定の場合
 
 geteapm_od:
 	bra68	d0,exprerr_fullformat	;68000/68010にはフルフォーマットはない
-	tst.b	(CPUTYPE2,a6)
-	bne	exprerr_fullformat	;ColdFireにはフルフォーマットはない
 	tst.w	d4
 	bpl	geteapm_od1		;プリインデックス or インデックスレジスタサプレス
 	ori.w	#EXW_POSTIDX,d3		;ポストインデックス

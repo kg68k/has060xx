@@ -7,6 +7,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -22,19 +23,19 @@
 ;----------------------------------------------------------------
 tablebody	.macro
 
-	optbl	'move',	    ~move,	$0000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
-	optbl	'moveq',    ~moveq,	$7000,C000|C010|C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
-	optbl	'movea',    ~movea,	$2040,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbl	'movem',    ~movem,	$4880,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,        SZL
-	optbl	'lea',	    ~lea,	$41C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
-	optbl	'pea',	    ~peajsrjmp,	$4840,C000|C010|C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
-	optbl	'jsr',	    ~jmpjsr,	$4E80,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbl	'jmp',	    ~jmpjsr,	$4EC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
+	optbl	'move',	    ~move,	$0000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'moveq',    ~moveq,	$7000,C000|C010|C020|C030|C040|C060,        SZL,        SZL
+	optbl	'movea',    ~movea,	$2040,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'movem',    ~movem,	$4880,C000|C010|C020|C030|C040|C060,    SZW|SZL,        SZL
+	optbl	'lea',	    ~lea,	$41C0,C000|C010|C020|C030|C040|C060,        SZL,        SZL
+	optbl	'pea',	    ~peajsrjmp,	$4840,C000|C010|C020|C030|C040|C060,        SZL,        SZL
+	optbl	'jsr',	    ~jmpjsr,	$4E80,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'jmp',	    ~jmpjsr,	$4EC0,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
 ;GASコード
-;	optbl	'mov',	    ~move,	$0000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
-;	optbl	'movq',	    ~moveq,	$7000,C000|C010|C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
-;	optbl	'mova',	    ~movea,	$2040,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-;	optbl	'movm',	    ~movem,	$4880,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,        SZL
+;	optbl	'mov',	    ~move,	$0000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
+;	optbl	'movq',	    ~moveq,	$7000,C000|C010|C020|C030|C040|C060,        SZL,        SZL
+;	optbl	'mova',	    ~movea,	$2040,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+;	optbl	'movm',	    ~movem,	$4880,C000|C010|C020|C030|C040|C060,    SZW|SZL,        SZL
 
 	pstbl	'even',     ~~even
 	pstbl	'quad',	    ~~quad
@@ -51,386 +52,370 @@ tablebody	.macro
 	pstbl	'set',	    ~~set
 	pstbl	'reg',	    ~~reg
 
-	optbl	'bra',	    ~bcc,	$6000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bt',	    ~bcc,	$6000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bsr',	    ~bcc,	$6100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bhi',	    ~bcc,	$6200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bls',	    ~bcc,	$6300,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bcc',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bhs',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bcs',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'blo',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bne',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnz',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'beq',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bze',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bvc',	    ~bcc,	$6800,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bvs',	    ~bcc,	$6900,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bpl',	    ~bcc,	$6A00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bmi',	    ~bcc,	$6B00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bge',	    ~bcc,	$6C00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'blt',	    ~bcc,	$6D00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bgt',	    ~bcc,	$6E00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'ble',	    ~bcc,	$6F00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bra',	    ~bcc,	$6000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bt',	    ~bcc,	$6000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bsr',	    ~bcc,	$6100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bhi',	    ~bcc,	$6200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bls',	    ~bcc,	$6300,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bcc',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bhs',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bcs',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'blo',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bne',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnz',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'beq',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bze',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bvc',	    ~bcc,	$6800,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bvs',	    ~bcc,	$6900,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bpl',	    ~bcc,	$6A00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bmi',	    ~bcc,	$6B00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bge',	    ~bcc,	$6C00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'blt',	    ~bcc,	$6D00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bgt',	    ~bcc,	$6E00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'ble',	    ~bcc,	$6F00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
 
-	optbl	'bnls',	    ~bcc,	$6200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnhi',	    ~bcc,	$6300,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bncs',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnlo',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bncc',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnhs',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bneq',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnze',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnne',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnnz',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnvs',	    ~bcc,	$6800,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnvc',	    ~bcc,	$6900,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnmi',	    ~bcc,	$6A00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnpl',	    ~bcc,	$6B00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnlt',	    ~bcc,	$6C00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnge',	    ~bcc,	$6D00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bnle',	    ~bcc,	$6E00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'bngt',	    ~bcc,	$6F00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnls',	    ~bcc,	$6200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnhi',	    ~bcc,	$6300,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bncs',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnlo',	    ~bcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bncc',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnhs',	    ~bcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bneq',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnze',	    ~bcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnne',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnnz',	    ~bcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnvs',	    ~bcc,	$6800,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnvc',	    ~bcc,	$6900,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnmi',	    ~bcc,	$6A00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnpl',	    ~bcc,	$6B00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnlt',	    ~bcc,	$6C00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnge',	    ~bcc,	$6D00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bnle',	    ~bcc,	$6E00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'bngt',	    ~bcc,	$6F00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
 
-	optbln	'rts',	    ~noopr,	$4E75,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
+	optbln	'rts',	    ~noopr,	$4E75,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
 
-	optbl	'dbra',     ~dbcc,	$51C8,C000|C010|C020|C030|C040|C060,                   SZW,    SZNO
+	optbl	'dbra',     ~dbcc,	$51C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
 
-	optbl	'clr',	    ~clr,	$4200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
-	optbl	'neg',	    ~negnot,	$4400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'not',	    ~negnot,	$4600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'tst',	    ~tst,	$4A00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'clr',	    ~clr,	$4200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'neg',	    ~negnot,	$4400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'not',	    ~negnot,	$4600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'tst',	    ~tst,	$4A00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
 
-	optbl	'cmp',	    ~cmp,	$B000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
-	optbl	'cmpi',     ~cmpi,	$0C00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
-	optbl	'cmpa',     ~cmpa,	$B0C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbl	'cmpm',     ~cmpm,	$B108,C000|C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'sub',	    ~subadd,	$9000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'subq',     ~subaddq,	$5100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'subi',     ~subaddi,	$0400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'suba',     ~sbadcpa,	$90C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,        SZL
-	optbl	'add',	    ~subadd,	$D000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'addq',     ~subaddq,	$5000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'addi',     ~subaddi,	$0600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'adda',     ~sbadcpa,	$D0C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,        SZL
+	optbl	'cmp',	    ~cmp,	$B000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'cmpi',     ~cmpi,	$0C00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'cmpa',     ~cmpa,	$B0C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'cmpm',     ~cmpm,	$B108,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'sub',	    ~subadd,	$9000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'subq',     ~subaddq,	$5100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'subi',     ~subaddi,	$0400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'suba',     ~sbadcpa,	$90C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,        SZL
+	optbl	'add',	    ~subadd,	$D000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'addq',     ~subaddq,	$5000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'addi',     ~subaddi,	$0600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'adda',     ~sbadcpa,	$D0C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,        SZL
 
-	optbl	'or',	    ~orand,	$8000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'ori',	    ~orandeori, $0000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'and',	    ~orand,	$C000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'andi',     ~orandeori, $0200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'eor',	    ~eor,	$B100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'eori',     ~orandeori, $0A00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
+	optbl	'or',	    ~orand,	$8000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'ori',	    ~orandeori, $0000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'and',	    ~orand,	$C000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'andi',     ~orandeori, $0200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'eor',	    ~eor,	$B100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'eori',     ~orandeori, $0A00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
 
-	optbl	'link',     ~link,	$4E50,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW
-	optbl	'unlk',     ~unlk,	$4E58,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
+	optbl	'link',     ~link,	$4E50,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW
+	optbl	'unlk',     ~unlk,	$4E58,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
 
-	optbl	'exg',	    ~exg,	$C100,C000|C010|C020|C030|C040|C060,                       SZL,SZNO
-	optbl	'ext',	    ~ext,	$4880,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbl	'extb',     ~extb,	$49C0,		C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
-	optbl	'swap',     ~swap,	$4840,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW,        SZW
+	optbl	'exg',	    ~exg,	$C100,C000|C010|C020|C030|C040|C060,        SZL,SZNO
+	optbl	'ext',	    ~ext,	$4880,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'extb',     ~extb,	$49C0,		C020|C030|C040|C060,        SZL,        SZL
+	optbl	'swap',     ~swap,	$4840,C000|C010|C020|C030|C040|C060,    SZW,        SZW
 
-	optbl	'asr',	    ~sftrot,	$E000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'asl',	    ~asl,	$E100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'lsr',	    ~sftrot,	$E008,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'lsl',	    ~sftrot,	$E108,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'roxr',     ~sftrot,	$E010,C000|C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'roxl',     ~sftrot,	$E110,C000|C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'ror',	    ~sftrot,	$E018,C000|C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'rol',	    ~sftrot,	$E118,C000|C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
+	optbl	'asr',	    ~sftrot,	$E000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'asl',	    ~asl,	$E100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'lsr',	    ~sftrot,	$E008,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'lsl',	    ~sftrot,	$E108,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'roxr',     ~sftrot,	$E010,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'roxl',     ~sftrot,	$E110,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'ror',	    ~sftrot,	$E018,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'rol',	    ~sftrot,	$E118,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
 
-	optbl	'bchg',     ~bchclst,	$0040,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZL,    SZB|SZL
-	optbl	'bclr',     ~bchclst,	$0080,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZL,    SZB|SZL
-	optbl	'bset',     ~bchclst,	$00C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZL,    SZB|SZL
-	optbl	'btst',     ~btst,	$0000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZL,    SZB|SZL
+	optbl	'bchg',     ~bchclst,	$0040,C000|C010|C020|C030|C040|C060,SZB|SZL,    SZB|SZL
+	optbl	'bclr',     ~bchclst,	$0080,C000|C010|C020|C030|C040|C060,SZB|SZL,    SZB|SZL
+	optbl	'bset',     ~bchclst,	$00C0,C000|C010|C020|C030|C040|C060,SZB|SZL,    SZB|SZL
+	optbl	'btst',     ~btst,	$0000,C000|C010|C020|C030|C040|C060,SZB|SZL,    SZB|SZL
 
-	optbl	'st',	    ~scc,	$50C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sf',	    ~scc,	$51C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'shi',	    ~scc,	$52C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sls',	    ~scc,	$53C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'scc',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'shs',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'scs',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'slo',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sne',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snz',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'seq',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sze',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'svc',	    ~scc,	$58C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'svs',	    ~scc,	$59C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'spl',	    ~scc,	$5AC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'smi',	    ~scc,	$5BC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sge',	    ~scc,	$5CC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'slt',	    ~scc,	$5DC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sgt',	    ~scc,	$5EC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sle',	    ~scc,	$5FC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
+	optbl	'st',	    ~scc,	$50C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sf',	    ~scc,	$51C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'shi',	    ~scc,	$52C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sls',	    ~scc,	$53C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'scc',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'shs',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'scs',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'slo',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sne',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snz',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'seq',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sze',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'svc',	    ~scc,	$58C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'svs',	    ~scc,	$59C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'spl',	    ~scc,	$5AC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'smi',	    ~scc,	$5BC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sge',	    ~scc,	$5CC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'slt',	    ~scc,	$5DC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sgt',	    ~scc,	$5EC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sle',	    ~scc,	$5FC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
 
-	optbl	'snf',	    ~scc,	$50C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snt',	    ~scc,	$51C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snls',	    ~scc,	$52C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snhi',	    ~scc,	$53C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sncs',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snlo',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sncc',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snhs',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sneq',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snze',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snne',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snnz',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snvs',	    ~scc,	$58C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snvc',	    ~scc,	$59C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snmi',	    ~scc,	$5AC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snpl',	    ~scc,	$5BC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snlt',	    ~scc,	$5CC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snge',	    ~scc,	$5DC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'snle',	    ~scc,	$5EC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
-	optbl	'sngt',	    ~scc,	$5FC0,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB,        SZB
+	optbl	'snf',	    ~scc,	$50C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snt',	    ~scc,	$51C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snls',	    ~scc,	$52C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snhi',	    ~scc,	$53C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sncs',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snlo',	    ~scc,	$54C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sncc',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snhs',	    ~scc,	$55C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sneq',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snze',	    ~scc,	$56C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snne',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snnz',	    ~scc,	$57C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snvs',	    ~scc,	$58C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snvc',	    ~scc,	$59C0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snmi',	    ~scc,	$5AC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snpl',	    ~scc,	$5BC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snlt',	    ~scc,	$5CC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snge',	    ~scc,	$5DC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'snle',	    ~scc,	$5EC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
+	optbl	'sngt',	    ~scc,	$5FC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
 
-	optbl	'divu',     ~divmul,	$80C0,C000|C010|C020|C030|C040|C060|C530|C540,         SZW|SZL,    SZW|SZL
-	optbl	'divs',     ~divmul,	$81C0,C000|C010|C020|C030|C040|C060|C530|C540,         SZW|SZL,    SZW|SZL
-	optbl	'mulu',     ~divmul,	$C0C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbl	'muls',     ~divmul,	$C1C0,C000|C010|C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbl	'divul',    ~divl,	$0000,		C020|C030|C040|C060,                       SZL,SZNO
-	optbl	'divsl',    ~divl,	$0800,		C020|C030|C040|C060,                       SZL,SZNO
-;ColdFireのremu/remsには未対応
-;	optbl	'remu',     ~divmul,	$????,                              C530|C540,     SZNO,           SZW|SZL
-;	optbl	'rems',     ~divmul,	$????,                              C530|C540,     SZNO,           SZW|SZL
+	optbl	'divu',     ~divmul,	$80C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'divs',     ~divmul,	$81C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'mulu',     ~divmul,	$C0C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'muls',     ~divmul,	$C1C0,C000|C010|C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbl	'divul',    ~divl,	$0000,		C020|C030|C040|C060,        SZL,SZNO
+	optbl	'divsl',    ~divl,	$0800,		C020|C030|C040|C060,        SZL,SZNO
 
-	optbl	'dbt',	    ~dbcc,	$50C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbf',	    ~dbcc,	$51C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbhi',     ~dbcc,	$52C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbls',     ~dbcc,	$53C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbcc',     ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbhs',     ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbcs',     ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dblo',     ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbne',     ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnz',     ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbeq',     ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbze',     ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbvc',     ~dbcc,	$58C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbvs',     ~dbcc,	$59C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbpl',     ~dbcc,	$5AC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbmi',     ~dbcc,	$5BC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbge',     ~dbcc,	$5CC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dblt',     ~dbcc,	$5DC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbgt',     ~dbcc,	$5EC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dble',     ~dbcc,	$5FC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
+	optbl	'dbt',	    ~dbcc,	$50C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbf',	    ~dbcc,	$51C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbhi',     ~dbcc,	$52C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbls',     ~dbcc,	$53C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbcc',     ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbhs',     ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbcs',     ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dblo',     ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbne',     ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnz',     ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbeq',     ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbze',     ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbvc',     ~dbcc,	$58C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbvs',     ~dbcc,	$59C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbpl',     ~dbcc,	$5AC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbmi',     ~dbcc,	$5BC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbge',     ~dbcc,	$5CC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dblt',     ~dbcc,	$5DC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbgt',     ~dbcc,	$5EC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dble',     ~dbcc,	$5FC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
 
-	optbl	'dbnf',	    ~dbcc,	$50C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnt',	    ~dbcc,	$51C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnls',    ~dbcc,	$52C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnhi',    ~dbcc,	$53C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbncs',    ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnlo',    ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbncc',    ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnhs',    ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbneq',    ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnze',    ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnne',    ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnnz',    ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnvs',    ~dbcc,	$58C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnvc',    ~dbcc,	$59C8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnmi',    ~dbcc,	$5AC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnpl',    ~dbcc,	$5BC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnlt',    ~dbcc,	$5CC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnge',    ~dbcc,	$5DC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbnle',    ~dbcc,	$5EC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
-	optbl	'dbngt',    ~dbcc,	$5FC8,C000|C010|C020|C030|C040|C060,         SZW,    SZNO
+	optbl	'dbnf',	    ~dbcc,	$50C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnt',	    ~dbcc,	$51C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnls',    ~dbcc,	$52C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnhi',    ~dbcc,	$53C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbncs',    ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnlo',    ~dbcc,	$54C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbncc',    ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnhs',    ~dbcc,	$55C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbneq',    ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnze',    ~dbcc,	$56C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnne',    ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnnz',    ~dbcc,	$57C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnvs',    ~dbcc,	$58C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnvc',    ~dbcc,	$59C8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnmi',    ~dbcc,	$5AC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnpl',    ~dbcc,	$5BC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnlt',    ~dbcc,	$5CC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnge',    ~dbcc,	$5DC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbnle',    ~dbcc,	$5EC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
+	optbl	'dbngt',    ~dbcc,	$5FC8,C000|C010|C020|C030|C040|C060,    SZW,    SZNO
 
-	optbl	'subx',     ~subaddx,	$9100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'addx',     ~subaddx,	$D100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
-	optbl	'negx',     ~negnot,	$4000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,        SZL
+	optbl	'subx',     ~subaddx,	$9100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'addx',     ~subaddx,	$D100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
+	optbl	'negx',     ~negnot,	$4000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,        SZL
 
-	optbl	'sbcd',     ~sabcd,	$8100,C000|C010|C020|C030|C040|C060,               SZB,        SZNO
-	optbl	'abcd',     ~sabcd,	$C100,C000|C010|C020|C030|C040|C060,               SZB,        SZNO
-	optbl	'nbcd',     ~scc,	$4800,C000|C010|C020|C030|C040|C060,               SZB,        SZNO
+	optbl	'sbcd',     ~sabcd,	$8100,C000|C010|C020|C030|C040|C060,SZB,        SZNO
+	optbl	'abcd',     ~sabcd,	$C100,C000|C010|C020|C030|C040|C060,SZB,        SZNO
+	optbl	'nbcd',     ~scc,	$4800,C000|C010|C020|C030|C040|C060,SZB,        SZNO
 
-	optbl	'bftst',    ~bftst,	$E8C0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfextu',   ~bfextffo,	$E9C0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfchg',    ~bfchclst,	$EAC0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfexts',   ~bfextffo,	$EBC0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfclr',    ~bfchclst,	$ECC0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfffo',    ~bfextffo,	$EDC0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfset',    ~bfchclst,	$EEC0,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'bfins',    ~bfins,	$EFC0,		C020|C030|C040|C060,               SZNO,       SZNO
+	optbl	'bftst',    ~bftst,	$E8C0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfextu',   ~bfextffo,	$E9C0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfchg',    ~bfchclst,	$EAC0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfexts',   ~bfextffo,	$EBC0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfclr',    ~bfchclst,	$ECC0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfffo',    ~bfextffo,	$EDC0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfset',    ~bfchclst,	$EEC0,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'bfins',    ~bfins,	$EFC0,		C020|C030|C040|C060,SZNO,       SZNO
 
-	optbl	'trap',     ~trap,	$4E40,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbln	'illegal',  ~noopr,	$4AFC,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbln	'reset',    ~noopr,	$4E70,C000|C010|C020|C030|C040|C060,               SZNO,       SZNO
-	optbln	'nop',	    ~noopr,	$4E71,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbln	'rte',	    ~noopr,	$4E73,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbln	'trapv',    ~noopr,	$4E76,C000|C010|C020|C030|C040|C060,               SZNO,       SZNO
-	optbln	'rtr',	    ~noopr,	$4E77,C000|C010|C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'stop',     ~stoprtd,	$4E72,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbl	'lpstop',   ~lpstop,	$F800,			       C060,                   SZW,    SZNO
+	optbl	'trap',     ~trap,	$4E40,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbln	'illegal',  ~noopr,	$4AFC,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbln	'reset',    ~noopr,	$4E70,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbln	'nop',	    ~noopr,	$4E71,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbln	'rte',	    ~noopr,	$4E73,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbln	'trapv',    ~noopr,	$4E76,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbln	'rtr',	    ~noopr,	$4E77,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'stop',     ~stoprtd,	$4E72,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'lpstop',   ~lpstop,	$F800,			       C060,    SZW,    SZNO
 
-	optbl	'mac',      ~mac,	$A000,				    C520|C530|C540,SZNO,           SZW|SZL
-	optbl	'macl',     ~macl,	$A080,				    C520|C530|C540,SZNO,           SZW|SZL
-	optbl	'msac',     ~msac,	$A000,				    C520|C530|C540,SZNO,           SZW|SZL
-	optbl	'msacl',    ~msacl,	$A080,				    C520|C530|C540,SZNO,           SZW|SZL
-	optbln	'halt',     ~noopr,	$4AC8,				    C520|C530|C540,SZNO,       SZNO
-	optbln	'pulse',    ~noopr,	$4ACC,				    C520|C530|C540,SZNO,       SZNO
-	optbl	'wddata',   ~wddata,	$FB00,				    C520|C530|C540,SZNO,       SZB|SZW|SZL
-	optbl	'wdebug',   ~wdebug,	$FBC0,				    C520|C530|C540,SZNO,               SZL
-	optbl	'mov3q',    ~mov3q,	$A140,					      C540,SZNO,               SZL
-	optbl	'mvs',      ~mvsmvz,	$7100,					      C540,SZNO,       SZB|SZW
-	optbl	'mvz',      ~mvsmvz,	$7180,					      C540,SZNO,       SZB|SZW
-	optbl	'sats',     ~extb,	$4C80,					      C540,SZNO,               SZL
+	optbl	'rtd',	    ~rtd,	$4E74,	   C010|C020|C030|C040|C060,SZNO,       SZNO
 
-	optbl	'rtd',	    ~rtd,	$4E74,	   C010|C020|C030|C040|C060,               SZNO,       SZNO
+	optbl	'chk',	    ~chk,	$4100,C000|C010|C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbl	'tas',	    ~tas,	$4AC0,C000|C010|C020|C030|C040|C060,SZB,        SZB
 
-	optbl	'chk',	    ~chk,	$4100,C000|C010|C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbl	'tas',	    ~tas,	$4AC0,C000|C010|C020|C030|C040|C060|C540,          SZB,        SZB
-
-	optbl	'movep',    ~movep,	$0108,C000|C010|C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbl	'moves',    ~moves,	$0E00,	   C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'movec',    ~movec,	$4E7A,	   C010|C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
-	optbl	'bkpt',     ~bkpt,	$4848,	   C010|C020|C030|C040|C060,               SZNO,       SZNO
+	optbl	'movep',    ~movep,	$0108,C000|C010|C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbl	'moves',    ~moves,	$0E00,	   C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'movec',    ~movec,	$4E7A,	   C010|C020|C030|C040|C060,        SZL,        SZL
+	optbl	'bkpt',     ~bkpt,	$4848,	   C010|C020|C030|C040|C060,SZNO,       SZNO
 ;GASコード
-;	optbl	'movp',	    ~movep,	$0108,C000|C010|C020|C030|C040|C060,                   SZW|SZL,SZNO
-;	optbl	'movs',	    ~moves,	$0E00,	   C010|C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-;	optbl	'movc',	    ~movec,	$4E7A,	   C010|C020|C030|C040|C060|C520|C530|C540,        SZL,        SZL
+;	optbl	'movp',	    ~movep,	$0108,C000|C010|C020|C030|C040|C060,    SZW|SZL,SZNO
+;	optbl	'movs',	    ~moves,	$0E00,	   C010|C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+;	optbl	'movc',	    ~movec,	$4E7A,	   C010|C020|C030|C040|C060,        SZL,        SZL
 
-	optbl	'cas',	    ~cas,	$08C0,		C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'cas2',     ~cas2,	$08FC,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbl	'cmp2',     ~cmpchk2,	$0000,		C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
-	optbl	'chk2',     ~cmpchk2,	$0800,		C020|C030|C040|C060,               SZB|SZW|SZL,SZNO
+	optbl	'cas',	    ~cas,	$08C0,		C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'cas2',     ~cas2,	$08FC,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbl	'cmp2',     ~cmpchk2,	$0000,		C020|C030|C040|C060,SZB|SZW|SZL,SZNO
+	optbl	'chk2',     ~cmpchk2,	$0800,		C020|C030|C040|C060,SZB|SZW|SZL,SZNO
 
-	optbl	'pack',     ~packunpk,	$8140,		C020|C030|C040|C060,               SZNO,       SZNO
-	optbl	'unpk',     ~packunpk,	$8180,		C020|C030|C040|C060,               SZNO,       SZNO
+	optbl	'pack',     ~packunpk,	$8140,		C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'unpk',     ~packunpk,	$8180,		C020|C030|C040|C060,SZNO,       SZNO
 
-	optbln	'trapt',    ~trapcc,	$50F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapf',    ~trapcc,	$51F8,		C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbln	'traphi',   ~trapcc,	$52F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapls',   ~trapcc,	$53F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapcc',   ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'traphs',   ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapcs',   ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'traplo',   ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapne',   ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnz',   ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapeq',   ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapze',   ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapvc',   ~trapcc,	$58F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapvs',   ~trapcc,	$59F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trappl',   ~trapcc,	$5AF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapmi',   ~trapcc,	$5BF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapge',   ~trapcc,	$5CF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'traplt',   ~trapcc,	$5DF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapgt',   ~trapcc,	$5EF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'traple',   ~trapcc,	$5FF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
+	optbln	'trapt',    ~trapcc,	$50F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapf',    ~trapcc,	$51F8,		C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbln	'traphi',   ~trapcc,	$52F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapls',   ~trapcc,	$53F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapcc',   ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'traphs',   ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapcs',   ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'traplo',   ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapne',   ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnz',   ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapeq',   ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapze',   ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapvc',   ~trapcc,	$58F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapvs',   ~trapcc,	$59F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trappl',   ~trapcc,	$5AF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapmi',   ~trapcc,	$5BF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapge',   ~trapcc,	$5CF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'traplt',   ~trapcc,	$5DF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapgt',   ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'traple',   ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
 
-	optbln	'trapnf',   ~trapcc,	$50F8,		C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbln	'trapnt',   ~trapcc,	$51F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnls',  ~trapcc,	$52F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnhi',  ~trapcc,	$53F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapncs',  ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnlo',  ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapncc',  ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnhs',  ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapneq',  ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnze',  ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnne',  ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnnz',  ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnvs',  ~trapcc,	$58F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnvc',  ~trapcc,	$59F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnmi',  ~trapcc,	$5AF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnpl',  ~trapcc,	$5BF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnlt',  ~trapcc,	$5CF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnge',  ~trapcc,	$5DF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapnle',  ~trapcc,	$5EF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'trapngt',  ~trapcc,	$5FF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
+	optbln	'trapnf',   ~trapcc,	$50F8,		C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbln	'trapnt',   ~trapcc,	$51F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnls',  ~trapcc,	$52F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnhi',  ~trapcc,	$53F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapncs',  ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnlo',  ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapncc',  ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnhs',  ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapneq',  ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnze',  ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnne',  ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnnz',  ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnvs',  ~trapcc,	$58F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnvc',  ~trapcc,	$59F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnmi',  ~trapcc,	$5AF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnpl',  ~trapcc,	$5BF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnlt',  ~trapcc,	$5CF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnge',  ~trapcc,	$5DF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapnle',  ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'trapngt',  ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
 
-	optbln	'tpt',    ~trapcc,	$50F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpf',    ~trapcc,	$51F8,		C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbln	'tphi',   ~trapcc,	$52F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpls',   ~trapcc,	$53F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpcc',   ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tphs',   ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpcs',   ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tplo',   ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpne',   ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnz',   ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpeq',   ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpze',   ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpvc',   ~trapcc,	$58F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpvs',   ~trapcc,	$59F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tppl',   ~trapcc,	$5AF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpmi',   ~trapcc,	$5BF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpge',   ~trapcc,	$5CF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tplt',   ~trapcc,	$5DF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpgt',   ~trapcc,	$5EF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tple',   ~trapcc,	$5FF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnf',   ~trapcc,	$50F8,		C020|C030|C040|C060|C520|C530|C540,    SZW|SZL,    SZW|SZL
-	optbln	'tpnt',   ~trapcc,	$51F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnls',  ~trapcc,	$52F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnhi',  ~trapcc,	$53F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpncs',  ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnlo',  ~trapcc,	$54F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpncc',  ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnhs',  ~trapcc,	$55F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpneq',  ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnze',  ~trapcc,	$56F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnne',  ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnnz',  ~trapcc,	$57F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnvs',  ~trapcc,	$58F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnvc',  ~trapcc,	$59F8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnmi',  ~trapcc,	$5AF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnpl',  ~trapcc,	$5BF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnlt',  ~trapcc,	$5CF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnge',  ~trapcc,	$5DF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpnle',  ~trapcc,	$5EF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
-	optbln	'tpngt',  ~trapcc,	$5FF8,		C020|C030|C040|C060,                   SZW|SZL,SZNO
+	optbln	'tpt',    ~trapcc,	$50F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpf',    ~trapcc,	$51F8,		C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbln	'tphi',   ~trapcc,	$52F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpls',   ~trapcc,	$53F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpcc',   ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tphs',   ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpcs',   ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tplo',   ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpne',   ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnz',   ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpeq',   ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpze',   ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpvc',   ~trapcc,	$58F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpvs',   ~trapcc,	$59F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tppl',   ~trapcc,	$5AF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpmi',   ~trapcc,	$5BF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpge',   ~trapcc,	$5CF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tplt',   ~trapcc,	$5DF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpgt',   ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tple',   ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnf',   ~trapcc,	$50F8,		C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
+	optbln	'tpnt',   ~trapcc,	$51F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnls',  ~trapcc,	$52F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnhi',  ~trapcc,	$53F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpncs',  ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnlo',  ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpncc',  ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnhs',  ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpneq',  ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnze',  ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnne',  ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnnz',  ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnvs',  ~trapcc,	$58F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnvc',  ~trapcc,	$59F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnmi',  ~trapcc,	$5AF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnpl',  ~trapcc,	$5BF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnlt',  ~trapcc,	$5CF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnge',  ~trapcc,	$5DF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpnle',  ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
+	optbln	'tpngt',  ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
 
-	optbl	'callm',    ~callm,	$06C0,		C020,			           SZNO,       SZNO
-	optbl	'rtm',	    ~rtm,	$06C0,		C020,			           SZNO,       SZNO
+	optbl	'callm',    ~callm,	$06C0,		C020,               SZNO,       SZNO
+	optbl	'rtm',	    ~rtm,	$06C0,		C020,               SZNO,       SZNO
 
-	optbl	'move16',   ~move16,	$F600,			  C040|C060,               SZNO,       SZNO
+	optbl	'move16',   ~move16,	$F600,                    C040|C060,SZNO,       SZNO
 ;GASコード
-;	optbl	'mov16',    ~move16,	$F600,			  C040|C060,               SZNO,       SZNO
+;	optbl	'mov16',    ~move16,	$F600,                    C040|C060,SZNO,       SZNO
 
-	optbl	'dec',	    ~decinc,	$5300,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
-	optbl	'inc',	    ~decinc,	$5200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'dec',	    ~decinc,	$5300,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
+	optbl	'inc',	    ~decinc,	$5200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
 
-	optbl	'jbra',	    ~jbcc,	$6000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbt',	    ~jbcc,	$6000,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbsr',	    ~jbcc,	$6100,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbhi',	    ~jbcc,	$6200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbls',	    ~jbcc,	$6300,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbcc',	    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbhs',	    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbcs',	    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jblo',	    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbne',	    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnz',	    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbeq',	    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbze',	    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbvc',	    ~jbcc,	$6800,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbvs',	    ~jbcc,	$6900,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbpl',	    ~jbcc,	$6A00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbmi',	    ~jbcc,	$6B00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbge',	    ~jbcc,	$6C00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jblt',	    ~jbcc,	$6D00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbgt',	    ~jbcc,	$6E00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jble',	    ~jbcc,	$6F00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnls',    ~jbcc,	$6200,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnhi',    ~jbcc,	$6300,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbncs',    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnlo',    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbncc',    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnhs',    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbneq',    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnze',    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnne',    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnnz',    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnvs',    ~jbcc,	$6800,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnvc',    ~jbcc,	$6900,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnmi',    ~jbcc,	$6A00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnpl',    ~jbcc,	$6B00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnlt',    ~jbcc,	$6C00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnge',    ~jbcc,	$6D00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbnle',    ~jbcc,	$6E00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
-	optbl	'jbngt',    ~jbcc,	$6F00,C000|C010|C020|C030|C040|C060|C520|C530|C540,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbra',	    ~jbcc,	$6000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbt',	    ~jbcc,	$6000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbsr',	    ~jbcc,	$6100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbhi',	    ~jbcc,	$6200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbls',	    ~jbcc,	$6300,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbcc',	    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbhs',	    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbcs',	    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jblo',	    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbne',	    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnz',	    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbeq',	    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbze',	    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbvc',	    ~jbcc,	$6800,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbvs',	    ~jbcc,	$6900,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbpl',	    ~jbcc,	$6A00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbmi',	    ~jbcc,	$6B00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbge',	    ~jbcc,	$6C00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jblt',	    ~jbcc,	$6D00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbgt',	    ~jbcc,	$6E00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jble',	    ~jbcc,	$6F00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnls',    ~jbcc,	$6200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnhi',    ~jbcc,	$6300,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbncs',    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnlo',    ~jbcc,	$6400,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbncc',    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnhs',    ~jbcc,	$6500,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbneq',    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnze',    ~jbcc,	$6600,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnne',    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnnz',    ~jbcc,	$6700,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnvs',    ~jbcc,	$6800,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnvc',    ~jbcc,	$6900,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnmi',    ~jbcc,	$6A00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnpl',    ~jbcc,	$6B00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnlt',    ~jbcc,	$6C00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnge',    ~jbcc,	$6D00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbnle',    ~jbcc,	$6E00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
+	optbl	'jbngt',    ~jbcc,	$6F00,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
 
 	pstbl	'rept',     ~~rept
 	pstbl	'irp',	    ~~irp
@@ -519,9 +504,6 @@ tablebody	.macro
 	pstbl	'68030',    ~~cpu_68030
 	pstbl	'68040',    ~~cpu_68040
 	pstbl	'68060',    ~~cpu_68060
-	pstbl	'5200',     ~~cpu_5200
-	pstbl	'5300',     ~~cpu_5300
-	pstbl	'5400',     ~~cpu_5400
 
 	pstbl	'fpid',	    ~~fpid
 	pstbl	'pragma',   ~~pragma
@@ -571,35 +553,35 @@ tablebody	.macro
 	optbl	'fsglmul',  ~fsgl,	$0027,C040|C060|CFPP,SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
 	optbl	'fsub',     ~fopr,	$0028,C040|C060|CFPP,SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
 
-	optbl	'fssqrt',   ~funary,	$0041,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdsqrt',   ~funary,	$0045,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fsabs',    ~funary,	$0058,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdabs',    ~funary,	$005C,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fsneg',    ~funary,	$005A,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdneg',    ~funary,	$005E,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fsmove',   ~fopr,	$0040,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdmove',   ~fopr,	$0044,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fsdiv',    ~fopr,	$0060,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fddiv',    ~fopr,	$0064,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fsadd',    ~fopr,	$0062,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdadd',    ~fopr,	$0066,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fsmul',    ~fopr,	$0063,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdmul',    ~fopr,	$0067,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fssub',    ~fopr,	$0068,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fdsub',    ~fopr,	$006C,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fssqrt',   ~funary,	$0041,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdsqrt',   ~funary,	$0045,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fsabs',    ~funary,	$0058,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdabs',    ~funary,	$005C,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fsneg',    ~funary,	$005A,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdneg',    ~funary,	$005E,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fsmove',   ~fopr,	$0040,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdmove',   ~fopr,	$0044,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fsdiv',    ~fopr,	$0060,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fddiv',    ~fopr,	$0064,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fsadd',    ~fopr,	$0062,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdadd',    ~fopr,	$0066,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fsmul',    ~fopr,	$0063,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdmul',    ~fopr,	$0067,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fssub',    ~fopr,	$0068,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+	optbl	'fdsub',    ~fopr,	$006C,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
 ;GASコード
-;	optbl	'fsmov',    ~fopr,	$0040,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-;	optbl	'fdmov',    ~fopr,	$0044,C040|C060,	SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+;	optbl	'fsmov',    ~fopr,	$0040,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
+;	optbl	'fdmov',    ~fopr,	$0044,C040|C060,     SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
 
 	optbl	'fsincos',  ~fsincos,	$0030,C040|C060|CFPP,SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
-	optbl	'fmovecr',  ~fmovecr,	$5C00,C040|C060|CFPP,		    SZX,SZNO
-	optbl	'fmovem',   ~fmovem,	$C000,C040|C060|CFPP,		SZL|SZX,SZNO
-	optbln	'fnop',     ~fnop,	$F080,C040|C060|CFPP,SZNO,              SZNO
-	optbl	'fsave',    ~fsave,	$F100,C040|C060|CFPP,SZNO,              SZNO
-	optbl	'frestore', ~frestore,	$F140,C040|C060|CFPP,SZNO,              SZNO
+	optbl	'fmovecr',  ~fmovecr,	$5C00,C040|C060|CFPP,                    SZX,    SZNO
+	optbl	'fmovem',   ~fmovem,	$C000,C040|C060|CFPP,        SZL|SZX,            SZNO
+	optbln	'fnop',     ~fnop,	$F080,C040|C060|CFPP,SZNO,                       SZNO
+	optbl	'fsave',    ~fsave,	$F100,C040|C060|CFPP,SZNO,                       SZNO
+	optbl	'frestore', ~frestore,	$F140,C040|C060|CFPP,SZNO,                       SZNO
 ;GASコード
-;	optbl	'fmovcr',   ~fmovecr,	$5C00,C040|C060|CFPP,		    SZX,SZNO
-;	optbl	'fmovm',    ~fmovem,	$C000,C040|C060|CFPP,		SZL|SZX,SZNO
+;	optbl	'fmovcr',   ~fmovecr,	$5C00,C040|C060|CFPP,            SZX,            SZNO
+;	optbl	'fmovm',    ~fmovem,	$C000,C040|C060|CFPP,        SZL|SZX,            SZNO
 
 	optbl	'fbf',	    ~fbcc,	$F080,C040|C060|CFPP,    SZW|SZL,SZNO
 	optbl	'fbeq',     ~fbcc,	$F081,C040|C060|CFPP,    SZW|SZL,SZNO
@@ -735,20 +717,20 @@ tablebody	.macro
 	optbln	'ftrapsne', ~ftrapcc,	$001E,C040|C060|CFPP,    SZW|SZL,SZNO
 	optbln	'ftrapst',  ~ftrapcc,	$001F,C040|C060|CFPP,    SZW|SZL,SZNO
 
-	optbl	'cinvl',    ~cinvpushlp,$F408,			  C040|C060,               SZNO,       SZNO
-	optbl	'cinvp',    ~cinvpushlp,$F410,			  C040|C060,               SZNO,       SZNO
-	optbl	'cinva',    ~cinvpusha, $F418,			  C040|C060,               SZNO,       SZNO
-	optbl	'cpushl',   ~cinvpushlp,$F428,			  C040|C060|C520|C530|C540,SZNO,       SZNO
-	optbl	'cpushp',   ~cinvpushlp,$F430,			  C040|C060,               SZNO,       SZNO
-	optbl	'cpusha',   ~cinvpusha, $F438,			  C040|C060,               SZNO,       SZNO
+	optbl	'cinvl',    ~cinvpushlp,$F408,C040|C060,          SZNO,       SZNO
+	optbl	'cinvp',    ~cinvpushlp,$F410,C040|C060,          SZNO,       SZNO
+	optbl	'cinva',    ~cinvpusha, $F418,C040|C060,          SZNO,       SZNO
+	optbl	'cpushl',   ~cinvpushlp,$F428,C040|C060,          SZNO,       SZNO
+	optbl	'cpushp',   ~cinvpushlp,$F430,C040|C060,          SZNO,       SZNO
+	optbl	'cpusha',   ~cinvpusha, $F438,C040|C060,          SZNO,       SZNO
 
-	optbln	'pflusha',  ~pflusha,	$F518,CMMU|C030|C040|C060,               SZNO,       SZNO
-	optbl	'pflush',   ~pflush,	$F508,CMMU|C030|C040|C060,               SZNO,       SZNO
-	optbln	'pflushan', ~pflushan,	$F510,		C040|C060,               SZNO,       SZNO
-	optbl	'pflushn',  ~pflushn,	$F500,		C040|C060,               SZNO,       SZNO
+	optbln	'pflusha',  ~pflusha,	$F518,CMMU|C030|C040|C060,SZNO,       SZNO
+	optbl	'pflush',   ~pflush,	$F508,CMMU|C030|C040|C060,SZNO,       SZNO
+	optbln	'pflushan', ~pflushan,	$F510,		C040|C060,SZNO,       SZNO
+	optbl	'pflushn',  ~pflushn,	$F500,		C040|C060,SZNO,       SZNO
 
-	optbl	'pflushs',  ~pflushs,	$3400,CMMU,		       SZNO,       SZNO
-	optbl	'pflushr',  ~pflushr,	$A000,CMMU,		       SZNO,       SZNO
+	optbl	'pflushs',  ~pflushs,	$3400,CMMU,               SZNO,       SZNO
+	optbl	'pflushr',  ~pflushr,	$A000,CMMU,               SZNO,       SZNO
 
 	optbl	'pmove',    ~pmove,	$0000,CMMU|C030,	  SZB|SZW|SZL|SZD|SZQ,SZNO
 	optbl	'pmovefd',  ~pmovefd,	$0100,	   C030,	      SZW|SZL|SZQ,    SZNO

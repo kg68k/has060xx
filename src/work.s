@@ -5,6 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2023  by M.Kamada
+;			  2025       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -141,7 +142,7 @@ ICPUTYPE::	.ds.w	1	;CPUタイプの初期値(C000など)
 CPUNUMBER::	.ds.l	1	;現在のCPU番号(68000など)
 	.even
 CPUTYPE::	.ds.b	1	;現在のCPUタイプ
-CPUTYPE2::	.ds.b	1	;ColdFireのタイプ
+		.ds.b	1	;(廃止、CPUTYPEのワードアクセス用に存続)
 
 EXTSIZE::	.ds.b	1	;外部参照/未定シンボルのデータサイズ(SZ_WORD or SZ_LONG)
 EXTSIZEFLG::	.ds.b	1	;外部参照/未定シンボルのデータサイズがSZ_LONGならtrue

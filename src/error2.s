@@ -67,8 +67,6 @@ ilsizeerr_fprn2::	bra	ilsizeerr_fprn
 ilsizeerr_fpcr2::	bra	ilsizeerr_fpcr
 ilsizeerr_fmovemfpn2::	bra	ilsizeerr_fmovemfpn
 ilsizeerr_fmovemfpcr2::	bra	ilsizeerr_fmovemfpcr
-ilsizeerr_cf_long2::	bra	ilsizeerr_cf_long
-ilsizeerr_cf_bccl2::	bra	ilsizeerr_cf_bccl
 ilsizeerr2::		bra	ilsizeerr
 ilsizeerr_pseudo_no2::	bra	ilsizeerr_pseudo_no
 ilsizeerr_op_no2::	bra	ilsizeerr_op_no
@@ -102,7 +100,6 @@ overflowerr2::		bra	overflowerr
 ilvalueerr2::		bra	ilvalueerr
 ilquickerr_addsubq2::	bra	ilquickerr_addsubq
 ilquickerr_moveq2::	bra	ilquickerr_moveq
-ilquickerr_mov3q2::	bra	ilquickerr_mov3q
 ilquickerr_sftrot2::	bra	ilquickerr_sftrot
 ilsfterr2::		bra	ilsfterr
 featureerr_cpu2::	bra	featureerr_cpu

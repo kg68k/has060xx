@@ -6,7 +6,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;		          1996-99  by M.Kamada
-;		          2024     by TcbnErik
+;		          2025     by TcbnErik
 ;----------------------------------------------------------------
 
   .ifndef __TMPCODE_EQU__
@@ -83,7 +83,6 @@ TCR_IMM8S	equ	$01	;	as?/ls?/ro?/rox? (1～8)
 TCR_MOVEQ	equ	$02	;	moveq (-$80～$FF)
 TCR_TRAP	equ	$03	;	trap (0～15)
 TCR_BKPT	equ	$04	;	bkpt (0～7)
-TCR_IMM3Q	equ	$05	;	mov3q (-1,1～7)
 T_CONST		equ	$1000	;アドレス非依存データ
 T_BITFIELD	equ	$1100	;ビットフィールド式データ
 TBF_OF		equ	$00	;	オフセットが式

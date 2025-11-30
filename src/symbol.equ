@@ -86,7 +86,7 @@ SYM_DEFINE:	.ds.l	1	;$0C 定義内容へのポインタ
 	.offset	SYM_BEGIN
 		.even		;$09
 SYM_ARCH:	.ds.b	1	;$0A CPUタイプ
-SYM_ARCH2:	.ds.b	1	;$0B ColdFire用のCPUタイプ
+		.ds.b	1	;$0B (廃止、SYM_ARCHのワードアクセス用に存続)
 SYM_REGNO:	.ds.b	1	;$0C レジスタ番号
 				;$0D
 
@@ -103,10 +103,10 @@ SYM_MACLOCS:	.ds.w	1	;$0A 使用されるローカルシンボル数
 	.offset	SYM_BEGIN
 SYM_NOOPR	.ds.b	1	;$09 オペランドを持つ命令か
 		.ds.b	1	;$0A CPUタイプ(SYM_ARCH) $00なら疑似命令
-		.ds.b	1	;$0B ColdFire用のCPUタイプ
+		.ds.b	1	;$0B (廃止、SYM_ARCHのワードアクセス用に存続)
 				;    SYM_ARCHはワードサイズで$0000なら疑似命令
 SYM_SIZE:	.ds.b	1	;$0C 命令の使用可能なサイズ
-SYM_SIZE2:	.ds.b	1	;$0D ColdFire用のサイズ
+		.ds.b	1	;$0D (廃止、SYM_SIZEのワードアクセス用に存続)
 SYM_OPCODE:	.ds.w	1	;$0E 命令コード基本パターン
 SYM_FUNC:	.ds.l	1	;$10 処理ルーチンへのポインタ
 				;$14

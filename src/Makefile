@@ -24,8 +24,6 @@ SRC2 = doasm.s eamode.s encode.s error.s error2.s expr.s \
 
 SRC = $(SRC1) $(SRC2)
 
-DAT = M68K.DOC COLDFIRE.DOC
-
 
 #link順序に注意
 #opname.s→macro.s(irp,irpc)は$7FFFを超えてもリンカがワーニングを出さない?

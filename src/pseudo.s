@@ -1635,15 +1635,6 @@ skipfend:
 ~~cpu_68060::
 	move.l	#68060,d1
 	bra	cputype_update
-~~cpu_5200::
-	move.l	#5200,d1
-	bra	cputype_update
-~~cpu_5300::
-	move.l	#5300,d1
-	bra	cputype_update
-~~cpu_5400::
-	move.l	#5400,d1
-	bra	cputype_update
 
 
 ;---------------------------------------------------------------
@@ -1669,15 +1660,6 @@ cputype_convert::
 	beq	8f
 	move.w	#C060,d0
 	cmp.l	#68060,d1
-	beq	8f
-	move.w	#C520,d0
-	cmp.l	#5200,d1
-	beq	8f
-	move.w	#C530,d0
-	cmp.l	#5300,d1
-	beq	8f
-	move.w	#C540,d0
-	cmp.l	#5400,d1
 	beq	8f
 	moveq.l	#-1,d0
 8:	tst.l	d0

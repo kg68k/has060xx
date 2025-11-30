@@ -174,8 +174,8 @@ usage_msg:
 	.dc.b	'68060のエラッタ対策(0=[する](-nは無効),[1]=しない)',CRLF
 	.dc.b	TAB,'-l',TAB,TAB
 	.dc.b	'起動時にタイトルを表示する',CRLF
-	.dc.b	TAB,'-m <680x0|5x00>',TAB
-	.dc.b	'アセンブル対象CPUの指定([68000]～68060/5200～5400)',CRLF
+	.dc.b	TAB,'-m <680x0>',TAB
+	.dc.b	'アセンブル対象CPUの指定([68000]～68060)',CRLF
 	.dc.b	TAB,'-n',TAB,TAB
 	.dc.b	'パス1で確定できないサイズの最適化を省略する(-k1を伴う)',CRLF
 	.dc.b	TAB,'-o <name>',TAB
@@ -358,18 +358,7 @@ predefinesymbol:
 	move.l	a1,(CPUSYMBOL,a6)
 	move.b	#SA_PREDEFINE,(SYM_ATTRIB,a1)	;プレデファインシンボル
 	clr.b	(SYM_SECTION,a1)	;セクション番号
-	move.b	(CPUTYPE2,a6),d0
-	beq	predefinesymbol00
-	movea.l	#5200,a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(5300-5200,a0),a0
-	lsr.b	#1,d0
-	bcs	predefinesymbol0
-	lea.l	(5400-5300,a0),a0
-	bra	predefinesymbol0
 
-predefinesymbol00:
 	move.b	(CPUTYPE,a6),d0		;CPUTYPEから初期値を決定する
 	movea.l	#68000,a0
 	lsr.b	#1,d0

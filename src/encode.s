@@ -349,14 +349,9 @@ encodecmd6:				;サイズ指定があった
 	movea.l	(CMDTBLPTR,a6),a1
 	cmpi.b	#ST_MACRO,(SYM_TYPE,a1)
 	beq	encodecmd7
-	move.b	(SYM_SIZE,a1),d0
-	tst.b	(CPUTYPE2,a6)
-	beq	encodecmd61
-	move.b	(SYM_SIZE2,a1),d0	;ColdFireのとき使えるサイズ
-encodecmd61:
 	moveq.l	#1,d2
 	lsl.b	d1,d2
-	and.b	d0,d2
+	and.b	(SYM_SIZE,a1),d2
 	beq	encodecmd7
 	tst.b	(ISIFSKIP,a6)		;ifスキップ中のエラー→命令を飛ばして何もしない
 	beq	encodecmd71		;指定できないサイズ
@@ -607,11 +602,6 @@ encodenum:
 	beq	overflowerr		;命令がない
 	movea.l	d0,a1
 	move.b	(SYM_SIZE,a1),d0	;使えないサイズのビットが1
-	tst.b	(CPUTYPE2,a6)
-	beq	encodenum00
-	move.b	(SYM_SIZE2,a1),d0	;ColdFireで使えないサイズのビットが1
-encodenum00:
-	tst.b	d0
 	bpl	encodenum01		;SZQがあればPMOVEfd
 	and.b	#SZS|SZD|SZX|SZP,d0
 	bne	overflowerr		;浮動小数点命令でない

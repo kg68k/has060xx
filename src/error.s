@@ -153,8 +153,6 @@ errtbl	.macro
 	error	0,ilsizeerr_fpcr	;'FPCR/FPIAR/FPSR はロングワードサイズのみ指定可能です'
 	error	0,ilsizeerr_fmovemfpn	;'FMOVEM FPn は拡張サイズのみ指定可能です'
 	error	0,ilsizeerr_fmovemfpcr	;'FMOVEM FPcr はロングワードサイズのみ指定可能です'
-	error	0,ilsizeerr_cf_long	;'5200/5300 ではロングワードサイズのみ指定可能です'
-	error	0,ilsizeerr_cf_bccl	;'5200/5300 ではロングワードサイズの相対分岐はできません'
 	error	1,ilsizeerr,		'指定できないサイズです'
 	error	0,ilsizeerr_pseudo_no
 	error	1,ilsizeerr_op_no,	'%s にはサイズを指定できません'
@@ -188,7 +186,6 @@ errtbl	.macro
 	error	1,ilvalueerr,		'不正な値です'
 	error	1,ilquickerr_addsubq,	'データが 1～8 の範囲外です'
 	error	1,ilquickerr_moveq,	'データが -128～127 の範囲外です'
-	error	1,ilquickerr_mov3q,	'データが -1,1～7 の範囲外です'
 	error	0,ilquickerr_sftrot
 	error	1,ilsfterr,		'シフト・ローテートのカウントが 1～8 の範囲外です'
 	error	1,featureerr_cpu,	'未対応の cpu です'

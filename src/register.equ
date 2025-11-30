@@ -8,6 +8,7 @@
 ;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 
@@ -103,14 +104,6 @@ REG_PCR		equ	$2C
 
 REG_ZPC		equ	$2E
 REG_OPC		equ	$2F
-
-REG_ROMBAR	equ	$30
-REG_RAMBAR0	equ	$34
-REG_RAMBAR1	equ	$35
-REG_MBAR	equ	$3F
-REG_ACC		equ	$70
-REG_MACSR	equ	$74
-REG_MASK	equ	$76
 
 ;----------------------------------------------------------------
 ;	MMUレジスタ(68851,68030,68040)

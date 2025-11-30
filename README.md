@@ -27,6 +27,7 @@ HAS060.X version 3.09+91の改造版です。
 
 * コマンドラインスイッチ`-8`、`-r`、`-z`。
 * 別名命令`CLR An`。
+* ColdFire対応。
 
 
 ## Known bugs

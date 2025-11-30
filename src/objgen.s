@@ -565,9 +565,6 @@ dispadr:				;04xx (d,An)
 dispadr_l:				;ディスプレースメントがロングワードなので
 	addq.l	#4,(LOCATION,a6)	;ベースディスプレースメント扱いになる
 	bra68	d0,dispadr_lerr
-;ColdFireではベースディスプレースメントは不可
-	tst.b	(CPUTYPE2,a6)
-	bne	dispadr_lerr
 	move.w	#EXW_FULL|EXW_BDL|EXW_IS,d0	;ロングワードの場合の拡張ワード
 	bsr	out1wobj		;拡張ワードを出力する
 	move.w	d2,d0
@@ -888,9 +885,6 @@ outpcdisp_w:
 
 outpcdisp_l:
 	bra68	d0,ilrelerr_outside	;68000/68010なら32bitオフセットは使用できない
-;ColdFireでは32ビットのオフセットは不可
-	tst.b	(CPUTYPE2,a6)
-	bne	ilrelerr_outside
 	move.l	d1,d0
 	bsr	out1lobj
 	bra	prnpccode
@@ -995,21 +989,8 @@ coderpn:				;0Fxx 命令コード埋め込み式データ
 	beq	cmdimm8s		;TCR_IMM8S
 	subq.w	#2,d1
 	bmi	cmdmoveq		;TCR_MOVEQ
-	subq.w	#1,d1
-	bmi	cmdtrap			;TCR_TRAP
-	subq.w	#1,d1
-	bmi	cmdbkpt			;TCR_BKPT
-;	bra	cmdimm3q		;TCR_IMM3Q
-
-cmdimm3q:				;mov3q
-	bsr	tmpreadsymex		;後続のデータを読み込む
-	tst.w	d0
-	bne	cmdimmer		;定数でない場合
-	tst.l	d1
-	beq	ilquickerr_mov3q	;-1,1～7の範囲外
-	bpl	cmdimm81
-	addq.l	#1,d1
-	bra	cmdimm81
+	beq	cmdtrap			;TCR_TRAP
+	bra	cmdbkpt			;TCR_BKPT
 
 cmdimm8s:				;sftrot
 	bsr	tmpreadsymex		;後続のデータを読み込む
@@ -1025,7 +1006,6 @@ cmdimm8:				;subq,addq,...
 	tst.w	d0
 	bne	cmdimmer		;定数でない場合
 	subq.l	#1,d1
-cmdimm81:
 	cmp.l	#8,d1
 	bcc	ilquickerr_addsubq	;クイックサイズの範囲外
 cmdimm82:

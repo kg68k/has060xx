@@ -64,8 +64,6 @@ ilsizeerr_fprn		reg	ilsizeerr_fprn2
 ilsizeerr_fpcr		reg	ilsizeerr_fpcr2
 ilsizeerr_fmovemfpn	reg	ilsizeerr_fmovemfpn2
 ilsizeerr_fmovemfpcr	reg	ilsizeerr_fmovemfpcr2
-ilsizeerr_cf_long	reg	ilsizeerr_cf_long2
-ilsizeerr_cf_bccl	reg	ilsizeerr_cf_bccl2
 ilsizeerr		reg	ilsizeerr2
 ilsizeerr_pseudo_no	reg	ilsizeerr_pseudo_no2
 ilsizeerr_op_no		reg	ilsizeerr_op_no2
@@ -98,7 +96,6 @@ overflowerr		reg	overflowerr2
 ilvalueerr		reg	ilvalueerr2
 ilquickerr_addsubq	reg	ilquickerr_addsubq2
 ilquickerr_moveq	reg	ilquickerr_moveq2
-ilquickerr_mov3q	reg	ilquickerr_mov3q2
 ilquickerr_sftrot	reg	ilquickerr_sftrot2
 ilsfterr		reg	ilsfterr2
 featureerr_cpu		reg	featureerr_cpu2

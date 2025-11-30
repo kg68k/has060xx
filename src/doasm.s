@@ -982,11 +982,6 @@ setfpop_tbl:				;サイズコードテーブル
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
 ;ori/andi/eori/or #imm/and #imm
-	tst.b	(CPUTYPE2,a6)
-	beq	~orandeori11
-	and.w	#EA_DN,d0
-	beq	iladrerr
-~orandeori11:
 	bsr	setopsize		;オペレーションサイズのセット
 	or.w	(EACODE,a1),d7
 	bsr	f43g_fifth		;5番目のチェック
@@ -1019,14 +1014,14 @@ setfpop_tbl:				;サイズコードテーブル
 	bpl	~orandeori_sr1		;定数でない
 	move.w	#$08E0,d1		;未定義のビットが1
 ;000～010にはMがない
-	move.w	#C020|C030|C040|C060|C520|C530|C540,d0
+	move.w	#C020|C030|C040|C060,d0
 	and.w	(CPUTYPE,a6),d0
 	bne	~orandeori_sr01
 	or.w	#$1000,d1		;000～010にはMがない
 ~orandeori_sr01:
 	and.w	#C020|C030|C040,d0
 	bne	~orandeori_sr02
-	or.w	#$4000,d1		;000～010と060とColdFireにはT0がない
+	or.w	#$4000,d1		;000～010と060にはT0がない
 ~orandeori_sr02:
 ;d1.w:未定義のビットが1
 	cmp.w	#$0240,d7		;andi to sr
@@ -1076,13 +1071,6 @@ setfpop_tbl:				;サイズコードテーブル
 ;----------------------------------------------------------------
 ;	cmp	<ea>,Dn
 ~cmp::
-;5200/5300はcmp.b/cmp.w/cmpa.w/cmpi.b/cmpi.w不可
-	move.w	#C520|C530,d0
-	and.w	(CPUTYPE,a6),d0
-	beq	~cmp00
-	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
-	bne	ilsizeerr_cf_long	;サイズ省略時もエラー
-~cmp00:
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
 	move.w	d0,d6			;(すべてのモード)
@@ -1215,14 +1203,8 @@ setfpop_tbl:				;サイズコードテーブル
 
 ;----------------------------------------------------------------
 ;	suba/adda/cmpa	<ea>,An
-;5200/5300はcmp.b/cmp.w/cmpa.w/cmpi.b/cmpi.w不可
 ~cmpa::
-	move.w	#C520|C530,d0
-	and.w	(CPUTYPE,a6),d0
-	beq	~sbadcpa
-	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
-	bne	ilsizeerr_cf_long	;サイズ省略時もエラー
-;	bra	~sbadcpa
+	bra	~sbadcpa
 
 ~sbadcpa::
 	movea.l	a4,a1
@@ -1352,7 +1334,6 @@ setfpop_tbl:				;サイズコードテーブル
 	move.l	(RPNBUF1,a1),d1
 	bne	~sbadcpa1cp1
 	bra68	d0,~sbadcpa1cp1
-;ColdFireにもTST.wl Anはある
 ;68020以上のときCMPA.{W|L} #0,An→TST.L An
 	and.w	#$0E00,d7
 	rol.w	#7,d7
@@ -1399,13 +1380,6 @@ setfpop_tbl:				;サイズコードテーブル
 ;----------------------------------------------------------------
 ;	cmpi	#xx,<ea>
 ~cmpi::
-;5200/5300はcmp.b/cmp.w/cmpa.w/cmpi.b/cmpi.w不可
-	move.w	#C520|C530,d0
-	and.w	(CPUTYPE,a6),d0
-	beq	~cmpi00
-	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
-	bne	ilsizeerr_cf_long	;サイズ省略時もエラー
-~cmpi00:
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
 	cmp.w	#EA_IMM,d0
@@ -1413,7 +1387,6 @@ setfpop_tbl:				;サイズコードテーブル
 	CHKLIM
 ~cmpi1:
 	movea.l	a5,a1
-;ColdFireはcmpiでPC相対不可
 	move.w	#C020|C030|C040|C060,d1
 	and.w	(CPUTYPE,a6),d1
 	bne	~cmpi0
@@ -1428,12 +1401,6 @@ setfpop_tbl:				;サイズコードテーブル
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 ~cmpi051:
 	beq	iladrerr
-;ColdFireはcmpi #immはdnのみ
-	tst.b	(CPUTYPE2,a6)
-	beq	~cmpi052
-	and.w	#EA_DN,d0
-	beq	iladrerr
-~cmpi052:
 	tst.b	(OPTCMPI0,a6)
 	beq	~subaddi2		;CMPI#0の最適化に対応しない
 	tst.b	(RPNSIZE1,a4)
@@ -1465,11 +1432,6 @@ setfpop_tbl:				;サイズコードテーブル
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
 ;addi/subi/cmpi/add #imm/sub #imm/cmp #
-	tst.b	(CPUTYPE2,a6)
-	beq	~subaddi11
-	and.w	#EA_DN,d0
-	beq	iladrerr
-~subaddi11:
 	tst.b	(OPTSUBADDI0,a6)
 	beq	~subaddi2		;SUBI/ADDI#0の最適化に対応しない
 	tst.b	(RPNSIZE1,a4)
@@ -1567,15 +1529,6 @@ setfpop_tbl:				;サイズコードテーブル
 	beq	~move_frccr		;move from CCR
 	cmp.w	#REG_USP|OT_REGISTER,d0
 	beq	~move_frusp		;move from USP
-	tst.b	(CPUTYPE2,a6)
-	beq	~move000
-	cmp.w	#REG_ACC|OT_REGISTER,d0
-	beq	~move_fracc		;move from ACC
-	cmp.w	#REG_MACSR|OT_REGISTER,d0
-	beq	~move_frmacsr		;move from MACSR
-	cmp.w	#REG_MASK|OT_REGISTER,d0
-	beq	~move_frmask		;move from MASK
-~move000:
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
 	move.w	d0,d6
@@ -1587,15 +1540,6 @@ setfpop_tbl:				;サイズコードテーブル
 	beq	~move_toccr		;move to CCR
 	cmp.w	#REG_USP|OT_REGISTER,d0
 	beq	~move_tousp		;move to USP
-	tst.b	(CPUTYPE2,a6)
-	beq	~move001
-	cmp.w	#REG_ACC|OT_REGISTER,d0
-	beq	~move_toacc		;move to ACC
-	cmp.w	#REG_MACSR|OT_REGISTER,d0
-	beq	~move_tomacsr		;move to MACSR
-	cmp.w	#REG_MASK|OT_REGISTER,d0
-	beq	~move_tomask		;move to MASK
-~move001:
 	movea.l	a5,a1
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
 	cmp.w	#EA_AN,d0
@@ -1605,60 +1549,6 @@ setfpop_tbl:				;サイズコードテーブル
 ~move1:
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
-;move <src>,<dst>
-;move <src>,anは除外済み
-;<src>がdn/an/(an)/(an)+/-(an)ならば制約なし
-;<src>が(d16,an)/(d16,pc)ならば<dst>は(d8,an,xi)/xxx.w/xxx.l不可
-;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#immならば<dst>は(d8,an,xi)/xxx.w/xxx.l不可
-;  5200/5300のとき(d16,an)も不可
-;  5400のとき(d16,an)はmove.l #imm,(d16,an)のときだけ不可
-;d6=<src>のアドレッシングモード
-;d0=<dst>のアドレッシングモード
-	tst.b	(CPUTYPE2,a6)
-	beq	~move109
-;ColdFire
-	move.w	d6,d7
-	and.w	#EA_DN|EA_AN|EA_ADR|EA_INCADR|EA_DECADR,d7
-	bne	~move109		;<src>がdn/an/(an)/(an)+/-(an)
-;<src>が(d16,an)/(d16,pc)/(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-	move.w	d0,d7
-	and.w	#EA_IDXADR|EA_ABSW|EA_ABSL,d7
-	bne	iladrerr		;<src>が(d16,an)/(d16,pc)/(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-					;<dst>が(d8,an,xi)/xxx.w/xxx.l
-;<src>が(d16,an)/(d16,pc)/(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-;<dst>がdn/(an)/(an)+/-(an)/(d16,an)
-	move.w	d6,d7
-	and.w	#EA_DSPADR|EA_DSPPC,d7
-	bne	~move109		;<src>が(d16,an)/(d16,pc)
-					;<dst>がdn/(an)/(an)+/-(an)/(d16,an)
-;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-;<dst>がdn/(an)/(an)+/-(an)/(d16,an)
-	move.w	d0,d7
-	and.w	#EA_DSPADR,d7
-	beq	~move109		;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-					;<dst>がdn/(an)/(an)+/-(an)
-;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-;<dst>が(d16,an)
-	move.w	#C520|C530,d7
-	and.w	(CPUTYPE,a6),d7
-	bne	iladrerr		;5200/5300
-					;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-					;<dst>が(d16,an)
-;5400
-;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l/#imm
-;<dst>が(d16,an)
-	move.w	d6,d7
-	and.w	#EA_IMM,d7
-	beq	~move109		;5400
-					;<src>が(d8,an,xi)/(d8,pc,xi)/xxx.w/xxx.l
-					;<dst>が(d16,an)
-;5400
-;<src>が#imm
-;<dst>が(d16,an)
-	cmpi.b	#SZ_LONG,(CMDOPSIZE,a6)
-	beq	iladrerr		;5400
-					;move.l #imm,(d16,an)
-~move109:
 	bsr	getopsize
 	move.w	d0,d7
 	beq	~move2			;.b
@@ -1743,7 +1633,6 @@ setfpop_tbl:				;サイズコードテーブル
 	bra	~move_frccr1
 
 ~move_frccr:				;move CCR,<ea>
-;ColdFireにもMOVE from CCRはある
 	move.w	(CPUTYPE,a6),d0
 	and.w	#C000,d0
 	bne	iladrerr		;68000では使用できない
@@ -1755,12 +1644,6 @@ setfpop_tbl:				;サイズコードテーブル
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
-;MOVE SR/CCR,Dx
-	tst.b	(CPUTYPE2,a6)
-	beq	~move_frccr11
-	and.w	#EA_DN,d0
-	beq	iladrerr
-~move_frccr11:
 	bsr	getopsize
 	cmp.b	#SZ_WORD,d0
 	bne	ilsizeerr_movefrsr
@@ -1780,11 +1663,6 @@ setfpop_tbl:				;サイズコードテーブル
 	and.w	#EG_DATA,d6		;データモード
 	beq	iladrerr
 ;MOVE Dx/#imm,SR/CCR
-	tst.b	(CPUTYPE2,a6)
-	beq	~move_tosrccr2001
-	and.w	#EA_DN|EA_IMM,d6	;レジスタ番号注意
-	beq	iladrerr
-~move_tosrccr2001:
 	bsr	getopsize
 	cmp.b	#SZ_WORD,d0
 	bne	ilsizeerr_movetosr
@@ -1807,7 +1685,6 @@ setfpop_tbl:				;サイズコードテーブル
 	bmi	iladrerr
 ~move_frusp1:
 	SETREGL
-~move_frusp11:
 	move.b	(CMDOPSIZE,a6),d0
 	bmi	~move_frusp2
 	cmp.b	#SZ_LONG,d0
@@ -1835,159 +1712,6 @@ setfpop_tbl:				;サイズコードテーブル
 	bne	iladrerr
 	move.w	(EACODE,a1),d1
 	bra	~move_frusp1
-
-;move from ACC
-~move_fracc:
-	move.w	#$A180,d7
-~move_fracc1:
-	addq.l	#2,a0
-	CHKLIM
-~move_fracc2:
-	bsr	getreg			;レジスタオペランドを得る
-	bmi	iladrerr
-	or.w	d1,d7
-	bra	~move_frusp11
-
-;move from MACSR
-~move_frmacsr:
-	move.w	#$A980,d7
-	addq.l	#2,a0
-	CHKLIM
-	cmpi.w	#REG_CCR|OT_REGISTER,(a0)
-	bne	~move_fracc2
-;move from MACSR to CCR
-	move.w	#$A9C0,d7
-	addq.l	#2,a0
-	bra	~move_frusp11
-
-;move from MASK
-~move_frmask:
-	move.w	#$AD80,d7
-	bra	~move_fracc1
-
-;move to ACC
-~move_toacc:
-	move.w	#$A100,d7
-~move_toacc1:
-	addq.l	#2,a0
-	and.w	#EA_DN|EA_AN|EA_IMM,d6
-	beq	iladrerr
-	move.b	(CMDOPSIZE,a6),d0
-	bpl	~move_toacc2
-	moveq.l	#SZ_LONG,d0		;省略時は.l
-	move.b	d0,(CMDOPSIZE,a6)	;#immがあるので必要
-~move_toacc2:
-	cmp.b	#SZ_LONG,d0
-	bne	ilsizeerr_cf_acc
-	or.w	(EACODE,a1),d7
-	OPOUT				;(d16,an)/(d16,pc)はないのでDSPOPOUTでなくてよい
-	bra	eadataout		;#immがあるので必要
-
-;move to MACSR
-~move_tomacsr:
-	move.w	#$A900,d7
-	bra	~move_toacc1
-
-;move to MASK
-~move_tomask:
-	move.w	#$AD00,d7
-	bra	~move_toacc1
-
-;	MAC.wl Ry.ul,Rx.ul
-;	MAC.wl Ry.ul,Rx.ul,<<|>>
-;	MSAC.wl Ry.ul,Rx.ul
-;	MSAC.wl Ry.ul,Rx.ul,<<|>>
-~msac::
-	move.w	#$0100,d6
-	bra	~mac1
-~mac::
-	clr.w	d6
-~mac1:
-	bsr	getreg			;Ry
-	bmi	iladrerr
-	ror.b	#3,d1			;0000000032100004
-	lsl.w	#4,d1			;0000321000040000
-	lsl.b	#2,d1			;0000321004000000
-	or.w	d1,d7			;Ry
-	bsr	getul
-	add.w	d1,d1			;bit6→bit7
-	or.w	d1,d6			;U/LY
-	CHKLIM
-	bsr	getreg			;Rx
-	bmi	iladrerr
-	or.w	d1,d7			;Rx
-	bsr	getul
-	or.w	d1,d6			;U/LX
-	cmpi.w	#','|OT_CHAR,(a0)
-	bne	~mac2			;SFなし
-	addq.l	#2,a0
-	bsr	getsf
-	bmi	iloprerr
-	or.w	d1,d6			;SF
-~mac2:
-	cmpi.b	#SZ_LONG,(CMDOPSIZE,a6)
-	bne	~mac3			;省略時はワード
-	or.w	#$0800,d6		;ロング
-~mac3:
-	OPOUT
-	move.w	d6,d0
-	bra	wrt1wobj
-
-;	MACL.wl Ry.ul,Rx.ul,<ea>,Rw
-;	MACL.wl Ry.ul,Rx.ul,<ea>&,Rw
-;	MACL.wl Ry.ul,Rx.ul,<<|>>,<ea>,Rw
-;	MACL.wl Ry.ul,Rx.ul,<<|>>,<ea>&,Rw
-;	MSACL.wl Ry.ul,Rx.ul,<ea>,Rw
-;	MSACL.wl Ry.ul,Rx.ul,<ea>&,Rw
-;	MSACL.wl Ry.ul,Rx.ul,<<|>>,<ea>,Rw
-;	MSACL.wl Ry.ul,Rx.ul,<<|>>,<ea>&,Rw
-~msacl::
-	move.w	#$0100,d6
-	bra	~macl1
-~macl::
-	clr.w	d6
-~macl1:
-	bsr	getreg			;Ry
-	bmi	iladrerr
-	ror.w	#4,d1
-	or.w	d1,d6			;Ry
-	bsr	getul
-	add.w	d1,d1			;bit6→bit7
-	or.w	d1,d6			;U/LY
-	CHKLIM
-	bsr	getreg			;Rx
-	bmi	iladrerr
-	or.w	d1,d6			;Rx
-	bsr	getul
-	or.w	d1,d6			;U/LX
-	CHKLIM
-	bsr	getsf
-	bmi	~macl2
-	or.w	d1,d6			;SF
-	CHKLIM
-~macl2:
-	cmpi.b	#SZ_LONG,(CMDOPSIZE,a6)
-	bne	~macl3			;省略時はワード
-	or.w	#$0800,d6		;ロング
-~macl3:
-	movea.l	a4,a1
-	bsr	geteamode_noopc		;<ea>
-	and.w	#EA_ADR|EA_INCADR|EA_DECADR|EA_DSPADR,d0
-	beq	iladrerr
-	bsr	getmam
-	or.w	d1,d6			;MAM
-	CHKLIM
-	bsr	getreg
-	bmi	iladrerr
-	ror.b	#3,d1			;0000000032100004
-	lsl.w	#4,d1			;0000321000040000
-	lsl.b	#2,d1			;0000321004000000
-	or.w	d1,d7			;Rw
-	or.w	(EACODE,a1),d7		;<ea>
-	DSPOPOUT			;(d16,an)があるのでOPOUTは不可
-	move.w	d6,d0
-	bsr	wrt1wobj
-	bra	eadataout
 
 ;$0000='.l',$0040='.u',省略時は.lとみなす
 getul:
@@ -2190,10 +1914,6 @@ f43g_second1:
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
 ;neg/negx/not
-	tst.b	(CPUTYPE2,a6)
-	beq	~negnot11
-	and.w	#EA_DN,d0
-	beq	iladrerr
 ~negnot11:
 	bsr	setopsize		;オペレーションサイズのセット
 	or.w	(EACODE,a1),d7
@@ -2205,12 +1925,10 @@ f43g_second1:
 ;	tst	<ea>
 ~tst::
 	movea.l	a4,a1
-;ColdFireでもtstはPC相対可
 	bran68	d1,~tst0
 	st.b	(ABSLTOOPCCAN,a6)	;tstは68000ではPC相対が使えない
 ~tst0:
 	bsr	geteamode		;実効アドレスオペランドを得る
-;ColdFireでもtstはすべてのモード
 	bran68	d1,~tst1		;68000/68010以外ならすべてのモード
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
@@ -2286,99 +2004,13 @@ f43g_second1:
 	bra	eadataout
 
 ;----------------------------------------------------------------
-;	mov3q.l #imm,<ea>
-~mov3q::
-	movea.l	a4,a1
-	bsr	geteamode		;実効アドレスオペランドを得る
-	cmp.w	#EA_IMM,d0
-	bne	iladrerr		;#xxでなければエラー
-	CHKLIM
-	movea.l	a5,a1
-	bsr	geteamode_noopc
-	and.w	#EG_ALT,d0		;可変モード
-	beq	iladrerr
-	or.w	(EACODE,a1),d7
-	movea.l	a4,a1
-	tst.w	(RPNLEN1,a1)
-	bpl	~mov3q_expr		;式の値が未確定
-	move.l	(RPNBUF1,a1),d1
-	beq	ilquickerr_mov3q	;-1,1～7の範囲外
-	bpl	~mov3q1
-	addq.l	#1,d1
-~mov3q1:
-	cmp.l	#7,d1
-	bhi	ilquickerr_mov3q	;-1,1～7の範囲外
-	SETREGH
-	DSPOPOUT
-	movea.l	a5,a1
-	bra	eadataout
-
-~mov3q_expr:
-	move.w	#T_CODERPN|TCR_IMM3Q,d0
-	bra	~subaddq_expr1
-
-;----------------------------------------------------------------
-;	mvs/mvz <ea>,dn
-~mvsmvz::
-	movea.l	a4,a1
-	bsr	geteamode
-	CHKLIM
-	bsr	getdreg			;データレジスタオペランドを得る
-	bmi	iladrerr
-	SETREGH
-	bsr	setopsize		;0=byteまたは1=wordのみ
-	or.w	(EACODE,a1),d7
-	DSPOPOUT
-	bra	eadataout
-
-;----------------------------------------------------------------
-;	wddata <ea>
-~wddata::
-	movea.l	a4,a1
-	bsr	geteamode_noopc
-	and.w	#EG_MEM&EG_ALT,d0	;メモリ・可変モード
-	beq	iladrerr
-	bsr	setopsize		;オペレーションサイズのセット
-	or.w	(EACODE,a1),d7
-	DSPOPOUT
-	bra	eadataout
-
-;----------------------------------------------------------------
-;	wdebug <ea>
-~wdebug::
-	movea.l	a4,a1
-	bsr	geteamode_noopc
-	and.w	#EA_ADR|EA_DSPADR,d0
-	beq	iladrerr
-	or.w	(EACODE,a1),d7
-	DSPOPOUT			;命令コードの出力
-	move.w	#$0003,d0
-	bsr	wrt1wobj		;特殊オペランドの出力
-	bra	eadataout
-
-;----------------------------------------------------------------
-~tas::
-	tst.b	(CPUTYPE2,a6)
-	beq	~scc
-;ColdFire,5400のみ
-	movea.l	a4,a1
-	bsr	geteamode_noopc
-	and.w	#EG_MEM&EG_ALT,d0	;メモリ・可変モード
-	beq	iladrerr
-	bra	~scc01
-
-;----------------------------------------------------------------
 ;	s<cc>/nbcd/tas	<ea>
 ~scc::
+~tas::
 	movea.l	a4,a1
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
-	tst.b	(CPUTYPE2,a6)
-	beq	~scc01
-	and.w	#EA_DN,d0
-	beq	iladrerr
-~scc01:
 	or.w	(EACODE,a1),d7
 	bsr	f43g_fifth		;5番目のチェック
 	DSPOPOUT
@@ -2620,8 +2252,6 @@ f43g_second1:
 
 ~sftrot_ea1:
 ;dnは既に除外してある
-	tst.b	(CPUTYPE2,a6)
-	bne	iladrerr
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
 	bsr	getopsize
@@ -2685,11 +2315,6 @@ f43g_second1:
 	bsr	geteamode		;実効アドレスオペランドを得る
 	cmp.w	#EA_IMM,d0
 	bne	iladrerr		;#xxでなければエラー
-;ColdFireはbchg/bclr/bset/btst #imm,<ea>は(d8,an,ix)不可
-	tst.b	(CPUTYPE2,a6)
-	beq	~btst50
-	and.w	#.not.EA_IDXADR,d6
-~btst50:
 	or.w	#$0800,d7		;#xx,<ea>
 	CHKLIM
 	movea.l	a5,a1
@@ -2911,8 +2536,6 @@ bfdataout6:
 
 ~sabcd5:
 ;subx/addx -(an),-(an)
-	tst.b	(CPUTYPE2,a6)
-	bne	iladrerr
 	or.w	#$0008,d7
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
@@ -2954,13 +2577,6 @@ bfdataout6:
 ~divmul1:
 	bra68	d0,ilsizeerr_000_long	;68000/68010では.lは使えない
 ;divu/divs/mulu/muls.l <ea>,Dn
-;ColdFireでは64ビットは使えないが.lは使える
-;ColdFireはdn,(an),(an)+,-(an),(d16,an)のみ
-	tst.b	(CPUTYPE2,a6)
-	beq	~divmul11
-	and.w	#EA_DN|EA_ADR|EA_INCADR|EA_DECADR|EA_DSPADR,d6	;レジスタ番号注意
-	beq	iladrerr
-~divmul11:
 	move.w	d7,d6
 	andi.w	#$4000,d7
 	eori.w	#$4000,d7
@@ -2976,9 +2592,6 @@ bfdataout6:
 	bra	~divmul3
 
 ~divmul2:				;<ea>,Dh(Dr):Dl(Dq)
-;ColdFireでは64ビットは使えない
-	tst.b	(CPUTYPE2,a6)
-	bne	iladrerr
 	move.w	#C060,d0
 	or.w	d0,(SOFTFLAG,a6)
 	and.w	(CPUTYPE,a6),d0
@@ -3081,7 +2694,6 @@ bfdataout6:
 ;----------------------------------------------------------------
 ;	link	An,#xx
 ~link::
-;ColdFireでもlinkは.wのみ(除外済み)
 	bran68	d0,~link1
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)	;68000/68010のlinkはワードのみ
 	beq	ilsizeerr_000_long	;.lなのでエラー
@@ -3153,12 +2765,6 @@ bfdataout6:
 	movea.l	a5,a1
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
 ;movem <list>,<ea>
-;ColdFireは(an),(d16,an)のみ
-	tst.b	(CPUTYPE2,a6)
-	beq	~movem00
-	and.w	#EA_ADR|EA_DSPADR,d0
-	beq	iladrerr
-~movem00:
 	move.w	(sp)+,d1
 	move.w	d0,d2
 	and.w	#EG_CTRL&EG_ALT,d2	;制御・可変モード
@@ -3181,12 +2787,6 @@ bfdataout6:
 	and.w	#EG_CTRL|EA_INCADR,d0	;制御モードまたは(An)+
 	beq	iladrerr
 ;movem <ea>,<list>
-;ColdFireは(an),(d16,an)のみ
-	tst.b	(CPUTYPE2,a6)
-	beq	~movem51
-	and.w	#EA_ADR|EA_DSPADR,d0
-	beq	iladrerr
-~movem51:
 	CHKLIM
 	bsr	getreglist		;レジスタリストオペランドを得る
 	bpl	@f
@@ -3544,9 +3144,6 @@ getdspadr1:
 	bra	~movec2
 
 ~movec1:				;Rc,Rn
-;ColdFireのMOVECはwrite only
-	tst.b	(CPUTYPE2,a6)
-	bne	iladrerr
 	bsr	getcreg
 	bmi	iladrerr
 	move.w	d1,d2
@@ -3564,15 +3161,12 @@ getdspadr1:
 ;----------------------------------------------------------------
 ;	bra/bsr/b<cc> 	<label>
 ~bcc::
-;68000/68010/5200/5300にはロングディスプレースメントはない
+;68000/68010にはロングディスプレースメントはない
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
 	bne	~bcc00
 	move.w	#C000|C010,d0
 	and.w	(CPUTYPE,a6),d0
 	bne	ilsizeerr_000_bccl
-	move.w	#C520|C530,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	ilsizeerr_cf_bccl
 ~bcc00:
 	movea.l	a4,a1
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
@@ -3843,16 +3437,16 @@ insigbitchk:
 	and.w	(RPNBUF1+2,a1),d0
 	bne	insigbitwarn
 ;000～010にはMがない
-	move.w	#C020|C030|C040|C060|C520|C530|C540,d0
+	move.w	#C020|C030|C040|C060,d0
 	and.w	(CPUTYPE,a6),d0
 	bne	insigbitchk1
 	btst.b	#12-8,(RPNBUF1+3-1,a1)	;000～010にはMがない
 	bne	insigbitwarn
 insigbitchk1:
-;000～010と060とColdFireにはT0がない
+;000～010と060にはT0がない
 	and.w	#C020|C030|C040,d0
 	bne	insigbitchk2
-	btst.b	#14-8,(RPNBUF1+3-1,a1)	;000～010と060とColdFireにはT0がない
+	btst.b	#14-8,(RPNBUF1+3-1,a1)	;000～010と060にはT0がない
 	bne	insigbitwarn
 insigbitchk2:
 	rts
@@ -4804,22 +4398,9 @@ getfpopr6:
 ;----------------------------------------------------------------
 ;	cinv[lp]/cpush[lp]	<caches>,(An)	(68040)
 ~cinvpushlp::
-;ColdFireのcpushl (An)はcpushl BC,(An)に相当する
-	tst.b	(CPUTYPE2,a6)
-	bne	~cinvpushlp1
-;ColdFireでないときNC/DC/IC/BCが必要
+;NC/DC/IC/BCが必要
 	bsr	getcache		;キャッシュ選択を得る
-	bra	~cinvpushlp2
-
-~cinvpushlp1:
-;ColdFireのときBCのみでBCは省略可能
-	move.w	#$00C0,d1		;BC
-	cmpi.w	#REG_BC|OT_REGISTER,(a0)
-	bne	~cinvpushlp3
-	addq.l	#2,a0
-~cinvpushlp2:
 	CHKLIM
-~cinvpushlp3:
 	or.w	d1,d7
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
