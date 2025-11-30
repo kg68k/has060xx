@@ -210,8 +210,6 @@ getfilename1:
 	move.b	(a0)+,d0
 	bmi	getfilename4
 	beq	getfilename3
-	cmp.b	#'.',d0
-	beq	getfilename1
 getfilename2:
 	cmp.b	#':',d0
 	beq	getfilename1

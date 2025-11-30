@@ -495,16 +495,11 @@ docmdline11:
 	bne	docmdline12
 	clr.l	(SYMFILE,a6)		;-x [file]の形でソースファイルが指定された
 docmdline12:
-	bsr	getfilename
-docmdline122:
-	move.b	(a1)+,d0
-	beq	docmdline13
-	cmp.b	#'.',d0
-	bne	docmdline122
-	bra	docmdline14
+	bsr	has_filename_ext	;a0=SOURCEFILE
+	tst.b	d0
+	bne	docmdline14		;ソースファイルに拡張子の指定あり
 
-docmdline13:				;拡張子が省略された場合
-	movea.l	d2,a1
+	movea.l	d2,a1			;拡張子が省略された場合
 	movea.l	(TEMPPTR,a6),a0
 	move.l	a0,(SOURCEFILE,a6)
 	clr.w	-(sp)			;'r'
@@ -595,6 +590,28 @@ docmdline3next:
 	bra	docmdline3lp
 
 ;----------------------------------------------------------------
+;	ファイル名に拡張子があるか調べる
+;	in :a0=ドライブ・パス名付きファイル名へのポインタ
+;	out:d0.l=0なら拡張子なし、d0.l='.'なら拡張子あり
+has_filename_ext:
+	movem.l	d1/a0-a1,-(sp)
+	bsr	getfilename
+	moveq	#0,d0
+	moveq	#'.',d1
+@@:
+	cmp.b	(a1)+,d1		;ドットファイル(.foo)の先頭の.を
+	beq	@b			;拡張子として扱わない
+	subq.l	#1,a1
+@@:
+	move.b	(a1)+,d0
+	beq	@f
+	cmp.b	d0,d1
+	bne	@b
+@@:
+	movem.l	(sp)+,d1/a0-a1
+	rts
+
+;----------------------------------------------------------------
 ;	オプションスイッチの処理
 optionsw:
 	addq.l	#1,a0
@@ -662,16 +679,11 @@ option_o:
 	bsr	getcmdstring
 	move.l	a0,(OBJFILE,a6)
 	move.l	a0,-(sp)		;パスをスキップしてから'.'を検索する
-	bsr	getfilename
-option_o1:
-	move.b	(a1)+,d0
-	beq	option_o2
-	cmp.b	#'.',d0
-	bne	option_o1
-	bra	9f
+	bsr	has_filename_ext
+	tst.b	d0
+	bne	9f			;拡張子あり
 
-option_o2:				;拡張子が省略されたら.oを加える
-	movea.l	(OBJFILE,a6),a0
+	movea.l	(OBJFILE,a6),a0		;拡張子が省略されたら.oを加える
 	lea	(dot_o,pc),a1
 	bsr	strdupcat
 	move.l	d0,(OBJFILE,a6)
@@ -1304,13 +1316,17 @@ getnextnum:
 ;	拡張子を取り除いたファイル名を転送する
 tfrfilename:
 	move.l	a1,-(sp)
-tfrfilename1:
+@@:	cmp.b	#'.',(a1)		;ドットファイル(.foo)の先頭の.を
+	bne	@f			;拡張子として扱わない
+	move.b	(a1)+,(a0)+
+	bra	@b
+@@:
 	move.b	(a1)+,d0
 	beq	tfrfilename9
 	cmp.b	#'.',d0
 	beq	tfrfilename9
 	move.b	d0,(a0)+
-	bra	tfrfilename1
+	bra	@b
 
 tfrfilename9:
 	clr.b	(a0)
