@@ -2017,25 +2017,6 @@ f43g_second1:
 	bra	eadataout
 
 ;----------------------------------------------------------------
-;	dec/inc	<ea>
-~decinc::
-	movea.l	a4,a1
-	bsr	geteamode_noopc		;実効アドレスオペランドを得る
-	and.w	#EG_ALT,d0		;可変モード
-	beq	iladrerr
-	cmp.w	#EA_AN,d0
-	bne	~decinc1
-	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
-	beq	~decinc1
-	bsr	shortwarn
-~decinc1:
-	bsr	setopsize		;オペレーションサイズのセット
-	or.w	(EACODE,a1),d7
-	bsr	f43g_fifth		;5番目のチェック
-	DSPOPOUT
-	bra	eadataout
-
-;----------------------------------------------------------------
 ;	chk	<ea>,Dn
 ~chk::
 	tst.b	(CMDOPSIZE,a6)

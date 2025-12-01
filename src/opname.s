@@ -374,9 +374,6 @@ tablebody	.macro
 ;GASコード
 ;	optbl	'mov16',    ~move16,	$F600,                    C040|C060,SZNO,       SZNO
 
-	optbl	'dec',	    ~decinc,	$5300,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
-	optbl	'inc',	    ~decinc,	$5200,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL,SZB|SZW|SZL
-
 	optbl	'jbra',	    ~jbcc,	$6000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
 	optbl	'jbt',	    ~jbcc,	$6000,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
 	optbl	'jbsr',	    ~jbcc,	$6100,C000|C010|C020|C030|C040|C060,SZB|SZW|SZL|SZS,SZB|SZW|SZL|SZS
