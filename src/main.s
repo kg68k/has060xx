@@ -1154,7 +1154,8 @@ option_c_x4:
 	cmpi.l	#'all'<<8,(a1)
 	bne	usage
 ;ALL
-	st.b	d0			;moveq.l #-1,d0は不可
+	move.w	#$ff00,d0		;moveq.l #-1,d0は不可
+	;厳密には C000|C020|C030|C040|C060 だと思うが、ほかの st.b と揃えている
 	cmpi.b	#'=',(a0)
 	bne	option_c_x95
 	addq.l	#1,a0
@@ -1169,9 +1170,8 @@ option_c_x99:
 option_c_x96:
 	cmp.b	#',',d0
 	beq	option_c_x0
-	tst.b	d0
-	bne	usage
-option_c_x98:
+	tst.b	-(a0)			;読んだ文字が=や,ではなくNULなら、リターン後に
+	bne	usage			;スイッチ列の終了として扱われるようにa0をNULに戻す
 	rts
 
 ;----------------------------------------------------------------

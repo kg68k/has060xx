@@ -16,8 +16,8 @@ verno		equ	309		;__HAS__の値
 verno060	equ	91		;__HAS060__の値
 copyright	reg	'(C) 1990-1994/1996-2023 Y.Nakamura/M.Kamada'	;title_msgの著作権表示
 
-version_x	reg	'1.2.2'
-verno_x		equ	$01_02_02	;__HAS060X__の値
+version_x	reg	'1.2.3'
+verno_x		equ	$01_02_03	;__HAS060X__の値
 copyright_x	reg	'(C) 2025 TcbnErik'
 
   .endif	;__VERSION_EQU__
