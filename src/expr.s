@@ -318,8 +318,7 @@ convrpnnum_sizeof11:
 	move.w	(a0)+,d0		;$ffの場合のみ、続くワードが文字列長
 @@:
 	add.w	d0,d7			;文字列長を加算
-	addq.l	#1,d0
-	and.w	#$FFFE,d0
+	doeven	d0
 	adda.l	d0,a0			;文字列の直後
 	cmpi.b	#OT_STR>>8,(a0)
 	beq	convrpnnum_sizeof11

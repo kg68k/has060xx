@@ -219,8 +219,8 @@ dodcparam01:
 	move.w	(2,a0),d0		;$ffの場合のみ、続くワードが文字列長
 	addq.l	#2,d0
 @@:
-	addq.l	#3,d0
-	bclr.l	#0,d0
+	addq.l	#2,d0
+	doeven	d0
 	adda.l	d0,a1			;文字列の終了アドレス
 	move.w	(a1),d0
 	beq	dodcstr			;文字列のみの場合
@@ -1954,8 +1954,7 @@ checksymdeb9:
 
 ~~def34:				;同名のシンボルがないので新たに登録する
 	move.l	(TEMPPTR,a6),d0
-	addq.l	#1,d0
-	bclr.l	#0,d0
+	doeven	d0
 	movea.l	d0,a4
 	move.l	a4,(a3)			;チェインをつなぐ
 	clr.l	(a4)+			;次の延長シンボルへのポインタ
@@ -1970,8 +1969,7 @@ checksymdeb9:
 	bhi	~~def35
 	clr.b	(-1,a4)
 	move.l	a4,(TEMPPTR,a6)
-	addq.l	#1,d1
-	bclr.l	#0,d1
+	doeven	d1
 	move.l	d1,(EXNAMELEN,a6)
 	bra	memcheck
 
