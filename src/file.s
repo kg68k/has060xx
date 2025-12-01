@@ -277,20 +277,19 @@ srchinclds2:
 ;	in :---
 ;	out:a0=作成したファイル名へのポインタ
 maketmpname::
-	move.l	a1,-(sp)
 	movea.l	(TEMPPTR,a6),a0
-	movem.l	d0-d2/a0,-(sp)
+	movem.l	d0-d2/a0-a1,-(sp)
 	movea.l	(TEMPPATH,a6),a1
 	tst.b	(a1)
-	bne	maketmpname2		;/tの指定があった場合
+	bne	maketmpname2		;-tの指定があった場合
 	movea.l	a0,a1
 	pea.l	(a0)
 	clr.l	-(sp)
 	pea.l	(env_temp,pc)
 	bsr	getenv			;DOS _GETENV
 					;環境変数'temp'の内容を読み出す
-	lea.l	(12,sp),sp
-	tst.l	d0
+	addq.l	#12-4,sp
+	move.l	d0,(sp)+
 	bmi	maketmpname25		;環境変数'temp'が定義されていない
 maketmpname2:
 	bsr	pathcpy

@@ -995,10 +995,7 @@ option_c_x::
 	tst.b	(a0)
 	beq	option_c_2
 option_c_x0:
-	move.l	(TEMPPTR,a6),d0
-	addq.l	#1,d0
-	and.b	#$FE,d0
-	movea.l	d0,a1
+	movea.l	(LINEBUFPTR,a6),a1
 	moveq.l	#15-1,d1		;最大15文字
 option_c_x1:
 	move.b	(a0)+,d0
@@ -1026,10 +1023,7 @@ option_c_x11:
 option_c_x2:
 	subq.l	#1,a0
 	clr.b	(a1)
-	move.l	(TEMPPTR,a6),d0
-	addq.l	#1,d0
-	and.b	#$FE,d0
-	movea.l	d0,a1
+	movea.l	(LINEBUFPTR,a6),a1
 ;-cfscc[=6]
 	cmpi.l	#'fscc',(a1)		;a1をインクリメントしないこと
 	bne	option_c_x3
