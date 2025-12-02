@@ -61,7 +61,7 @@ asmmain1:
 	bsr	asmpass2		;パス2
 	bsrl	asmpass3,d0		;パス3
 	bsr	tempdelete		;テンポラリファイルの削除
-	tst.w	(NUMOFERR,a6)
+	tst.l	(NUMOFERR,a6)
 	beq	asmmain2
 	move.w	#1,-(sp)		;エラーがあった場合の終了コード
 	move.l	(OBJFILE,a6),-(sp)
@@ -72,8 +72,7 @@ asmmain1:
 	movea.l	(LINEBUFPTR,a6),a0
 	lea.l	(fatal_msg1,pc),a1
 	bsr	strcpy
-	move.w	(NUMOFERR,a6),d0
-	ext.l	d0
+	move.l	(NUMOFERR,a6),d0
 	moveq.l	#0,d1			;(左詰め)
 	bsr	convdec
 	lea.l	(fatal_msg2,pc),a1

@@ -230,7 +230,7 @@ RPNBUFEX::	.ds.w	128	;逆ポーランド式バッファ/定数値
 
 ;----------------------------------------------------------------
 ;	エラー処理
-NUMOFERR::	.ds.w	1	;Fatal errorの数
+NUMOFERR::	.ds.l	1	;Fatal errorの数
 SPSAVE::	.ds.l	1	;エラー処理後のspの値
 ERRRET::	.ds.l	1	;エラー処理後の戻りアドレス
 ERRMESSYM::	.ds.l	1	;エラーメッセージに埋め込むシンボル

@@ -39,7 +39,7 @@ asmpass3::
 	movea.l	(OBJFILE,a6),a0
 	bsr	createopen		;オブジェクトファイルのオープン
 
-	clr.w	(NUMOFERR,a6)
+	clr.l	(NUMOFERR,a6)
 	sf.b	(ISASMEND,a6)
 	clr.l	(DSBSIZE,a6)
 	clr.l	(OBJLENCTR,a6)

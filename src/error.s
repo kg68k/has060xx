@@ -245,7 +245,7 @@ errout9:
 	moveq.l	#1,d1
 	bsr	printerr
 errout91:
-	addq.w	#1,(NUMOFERR,a6)
+	addq.l	#1,(NUMOFERR,a6)
 	movea.l	(SPSAVE,a6),sp
 	move.l	(ERRRET,a6),-(sp)
 	rts				;エラー処理から復帰
