@@ -3,8 +3,11 @@
 ;		HUPAIRデコード
 ;		< hupair.s >
 ;
-;		Copyright 2023  by TcbnErik
+;		Copyright 2025  by TcbnErik
 ;----------------------------------------------------------------
+
+	.include	has.equ
+	.include	work.equ
 
 	.cpu	68000
 	.text

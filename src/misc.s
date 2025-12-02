@@ -13,6 +13,7 @@
 	.include	doscall.mac
 	.include	has.equ
 	.include	register.equ
+	.include	work.equ
 
 	.cpu	68000
 	.text

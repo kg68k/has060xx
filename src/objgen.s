@@ -13,6 +13,7 @@
 	.include	register.equ
 	.include	tmpcode.equ
 	.include	eamode.equ
+	.include	work.equ
 
 	.cpu	68000
 	.text

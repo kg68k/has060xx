@@ -14,6 +14,7 @@
 	.include	tmpcode.equ
 	.include	register.equ
 	.include	symbol.equ
+	.include	work.equ
 
 	.cpu	68000
 	.text

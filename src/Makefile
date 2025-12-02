@@ -15,29 +15,20 @@ BIN = README.DOC HAS060.DOC HAS060.X DEBUGGED.DOC KNOWNBUG.DOC \
 	HISTORY.DOC PROJECTS.DOC \
 	HANOI.S K_MACRO.MAC
 
-SRC1 = Makefile doscall.mac \
-	eamode.equ error2.equ has.equ register.equ symbol.equ tmpcode.equ
+SRC1 = Makefile doscall.mac eamode.equ error2.equ has.equ register.equ \
+	symbol.equ tmpcode.equ work.equ
 SRC2 = doasm.s eamode.s encode.s error.s error2.s expr.s \
 	fexpr.s file.s hupair.s macro.s main.s misc.s objgen.s opname.s \
-	optimize.s pseudo.s regname.s symbol.s work.s
+	optimize.s pseudo.s regname.s symbol.s
 
 SRC = $(SRC1) $(SRC2)
 
 
 #link順序に注意
-#opname.s→macro.s(irp,irpc)は$7FFFを超えてもリンカがワーニングを出さない?
-#*+46でerror2.equとerror2.sを新たに追加した
-#*+52でdoasmのorandの最初のgeteamodeがオーバーフロー
-#*+63でwrt～が届かなくなったのでencode.sのdeflabelをencode.sの先頭に移動
-#*+66でencode.sからmisc.sにあるgetfplenへの参照がオーバーフロー
-#*+80でopadr_tbl内のオフセットをロングにしたのでopname.oをwork.oの直前に移動
-#*+80でfile.oとmisc.oをdoasm.oの後ろに移動
-#*+80でdoasm.sのchkdtsizeをobjgen.sにコピー
-#*+83でsymbol.sの先頭のreg_tblが届かなくなったのでfexpr.oとregname.oを入れ換え
 
 OBJ = main.o hupair.o optimize.o doasm.o file.o misc.o symbol.o \
 	error2.o pseudo.o expr.o macro.o encode.o \
-	eamode.o objgen.o error.o regname.o fexpr.o opname.o work.o
+	eamode.o objgen.o error.o regname.o fexpr.o opname.o
 
 
 all:	has060x.x
@@ -52,33 +43,24 @@ has060x.x:	$(OBJ)
 	$(LK) -o $@ $(OBJ)
 
 
-doasm.o:	has.equ symbol.equ register.equ tmpcode.equ \
-		eamode.equ error2.equ doasm.s
-eamode.o:	has.equ eamode.equ register.equ \
-		tmpcode.equ symbol.equ eamode.s
-encode.o:	has.equ tmpcode.equ register.equ symbol.equ \
-		encode.s
-error.o:	doscall.mac has.equ tmpcode.equ error.s
+doasm.o:	has.equ symbol.equ register.equ tmpcode.equ eamode.equ error2.equ work.equ doasm.s
+eamode.o:	has.equ eamode.equ register.equ tmpcode.equ symbol.equ work.equ eamode.s
+encode.o:	has.equ tmpcode.equ register.equ symbol.equ work.equ encode.s
+error.o:	has.equ doscall.mac tmpcode.equ work.equ error.s
 error2.o:	has.equ error2.s
-expr.o:		has.equ register.equ tmpcode.equ symbol.equ expr.s
-fexpr.o:	has.equ register.equ tmpcode.equ symbol.equ fexpr.s
-file.o:		doscall.mac has.equ tmpcode.equ error2.equ file.s
-hupair.o:	hupair.s
-macro.o:	has.equ register.equ tmpcode.equ \
-		symbol.equ macro.s
-main.o:		doscall.mac has.equ symbol.equ register.equ \
-		error2.equ version.equ main.s
-misc.o:		doscall.mac has.equ register.equ misc.s
-objgen.o:	has.equ symbol.equ register.equ tmpcode.equ \
-		eamode.equ objgen.s
+expr.o:		has.equ register.equ tmpcode.equ symbol.equ work.equ expr.s
+fexpr.o:	has.equ register.equ tmpcode.equ symbol.equ work.equ fexpr.s
+file.o:		has.equ doscall.mac tmpcode.equ error2.equ work.equ file.s
+hupair.o:	has.equ work.equ hupair.s
+macro.o:	has.equ register.equ tmpcode.equ symbol.equ work.equ macro.s
+main.o:		has.equ doscall.mac symbol.equ register.equ error2.equ work.equ version.equ main.s
+misc.o:		has.equ doscall.mac register.equ work.equ misc.s
+objgen.o:	has.equ symbol.equ register.equ tmpcode.equ eamode.equ work.equ objgen.s
 opname.o:	has.equ register.equ opname.s
-optimize.o:	has.equ symbol.equ register.equ tmpcode.equ \
-		eamode.equ error2.equ optimize.s
-pseudo.o:	doscall.mac has.equ register.equ \
-		tmpcode.equ symbol.equ pseudo.s
+optimize.o:	has.equ symbol.equ register.equ tmpcode.equ eamode.equ error2.equ work.equ optimize.s
+pseudo.o:	has.equ doscall.mac register.equ tmpcode.equ symbol.equ work.equ pseudo.s
 regname.o:	has.equ register.equ regname.s
-symbol.o:	has.equ symbol.equ tmpcode.equ symbol.s
-work.o:		has.equ work.s
+symbol.o:	has.equ symbol.equ tmpcode.equ work.equ symbol.s
 
 %.o: %.s
 	$(AS) $<
