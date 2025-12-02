@@ -575,7 +575,8 @@ fmodifyw1:
 	DOS	_SEEK			;修正位置まで移動
 	addq.l	#8,sp
 
-	pea.l	2.w
+	moveq.l	#2,d0
+	move.l	d0,-(sp)
 	pea.l	(6,sp)			;(修正データの位置)
 	move.w	(F_HANDLE,a1),-(sp)
 	DOS	_WRITE			;ファイルを修正
@@ -612,7 +613,8 @@ fmodify1:				;実際のファイル内を修正する
 	DOS	_SEEK			;修正位置まで移動
 	addq.l	#8,sp
 
-	pea.l	2.w
+	moveq.l	#2,d0
+	move.l	d0,-(sp)
 	pea.l	(6,sp)			;(修正データの位置)
 	move.w	(F_HANDLE,a1),-(sp)
 	DOS	_WRITE			;ファイルを修正
