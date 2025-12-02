@@ -21,7 +21,33 @@ __WORK_EQU__	equ	1
 	.offset	0
 
 ;----------------------------------------------------------------
+;	ロケーションカウンタ
+;	読み書きの多い(LOCATION,a6)を(a6)として最適化できるように先頭に配置
+LOCATION::	.ds.l	1	;現在のセクションのロケーションカウンタ
+LTOPLOC::	.ds.l	1	;処理中の行頭のロケーションカウンタ'*'
+LASTSYMLOC::	.ds.l	1	;最後にラベルに定義したロケーションカウンタ
+LCURLOC::	.ds.l	1	;現在処理中のロケーションカウンタ'$'
+LOCOFFSET::	.ds.l	1	;最適化時のロケーションオフセット
+SECTION::	.ds.b	1	;現在のセクション番号
+ORGNUM::	.ds.b	1	;現在のorgセクション番号
+	.quad
+LOCCTRBUF::	.ds.l	N_SECTIONS	;各セクションのロケーションカウンタ
+LOCOFFSETBUF::	.ds.l	N_SECTIONS	;各セクションの最適化ロケーションオフセット
+ORGNUMBUF::	.ds.b	N_SECTIONS	;各セクションのorgセクション番号
+
+	.quad
+OFFSYMVAL::	.ds.l	1	;offsymで初期値を与えるシンボルがあるときの初期値
+OFFSYMSYM::	.ds.l	1	;offsymで初期値を与えるシンボル
+OFFSYMTMP::	.ds.l	1	;offsymで初期値を与えるシンボルがあるときに
+				;初期値を与えるシンボルの位置の
+				;ロケーションカウンタを格納する仮のシンボル
+OFFSYMNUM::	.ds.w	1	;ハッシュ関数値を分散させるためのカウンタ
+
+OFFSYMMOD::	.ds.b	1	;0=offsymでない,-1=offsymでシンボルなし,1=offsymでシンボルあり
+
+;----------------------------------------------------------------
 ;	メモリ管理
+	.quad
 MEMPTR::	.ds.l	1	;ワークエリアの開始アドレス
 MEMLIMIT::	.ds.l	1	;メモリ不足で中断する限界のアドレス
 TEMPPTR::	.ds.l	1	;ワークエリアの未使用領域へのポインタ
@@ -174,30 +200,6 @@ IFNEST::	.ds.w	1	;条件アセンブルのネスティング
 IFSKIPNEST::	.ds.w	1	;.ifの不成立部読み飛ばしのネスティング
 ISIFSKIP::	.ds.b	1	;.ifの不成立部の読み飛ばし中ならtrue
 	.even
-
-;----------------------------------------------------------------
-;	ロケーションカウンタ
-	.quad
-LOCATION::	.ds.l	1	;現在のセクションのロケーションカウンタ
-LTOPLOC::	.ds.l	1	;処理中の行頭のロケーションカウンタ'*'
-LASTSYMLOC::	.ds.l	1	;最後にラベルに定義したロケーションカウンタ
-LCURLOC::	.ds.l	1	;現在処理中のロケーションカウンタ'$'
-LOCOFFSET::	.ds.l	1	;最適化時のロケーションオフセット
-SECTION::	.ds.b	1	;現在のセクション番号
-ORGNUM::	.ds.b	1	;現在のorgセクション番号
-	.quad
-LOCCTRBUF::	.ds.l	N_SECTIONS	;各セクションのロケーションカウンタ
-LOCOFFSETBUF::	.ds.l	N_SECTIONS	;各セクションの最適化ロケーションオフセット
-ORGNUMBUF::	.ds.b	N_SECTIONS	;各セクションのorgセクション番号
-
-OFFSYMMOD::	.ds.b	1	;0=offsymでない,-1=offsymでシンボルなし,1=offsymでシンボルあり
-	.quad
-OFFSYMVAL::	.ds.l	1	;offsymで初期値を与えるシンボルがあるときの初期値
-OFFSYMSYM::	.ds.l	1	;offsymで初期値を与えるシンボル
-OFFSYMTMP::	.ds.l	1	;offsymで初期値を与えるシンボルがあるときに
-				;初期値を与えるシンボルの位置の
-				;ロケーションカウンタを格納する仮のシンボル
-OFFSYMNUM::	.ds.w	1	;ハッシュ関数値を分散させるためのカウンタ
 
 ;----------------------------------------------------------------
 ;	オブジェクト出力
