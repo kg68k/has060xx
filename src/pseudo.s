@@ -669,7 +669,7 @@ pseudo_redeferr_a1:
 	sf.b	(SYM_FIRST,a1)
 	moveq.l	#0,d2
 ~~equ1:
-	cmpi.b	#SECT_RLCOMM,(SYM_EXTATR,a1)
+	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	pseudo_redeferr_a1	;.xref/.commシンボルだった
 	movea.l	a1,a2			;シンボルテーブルへのポインタ
 	movea.l	(OPRBUFPTR,a6),a0
@@ -820,10 +820,8 @@ pseudo_redeferr_a1:
 	beq	~~globl00		;プレデファインシンボルは外部宣言できない
 	move.b	(SYM_EXTATR,a0),d1
 	beq	~~globl3
-	cmp.b	#SECT_RLCOMM,d1
-	bcs	pseudo_redeferr_a0
 	cmp.b	#SECT_COMM,d1
-	bhi	pseudo_redeferr_a0	;すでに外部宣言されている(.comm以外)
+	bne	pseudo_redeferr_a0	;すでに外部宣言されている(.comm以外)
 ~~globl3:
 	tst.b	(SYM_ATTRIB,a0)
 	beq	~~globl4		;未定義シンボル
@@ -857,23 +855,9 @@ pseudo_redeferr_a1:
 	bra	ilsymerr_predefglobl
 
 ;---------------------------------------------------------------
-;	.rcomm/.rlcomm
-~~rcomm::
-	move.w	#SECT_RCOMM,d2
-	bra	~~comm1
-
-~~rlcomm::
-	move.w	#SECT_RLCOMM,d2
-	bra	~~comm1
-
-;---------------------------------------------------------------
 ;	.comm	<シンボル>,<式>
 ~~comm::
-	move.w	#SECT_COMM,d2
-~~comm1:
-	move.w	d2,-(sp)
 	bsr	encodeopr
-	move.w	(sp)+,d2
 	movea.l	(OPRBUFPTR,a6),a1
 	move.w	(a1)+,d0
 	cmp.w	#OT_SYMBOL,d0
@@ -884,7 +868,7 @@ pseudo_redeferr_a1:
 	tst.b	(SYM_ATTRIB,a0)
 	bne	pseudo_redeferr_a0	;定義済シンボルならエラー
 ;プレデファインシンボルは上で弾かれるのでこのままでよい
-	move.b	d2,(SYM_EXTATR,a0)
+	move.b	#SECT_COMM,(SYM_EXTATR,a0)
 	cmpi.w	#','|OT_CHAR,(a1)+
 	bne	iloprerr		;,<式>がない
 	move.l	a0,-(sp)
@@ -941,33 +925,6 @@ pseudo_redeferr_a1:
 	bra	~~text1
 
 ;---------------------------------------------------------------
-~~rdata::
-	moveq.l	#SECT_RDATA,d0
-~~rdata1:
-	st.b	(MAKERSECT,a6)
-	bra	~~text1
-
-~~rbss::
-	moveq.l	#SECT_RBSS,d0
-	bra	~~rdata1
-
-~~rstack::
-	moveq.l	#SECT_RSTACK,d0
-	bra	~~rdata1
-
-~~rldata::
-	moveq.l	#SECT_RLDATA,d0
-	bra	~~rdata1
-
-~~rlbss::
-	moveq.l	#SECT_RLBSS,d0
-	bra	~~rdata1
-
-~~rlstack::
-	moveq.l	#SECT_RLSTACK,d0
-	bra	~~rdata1
-
-;---------------------------------------------------------------
 ;	.offsym	<初期値>,<シンボル>
 ~~offsym::
 	move.b	(OFFSYMMOD,a6),-(sp)
@@ -989,7 +946,7 @@ pseudo_redeferr_a1:
 	bne	pseudo_ilsymerr_a1	;タイプの異なるシンボルと重複している
 	cmpi.b	#SA_PREDEFINE,(SYM_ATTRIB,a1)
 	beq	pseudo_redeferr_a1
-	cmpi.b	#SECT_RLCOMM,(SYM_EXTATR,a1)
+	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	pseudo_redeferr_a1	;.xref/.commシンボルだった
 	move.l	a1,(OFFSYMSYM,a6)	;初期値を与えるシンボル
 ;仮のシンボルを用意する
@@ -2020,6 +1977,8 @@ checksymdeb9:
 	moveq.l	#$50,d2
 	cmpi.b	#2,d1			;extern変数
 	beq	~~endef1
+	;SXHAS機能は削除したが、以下の値は.sclで指定されるもので
+	;どのように削除すべきかわからないので残しておく
 	cmpi.b	#80,d1			;extern変数(SXhas remote)
 	beq	~~endef1
 	cmpi.b	#82,d1			;extern変数(SXhas relocate)

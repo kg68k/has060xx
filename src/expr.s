@@ -629,7 +629,7 @@ calcrpnsym:
 	movea.l	(a1)+,a0
 	cmpi.b	#SA_NODET,(SYM_ATTRIB,a0)
 	bls	calcrpnundef		;未定義シンボル
-	cmpi.b	#SECT_RLCOMM,(SYM_EXTATR,a0)
+	cmpi.b	#SECT_COMM,(SYM_EXTATR,a0)
 	bcs	calcrpnsym1
 	moveq.l	#0,d0			;外部参照シンボル
 	move.l	d0,(a2)+
@@ -897,9 +897,9 @@ _mod:
 	rts
 
 _sub:
-	cmp.w	#SECT_RLCOMM,d2
+	cmp.w	#SECT_COMM,d2
 	bcc	_sub3
-	cmp.w	#SECT_RLCOMM,d3
+	cmp.w	#SECT_COMM,d3
 	bcc	calcrpnref		;<??>-<外部>
 	cmp.w	d2,d3
 	bne	_sub2
@@ -933,9 +933,9 @@ _sub3:
 	bra	_sub15
 
 _add:
-	cmp.w	#SECT_RLCOMM,d2
+	cmp.w	#SECT_COMM,d2
 	bcc	_add3			;<外部>+<??>
-	cmp.w	#SECT_RLCOMM,d3
+	cmp.w	#SECT_COMM,d3
 	bcc	_add4			;<??>+<外部>
 	move.w	d3,d4
 	or.w	d2,d4
@@ -962,7 +962,7 @@ _add3:
 	exg.l	d0,d1
 	exg.l	d2,d3
 _add4:
-	cmp.w	#SECT_RLCOMM,d2
+	cmp.w	#SECT_COMM,d2
 	bcc	calcrpnref		;<外部>+<外部>
 	tst.w	d2
 	bne	calcrpnref		;<アドレス>+<外部>

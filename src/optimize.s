@@ -463,7 +463,7 @@ dispadr5:				;最適化対象コード
 	bsr	calctmpexpr		;後続の式の値を計算する
 	tst.b	d0
 	beq	dispadr6
-	cmp.b	#SECT_RDATA,d0
+	cmp.b	#SECT_GLOBL,d0
 	bcc	dispadr8		;定数でない場合は最適化できない
 	bra	dispadr5_l
 
@@ -753,7 +753,7 @@ indexadr5:				;最適化対象コード
 	bsr	calctmpexpr		;後続の式の値を計算する
 	tst.b	d0
 	beq	indexadr6
-	cmp.b	#SECT_RDATA,d0
+	cmp.b	#SECT_GLOBL,d0
 	bcc	indexadr8		;定数でない場合は最適化できない
 	bra	indexadr5_l
 
@@ -892,7 +892,7 @@ bdodadr5:				;最適化対象コード
 	bsr	calctmpexpr		;後続の式の値を計算する
 	tst.b	d0
 	beq	bdodadr6
-	cmp.b	#SECT_RDATA,d0
+	cmp.b	#SECT_GLOBL,d0
 	bcc	bdodadr8		;定数でない場合は最適化できない
 	bra	bdodadr5_l
 
@@ -1025,7 +1025,7 @@ linkcmd5:				;最適化対象コード
 	bsr	calctmpexpr		;後続の式の値を計算する
 	tst.b	d0
 	beq	linkcmd6
-	cmp.b	#SECT_RDATA,d0
+	cmp.b	#SECT_GLOBL,d0
 	bcc	linkcmd8		;定数でない場合は最適化できない
 	bra	linkcmd5_l
 

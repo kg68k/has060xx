@@ -67,7 +67,7 @@ deflabel8:
 	bne	redeferr_offsym
 	bsr	redefwarn_offsym
 deflabel81:
-	cmpi.b	#SECT_RLCOMM,(SYM_EXTATR,a1)
+	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	redeferr		;.xref/.commシンボルだった
 deflabel85:
 	tst.b	(OFFSYMMOD,a6)

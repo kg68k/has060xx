@@ -99,7 +99,6 @@ ABSLTOOPCCAN::	.ds.b	1	;ABSLTOOPCを無効化する
 
 G2ASMODE::	.ds.b	1	;g2asモード
 MAKESCD::	.ds.b	1	;SCD用シンボル情報を出力するならtrue
-MAKERSECT::	.ds.b	1	;相対セクション情報を出力するならtrue
 COMPATSWA::	.ds.b	1	;(HAS v2.x互換) -aスイッチが指定されたらtrue
 COMPATSWQ::	.ds.b	1	;(HAS v2.x互換) -qスイッチが指定されたらtrue
 ISPRNSTDOUT::	.ds.b	1	;PRNファイル作成先が標準出力ならtrue

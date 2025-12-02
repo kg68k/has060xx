@@ -486,20 +486,10 @@ tablebody	.macro
 	pstbl	'size',     ~~size
 	pstbl	'dim',	    ~~dim
 
-	pstbl	'rdata',    ~~rdata
-	pstbl	'rbss',     ~~rbss
-	pstbl	'rstack',   ~~rstack
-	pstbl	'rcomm',    ~~rcomm
-	pstbl	'rldata',   ~~rldata
-	pstbl	'rlbss',    ~~rlbss
-	pstbl	'rlstack',  ~~rlstack
-	pstbl	'rlcomm',   ~~rlcomm
-
 	pstbl	'fpid',	    ~~fpid
 	pstbl	'pragma',   ~~pragma
 	pstbls	'fequ',     ~~fequ,		    SZS|SZD|SZX|SZP
 	pstbls	'fset',     ~~fset,		    SZS|SZD|SZX|SZP
-
 
 	optbl	'fmove',    ~fmove,	$0000,C040|C060|CFPP,SZB|SZW|SZL|SZS|SZD|SZX|SZP,SZNO
 ;GASコード追加

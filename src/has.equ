@@ -138,13 +138,7 @@ SECT_TEXT	equ	$01	;テキスト
 SECT_DATA	equ	$02	;データ
 SECT_BSS	equ	$03	;ブロックストレージ
 SECT_STACK	equ	$04	;スタック
-SECT_RDATA	equ	$05	;データ			(64KB以内相対)
-SECT_RBSS	equ	$06	;ブロックストレージ
-SECT_RSTACK	equ	$07	;スタック
-SECT_RLDATA	equ	$08	;データ			(64KB以上相対)
-SECT_RLBSS	equ	$09	;ブロックストレージ
-SECT_RLSTACK	equ	$0A	;スタック
-N_SECTIONS	equ	$0A	;セクションの数(text/data/bss/stack/rl?data/rl?bss/rl?stack)
+N_SECTIONS	equ	$04	;セクションの数(text/data/bss/stack)
 
 
 ;----------------------------------------------------------------
@@ -152,8 +146,6 @@ N_SECTIONS	equ	$0A	;セクションの数(text/data/bss/stack/rl?data/rl?bss/rl?
 ;----------------------------------------------------------------
 SECT_GLOBL	equ	$FA	;グローバル(外部参照/定義)
 SECT_XDEF	equ	$FB	;外部定義
-SECT_RLCOMM	equ	$FC	;コモンエリア(64KB以上相対)
-SECT_RCOMM	equ	$FD	;コモンエリア(64KB以内相対)
 SECT_COMM	equ	$FE	;コモンエリア
 SECT_XREF	equ	$FF	;外部参照
 

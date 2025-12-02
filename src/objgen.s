@@ -82,11 +82,8 @@ makeobjhead:
 	bsr	wrtstr
 	lea.l	(section_name,pc),a0
 	lea.l	(LOCCTRBUF,a6),a1
-	moveq.l	#4-1,d1
+	moveq.l	#N_SECTIONS-1,d1
 	move.w	#$C001,d2
-	tst.b	(MAKERSECT,a6)
-	beq	makeobjhead1
-	moveq.l	#10-1,d1		;相対セクションを使用した場合
 makeobjhead1:
 	move.w	d2,d0
 	bsr	wrtd0w			;C0[セクション番号] [オブジェクト長] セクション名～ 00
@@ -111,7 +108,6 @@ outaligninfo9:
 
 section_name:				;セクション名
 	.dc.b	'text',0,'data',0,'bss',0,'stack',0
-	.dc.b	'rdata',0,'rbss',0,'rstack',0,'rldata',0,'rlbss',0,'rlstack',0
 	.even
 
 
@@ -2199,11 +2195,6 @@ prnsymtable:
 	bsr	prnlout
 	lea.l	(seg2_msg,pc),a0
 	bsr	prnlout
-	tst.b	(MAKERSECT,a6)
-	beq	prnsymtable01
-	lea.l	(seg21_msg,pc),a0
-	bsr	prnlout
-prnsymtable01:
 	lea.l	(crlf_msg,pc),a0
 	bsr	prnlout
 	bsr	prnlout
@@ -2270,10 +2261,6 @@ prnsymsec:
 	beq	prnsymext		;.xref
 	cmp.b	#SECT_COMM,d0
 	beq	prnsymcom		;.comm
-	cmp.b	#SECT_RCOMM,d0
-	beq	prnsymrcom		;.rcomm
-	cmp.b	#SECT_RLCOMM,d0
-	beq	prnsymrlcom		;.rlcomm
 	move.b	#'(',(a0)+
 	bsr	convhex2		;セクション番号
 	move.b	#')',(a0)+
@@ -2291,12 +2278,6 @@ prnsymcom:
 	lea.l	(com_msg,pc),a3
 	bra	prnsymout
 
-prnsymrcom:
-	lea.l	(rcom_msg,pc),a3
-	bra	prnsymout
-
-prnsymrlcom:
-	lea.l	(rlcom_msg,pc),a3
 prnsymout:
 	moveq.l	#4-1,d0
 prnsymout1:
@@ -2306,15 +2287,10 @@ prnsymout1:
 
 seg1_msg:	.dc.b	'セグメントテーブル',CRLF,0
 seg2_msg:	.dc.b	' 01 text     02 data     03 bss      04 stack   ',0
-seg21_msg:	.dc.b	CRLF
-		.dc.b	'             05 rdata    06 rbss     07 rstack  ',CRLF
-		.dc.b	'             08 rldata   09 rlbss    0A rlstack ',0
 seg3_msg:	.dc.b	'シンボルテーブル',CRLF,0
 abs_msg:	.dc.b	' abs'
 ext_msg:	.dc.b	' ext'
 com_msg:	.dc.b	' com'
-rcom_msg:	.dc.b	' rcm'
-rlcom_msg:	.dc.b	' rlc'
 undef_msg:	.dc.b	'未定義シンボル',CRLF,0
 	.even
 
@@ -2641,10 +2617,6 @@ makesymfile5:
 	beq	makesymext
 	cmp.b	#SECT_COMM,d0
 	beq	makesymcom
-	cmp.b	#SECT_RCOMM,d0
-	beq	makesymrcom
-	cmp.b	#SECT_RLCOMM,d0
-	beq	makesymrlcom
 	bra	makesymglobl
 
 makesymext:
@@ -2655,12 +2627,6 @@ makesymcom:
 	lea.l	(symcom_msg,pc),a1
 	bra	makesymcom1
 
-makesymrcom:
-	lea.l	(symrcom_msg,pc),a1
-	bra	makesymcom1
-
-makesymrlcom:
-	lea.l	(symrlcom_msg,pc),a1
 makesymcom1:
 	bsr	strcpy
 	lea.l	(symno_msg,pc),a1
@@ -2723,15 +2689,12 @@ makesymfile9:
 
 symsec_msg:
 	.dc.b	'abs  ',0,'text ',0,'data ',0,'bss  ',0,'stack',0
-	.dc.b	'rdata',0,'rbss ',0,'rstck',0,'rldta',0,'rlbss',0,'rlstk',0
 sym_msg:
 	.dc.b	'SYMBOL           : class    section location',CRLF,CRLF,0
 symabs_msg:	.dc.b	'absolute',0
 symglb_msg:	.dc.b	'global  ',0
 symext_msg:	.dc.b	'external',0
 symcom_msg:	.dc.b	'common  ',0
-symrcom_msg:	.dc.b	'rcommon ',0
-symrlcom_msg:	.dc.b	'rlcommon',0
 symudf_msg:	.dc.b	'(undefined)',0
 symreg_msg:	.dc.b	'(register list)',0
 symmac_msg:	.dc.b	'(macro)',0
@@ -2820,7 +2783,7 @@ outobjexpr:
 	tst.w	d0
 	beq	outobjconst		;定数
 	bmi	iloprerr_not_fixed	;値が未確定
-	cmp.b	#SECT_RLCOMM,d0
+	cmp.b	#SECT_COMM,d0
 	bcs	outobjadrs		;アドレス値
 
 	cmp.w	#$01FF,d0
@@ -2903,11 +2866,9 @@ outobjcon_adrw:
 ;	アドレス値の出力
 outobjadrs:
 	and.w	#3,d2
-	cmp.b	#SECT_RDATA,d0
-	bcc	outobjadrs1		;相対セクションではエラーにしない
 	cmp.b	#SZ_LONG,d2
 	bne	iladrerr		;.l以外はエラー
-outobjadrs1:
+
 	tst.b	(MAKEPRN,a6)
  	beq	outobjadrs9
 	movea.l	(PRNLPTR,a6),a0		;'(xx)xxxxxxxx'
@@ -3036,7 +2997,7 @@ outobjrpnsym:				;シンボル
 	bsr	getsymdata
 	or.w	#$8000,d0
 	bsr	outobj1w
-	cmp.b	#SECT_RLCOMM,d0
+	cmp.b	#SECT_COMM,d0
 	bcs	outobjrpncon1
 	move.w	d1,d0			;外部参照値の場合、参照番号を出力
 	bsr	outobj1w
