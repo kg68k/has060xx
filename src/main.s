@@ -896,11 +896,6 @@ option_l:
 ;	-e		外部参照オフセットのデフォルトをロングワードにする
 option_e:
 	st.b	(EXTSHORT,a6)
-	bra68	d0,option_e1		;68000/68010ならフラグセットのみ
-	st.b	(EXTSIZEFLG,a6)
-	move.b	#SZ_LONG,(EXTSIZE,a6)
-	move.l	#4,(EXTLEN,a6)
-option_e1:
 	rts
 
 ;----------------------------------------------------------------
