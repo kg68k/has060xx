@@ -12,7 +12,6 @@
 	.include	has.equ
 	.include	symbol.equ
 	.include	register.equ
-	.include	cputype.equ
 	.include	error2.equ
 	.include	version.equ
 

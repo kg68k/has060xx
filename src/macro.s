@@ -11,7 +11,6 @@
 ;----------------------------------------------------------------
 
 	.include	has.equ
-	.include	cputype.equ
 	.include	register.equ
 	.include	tmpcode.equ
 	.include	symbol.equ

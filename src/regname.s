@@ -11,7 +11,6 @@
 ;----------------------------------------------------------------
 
 	.include	has.equ
-	.include	cputype.equ
 	.include	register.equ
 
 	.cpu	68000

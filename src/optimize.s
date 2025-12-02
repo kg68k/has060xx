@@ -12,7 +12,6 @@
 	.include	symbol.equ
 	.include	register.equ
 	.include	tmpcode.equ
-	.include	cputype.equ
 	.include	eamode.equ
 	.include	error2.equ
 

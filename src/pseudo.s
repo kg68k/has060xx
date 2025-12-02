@@ -10,7 +10,6 @@
 
 	.include	has.equ
 	.include	doscall.mac
-	.include	cputype.equ
 	.include	register.equ
 	.include	tmpcode.equ
 	.include	symbol.equ

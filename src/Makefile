@@ -16,8 +16,7 @@ BIN = README.DOC HAS060.DOC HAS060.X DEBUGGED.DOC KNOWNBUG.DOC \
 	HANOI.S K_MACRO.MAC
 
 SRC1 = Makefile doscall.mac \
-	cputype.equ eamode.equ error2.equ has.equ register.equ \
-	symbol.equ tmpcode.equ
+	eamode.equ error2.equ has.equ register.equ symbol.equ tmpcode.equ
 SRC2 = doasm.s eamode.s encode.s error.s error2.s expr.s \
 	fexpr.s file.s hupair.s macro.s main.s misc.s objgen.s opname.s \
 	optimize.s pseudo.s regname.s symbol.s work.s
@@ -54,8 +53,8 @@ has060x.x:	$(OBJ)
 
 
 doasm.o:	has.equ symbol.equ register.equ tmpcode.equ \
-		cputype.equ eamode.equ error2.equ doasm.s
-eamode.o:	has.equ cputype.equ eamode.equ register.equ \
+		eamode.equ error2.equ doasm.s
+eamode.o:	has.equ eamode.equ register.equ \
 		tmpcode.equ symbol.equ eamode.s
 encode.o:	has.equ tmpcode.equ register.equ symbol.equ \
 		encode.s
@@ -65,19 +64,19 @@ expr.o:		has.equ register.equ tmpcode.equ symbol.equ expr.s
 fexpr.o:	has.equ register.equ tmpcode.equ symbol.equ fexpr.s
 file.o:		doscall.mac has.equ tmpcode.equ error2.equ file.s
 hupair.o:	hupair.s
-macro.o:	has.equ cputype.equ register.equ tmpcode.equ \
+macro.o:	has.equ register.equ tmpcode.equ \
 		symbol.equ macro.s
 main.o:		doscall.mac has.equ symbol.equ register.equ \
-		cputype.equ error2.equ version.equ main.s
+		error2.equ version.equ main.s
 misc.o:		doscall.mac has.equ register.equ misc.s
 objgen.o:	has.equ symbol.equ register.equ tmpcode.equ \
-		cputype.equ eamode.equ objgen.s
-opname.o:	has.equ cputype.equ register.equ opname.s
+		eamode.equ objgen.s
+opname.o:	has.equ register.equ opname.s
 optimize.o:	has.equ symbol.equ register.equ tmpcode.equ \
-		cputype.equ eamode.equ error2.equ optimize.s
-pseudo.o:	doscall.mac has.equ cputype.equ register.equ \
+		eamode.equ error2.equ optimize.s
+pseudo.o:	doscall.mac has.equ register.equ \
 		tmpcode.equ symbol.equ pseudo.s
-regname.o:	has.equ cputype.equ register.equ regname.s
+regname.o:	has.equ register.equ regname.s
 symbol.o:	has.equ symbol.equ tmpcode.equ symbol.s
 work.o:		has.equ work.s
 
