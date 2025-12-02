@@ -325,47 +325,6 @@ tablebody	.macro
 	optbln	'trapnle',  ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
 	optbln	'trapngt',  ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
 
-	optbln	'tpt',    ~trapcc,	$50F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpf',    ~trapcc,	$51F8,		C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
-	optbln	'tphi',   ~trapcc,	$52F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpls',   ~trapcc,	$53F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpcc',   ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tphs',   ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpcs',   ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tplo',   ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpne',   ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnz',   ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpeq',   ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpze',   ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpvc',   ~trapcc,	$58F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpvs',   ~trapcc,	$59F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tppl',   ~trapcc,	$5AF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpmi',   ~trapcc,	$5BF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpge',   ~trapcc,	$5CF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tplt',   ~trapcc,	$5DF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpgt',   ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tple',   ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnf',   ~trapcc,	$50F8,		C020|C030|C040|C060,    SZW|SZL,    SZW|SZL
-	optbln	'tpnt',   ~trapcc,	$51F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnls',  ~trapcc,	$52F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnhi',  ~trapcc,	$53F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpncs',  ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnlo',  ~trapcc,	$54F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpncc',  ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnhs',  ~trapcc,	$55F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpneq',  ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnze',  ~trapcc,	$56F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnne',  ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnnz',  ~trapcc,	$57F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnvs',  ~trapcc,	$58F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnvc',  ~trapcc,	$59F8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnmi',  ~trapcc,	$5AF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnpl',  ~trapcc,	$5BF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnlt',  ~trapcc,	$5CF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnge',  ~trapcc,	$5DF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpnle',  ~trapcc,	$5EF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-	optbln	'tpngt',  ~trapcc,	$5FF8,		C020|C030|C040|C060,    SZW|SZL,SZNO
-
 	optbl	'callm',    ~callm,	$06C0,		C020,               SZNO,       SZNO
 	optbl	'rtm',	    ~rtm,	$06C0,		C020,               SZNO,       SZNO
 
