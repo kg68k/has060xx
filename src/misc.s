@@ -48,26 +48,24 @@ getenv9:
 ;	in :---
 ;	out:---
 resetlocctr::
-	movem.l	d0/a0,-(sp)
+	movem.l	d0-d1/a0-a2,-(sp)
 	lea.l	(LOCCTRBUF,a6),a0
-	move.w	#N_SECTIONS-1,d0
-resetlocctr1:
-	clr.l	(a0)+			;ロケーションカウンタをクリア
-	dbra	d0,resetlocctr1
-	move.w	#N_SECTIONS-1,d0
-resetlocctr2:
-	clr.l	(a0)+			;最適化ロケーションオフセットをクリア
-	dbra	d0,resetlocctr2
-	move.w	#N_SECTIONS-1,d0
-resetlocctr3:
-	clr.b	(a0)+			;orgセクション番号をクリア
-	dbra	d0,resetlocctr3
-	clr.l	(LOCATION,a6)
-	clr.l	(LOCOFFSET,a6)
-	clr.b	(ORGNUM,a6)
+	lea.l	(LOCOFFSETBUF,a6),a1
+	lea.l	(ORGNUMBUF,a6),a2
+	moveq.l	#0,d0
+	moveq.l	#N_SECTIONS-1,d1
+@@:
+	move.l	d0,(a0)+		;ロケーションカウンタをクリア
+	move.l	d0,(a1)+		;最適化ロケーションオフセットをクリア
+	move.b	d0,(a2)+		;orgセクション番号をクリア
+	dbra	d1,@b
+
+	move.l	d0,(LOCATION,a6)
+	move.l	d0,(LOCOFFSET,a6)
+	move.b	d0,(ORGNUM,a6)
 	move.b	#SECT_TEXT,(SECTION,a6)	;textセクションにする
 	sf.b	(OFFSYMMOD,a6)
-	movem.l	(sp)+,d0/a0
+	movem.l	(sp)+,d0-d1/a0-a2
 	rts
 
 ;----------------------------------------------------------------
