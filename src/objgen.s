@@ -251,8 +251,9 @@ outsymbol:				;シンボルの出力
 	move.l	(SYM_VALUE,a1),d0	;xdef:シンボル値/xref:シンボル番号/comm:エリアサイズ
 	bsr	wrtd0l
 	movea.l	(SYM_NAME,a1),a0
-	bra	wrtstr
-
+	move.b	(LEADINGSYMCHAR,a6),d0
+	beq	wrtstr
+	bra	wrtstr_with_leading_char
 
 ;----------------------------------------------------------------
 ;	外部定義シンボルの修正
@@ -3031,24 +3032,27 @@ outobjcom:
 
 ;----------------------------------------------------------------
 ;	文字列をファイルに出力する
+;	in :d0.b=先頭に挿入する文字
+;	    a0=文字列へのポインタ
+;	out:a0=文字列終了位置へのポインタ (d0.wは破壊される)
+wrtstr_with_leading_char:
+	bra	wrtstr2
+
+;----------------------------------------------------------------
+;	文字列をファイルに出力する
 ;	in :a0=文字列へのポインタ
-;	out:a0=文字列終了位置へのポインタ
-wrtstr:
-	move.w	d0,-(sp)
-wrtstr1:
-	clr.w	d0
-	move.b	(a0)+,d0
-	beq	wrtstr9
+;	out:a0=文字列終了位置へのポインタ (d0.wは破壊される)
+wrtstr2:
 	lsl.w	#8,d0
 	move.b	(a0)+,d0
-	beq	wrtstr9
-	bsr	wrtd0w
-	bra	wrtstr1
-
-wrtstr9:
-	bsr	wrtd0w
-	move.w	(sp)+,d0
-	rts
+	beq	@f			;$xx00を出力して終わり
+	bsr	wrtd0w			;$xxyyを出力
+wrtstr:
+	clr.w	d0
+	move.b	(a0)+,d0
+	bne	wrtstr2
+@@:					;$0000を出力して終わり
+	bra	wrtd0w
 
 ;----------------------------------------------------------------
 ;	オブジェクトを1ロングワード出力する

@@ -120,7 +120,7 @@ MAKESYMDEB::	.ds.b	1	;SCD用デバッグ情報を出力するならtrue		(-g)
 COMPATMODE::	.ds.b	1	;HAS v2.xと互換のある最適化を行うならtrue	(-c)
 LONGABS::	.ds.b	1	;ロングワードのPC間接を絶対ロングにするならtrue	(-b)
 PCTOABSL::	.ds.b	1	;-b2または-b4のときtrue
-PCTOABSLNOTALL::	.ds.b	1	;-b4でないときtrue
+PCTOABSLNOTALL::.ds.b	1	;-b4でないときtrue
 PCTOABSLCAN::	.ds.b	1	;-b4でなくてlea/pea/jmp/jsrのときtrue
 ABSLTOOPC::	.ds.b	1	;絶対ロングを(d,OPC)にするならtrue		(-1)
 ABSLTOOPCCAN::	.ds.b	1	;ABSLTOOPCを無効化する
@@ -156,6 +156,8 @@ X_MOVEP::	.ds.w	1	;MOVEP展開(展開するCPUのビットが1)
 
 MAKEALIGN::	.ds.b	1	;拡張アラインメント情報を出力するならtrue
 MAXALIGN::	.ds.b	1	;ソース中で使用された最大のアライン値(2^n)
+
+LEADINGSYMCHAR:	.ds.b	1	;外部定義・外部参照シンボルの先頭に挿入する文字	(-_)
 
 ;----------------------------------------------------------------
 ;	アセンブルコード

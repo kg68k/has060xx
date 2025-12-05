@@ -198,6 +198,8 @@ usage_msg:
 	.dc.b	TAB,'-y[n]',TAB,TAB
 	.dc.b	'プレデファインシンボル(0=[禁止],[1]=許可)',CRLF
 ;-z HAS拡張機能のワーニング禁止(廃止)
+	.dc.b	TAB,'-_',TAB,TAB
+	.dc.b	"外部定義・外部参照シンボルの先頭に'_'を挿入する",CRLF
 	.dc.b	'    環境変数 HAS の内容がコマンドラインの手前(-iは後ろ)に挿入されます',CRLF
 	.dc.b	0
 
@@ -585,6 +587,9 @@ optionsw1:
 	moveq.l	#'z'-'a'+1,d2		;アルファベット以外を先に判別
 	cmpi.b	#'1',d0
 	beq	@f
+	addq.w	#1,d2
+	cmpi.b	#'_',d0
+	beq	@f
 
 	moveq.l	#$20,d2
 	or.b	d0,d2			;小文字化
@@ -605,6 +610,7 @@ optjp_tbl:
 	.irpc	ch,abcdefghijklmnopqrstuvwxyz1
 	.dc.w	option_&ch-optjp_tbl
 	.endm
+	.dc.w	option_underscore-optjp_tbl
 
 ;----------------------------------------------------------------
 ;	-t path		テンポラリパス指定
@@ -1212,6 +1218,12 @@ option_y_0:
 	sf.b	(PREDEFINE,a6)
 	rts
 
+;----------------------------------------------------------------
+;	-_		外部定義・外部参照シンボルの先頭に'_'を挿入する
+
+option_underscore:
+	move.b	#'_',(LEADINGSYMCHAR,a6)
+	rts
 
 ;----------------------------------------------------------------
 ;	(ダミーのオプションスイッチ)
