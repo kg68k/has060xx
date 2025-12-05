@@ -582,16 +582,19 @@ optionsw:
 optionsw1:
 	move.b	(a0)+,d0
 	beq	optionsw0
-	cmpi.b	#'1',d0			;アルファベット以外を先に判別
-	beq	option_1
-	andi	#$00df,d0		;大文字化
-	subi	#'A',d0
-	cmpi	#'Z'-'A',d0
-	bhi	usage			;該当するオプションスイッチがない
+	moveq.l	#'z'-'a'+1,d2		;アルファベット以外を先に判別
+	cmpi.b	#'1',d0
+	beq	@f
 
-	add	d0,d0
-	move	(optjp_tbl,pc,d0.w),d0
-	jsr	(optjp_tbl,pc,d0.w)
+	moveq.l	#$20,d2
+	or.b	d0,d2			;小文字化
+	subi	#'a',d2
+	cmpi	#'z'-'a',d2
+	bhi	usage			;該当するオプションスイッチがない
+@@:
+	add	d2,d2
+	move	(optjp_tbl,pc,d2.w),d2
+	jsr	(optjp_tbl,pc,d2.w)
 	bra	optionsw1
 optionsw0:
 	rts
@@ -599,7 +602,7 @@ optionsw0:
 ;----------------------------------------------------------------
 ;	オプションスイッチのジャンプテーブル
 optjp_tbl:
-	.irpc	ch,abcdefghijklmnopqrstuvwxyz
+	.irpc	ch,abcdefghijklmnopqrstuvwxyz1
 	.dc.w	option_&ch-optjp_tbl
 	.endm
 
