@@ -29,6 +29,13 @@ ST_REGISTER	equ	-1	;レジスタ名
 ST_MACRO	equ	4	;マクロ
 ST_OPCODE	equ	-2	;命令名
 
+;----------------------------------------------------------------
+;	SYM_FIRST シンボル定義方法(ST_VALUEのみ)
+;----------------------------------------------------------------
+
+SYM1ST_SET:	.equ	$ff	;.set
+SYM1ST_OTHER:	.equ	$00	;その他
+SYM1ST_OFFSYM:	.equ	$01	;.offsym
 
 ;----------------------------------------------------------------
 ;	シンボルテーブル構造
@@ -60,7 +67,7 @@ SYM_EXTATR:	.ds.b	1	;$0B 外部定義属性
 SYM_SECTION:	.ds.b	1	;$0C セクション
 SYM_ORGNUM:	.ds.b	1	;$0D アドレスシンボルのorgセクション番号
 SYM_FIRST:	.ds.b	1	;$0E 最初に定義した方法(ST_VALUEのみ)
-				;    -1=set,0=その他,1=offsym
+				;    SYM1ST_* -1=set,0=その他,1=offsym
 		.ds.b	1	;$0F
 SYM_VALUE:	.ds.l	1	;$10 シンボルの持つ値
 SYM_TBLLEN:			;$14

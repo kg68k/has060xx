@@ -46,7 +46,6 @@ deflabel7:
 	beq	deflabel8		;すでに登録済
 	moveq.l	#ST_VALUE,d2		;数値シンボル
 	bsr	defsymbol		;新しく登録する
-	sf.b	(SYM_FIRST,a6)
 	bra	deflabel85
 
 deflabel8:
@@ -697,7 +696,6 @@ encodesym:
 encodesymr5:				;未定義シンボルの場合
 	moveq.l	#ST_VALUE,d2
 	bsr	defsymbol		;シンボルを登録
-	sf.b	(SYM_FIRST,a6)
 	bra	encodesym
 
 encodereg:				;レジスタ名

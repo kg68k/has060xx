@@ -475,6 +475,13 @@ defsymbol1:
 	movea.l	a0,a1
 	move.b	d2,(SYM_TYPE,a1)
 	move.l	a2,(SYM_NAME,a1)
+
+.if SYM1ST_OTHER.ne.0
+  cmpi.b #ST_VALUE,d2
+  bne @f
+    move.b #SYM1ST_OTHER,(SYM_FIRST,a1)
+  @@:
+.endif
 	movem.l	(sp)+,a2-a3
 	bra	memcheck
 
