@@ -28,7 +28,6 @@ OT_SIZE		equ	$0800	;サイズ指定子(.b/.w/.l/.s/.d/.x/.p)
 OT_OPERATOR	equ	$0900	;演算子(下位バイトが演算子コード)
 OT_LOCALREF	equ	$0A00	;ローカルラベル参照(@f/@b 下位バイトが相対位置)
 OT_VALUEQ	equ	$0B00	;数値データ(続く2ロングワードがデータ)
-OT_MAC		equ	$0C00	;'u'=.u
 
 OT_STR_WORDLEN	equ	$ff	;下位バイトがこの値なら、続くワードが文字列長
 

@@ -1713,49 +1713,6 @@ setfpop_tbl:				;サイズコードテーブル
 	move.w	(EACODE,a1),d1
 	bra	~move_frusp1
 
-;$0000='.l',$0040='.u',省略時は.lとみなす
-getul:
-	move.w	(a0)+,d0
-	moveq.l	#$40,d1
-	cmp.w	#'u'|OT_MAC,d0		;.u
-	beq	getul1
-	clr.w	d1
-	cmp.w	#OT_SIZE|SZ_LONG,d0	;.l
-	beq	getul1
-	subq.l	#2,a0
-getul1:
-	rts
-
-;$0200='<<',$0600='>>'
-getsf:
-	move.w	(a0),d0
-	move.w	#$0200,d1
-	cmp.w	#'<'|OT_CHAR,d0
-	beq	getsf1
-	move.w	#$0600,d1
-	cmp.w	#'>'|OT_CHAR,d0
-	bne	getsf2
-getsf1:
-	cmp.w	(2,a0),d0
-	bne	getsf2
-	addq.l	#4,a0
-	rts
-
-getsf2:
-	moveq.l	#-1,d1
-	rts
-
-;$0000=&なし,$0020=&あり
-getmam:
-	clr.w	d1
-	cmpi.w	#'&'|OT_CHAR,(a0)
-	bne	getmam2
-getmam1:
-	addq.l	#2,a0
-	moveq.l	#$20,d1
-getmam2:
-	rts
-
 ;----------------------------------------------------------------
 ;	movea	<ea>,An
 ~movea::

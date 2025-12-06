@@ -578,9 +578,6 @@ encodesize:
 	beq	encodesize1
 	addq.b	#SZ_QUAD-SZ_PACKED,d2
 	cmp.b	#'q',d0			;.q
-	beq	encodesize1
-	move.w	#OT_MAC|'u',d2
-	cmp.b	#'u',d0			;.u
 	bne	encodeexop_real		;サイズ名が存在しない
 encodesize1:
 	move.w	d2,(a2)+
