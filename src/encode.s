@@ -61,7 +61,7 @@ deflabel8:
 ;SA_NODET/SA_DEFINE
 	tst.b	(OFFSYMMOD,a6)
 	beq	redeferr		;offsym中でないので二重定義エラー
-	tst.b	(SYM_FIRST,a1)
+	tst.b	(SYM_FIRST,a1)		;SYM1ST_OFFSYMか?
 	bgt	deflabel81
 	tst.b	(OWOFFSYM,a6)		;offsymのシンボルでない
 	bne	redeferr_offsym
@@ -73,7 +73,7 @@ deflabel85:
 	tst.b	(OFFSYMMOD,a6)
 	beq	deflabel850
 	bgt	deflabel_offsym		;offsymでシンボルあり
-	move.b	#1,(SYM_FIRST,a1)	;offsymのシンボル
+	move.b	#SYM1ST_OFFSYM,(SYM_FIRST,a1)	;offsymのシンボル
 deflabel850:
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;定義済シンボル
 	move.l	(LTOPLOC,a6),d0		;ロケーションカウンタ値
@@ -100,7 +100,7 @@ deflabel9:
 
 ;a1=行頭のシンボル
 deflabel_offsym:
-	move.b	#1,(SYM_FIRST,a1)	;offsymのシンボル
+	move.b	#SYM1ST_OFFSYM,(SYM_FIRST,a1)	;offsymのシンボル
 	cmpa.l	(OFFSYMSYM,a6),a1
 	beq	deflabel_offsym1
 ;初期値を与えるシンボルでないとき

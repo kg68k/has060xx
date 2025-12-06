@@ -648,13 +648,14 @@ pseudo_redeferr_a1:
 	bsr	defltopsym		;行頭のシンボルを定義する
 	tst.b	(SYM_ATTRIB,a1)		;(cmpi.b #SA_UNDEF,(SYM_ATTRIB,a1))
 	beq	~~set1			;未定義
-	tst.b	(SYM_FIRST,a1)
+	tst.b	(SYM_FIRST,a1)		;SYM1ST_SETか?
 	blt	~~set1			;setで定義されている
 	move.l	a1,(ERRMESSYM,a6)
 	tst.b	(OWSET,a6)
 	bne	redeferr_set
 	bsr	redefwarn_set
 ~~set1:
+	.fail	SYM1ST_SET.ne.$ff
 	st.b	(SYM_FIRST,a1)
 	moveq.l	#-1,d2
 	bra	~~equ1
@@ -666,6 +667,8 @@ pseudo_redeferr_a1:
 	bsr	defltopsym		;行頭のシンボルを定義する
 	tst.b	(SYM_ATTRIB,a1)		;(cmpi.b #SA_UNDEF,(SYM_ATTRIB,a1))
 	bne	pseudo_redeferr_a1	;定義済シンボルならエラー
+
+	.fail	SYM1ST_OTHER.ne.$00
 	sf.b	(SYM_FIRST,a1)
 	moveq.l	#0,d2
 ~~equ1:
