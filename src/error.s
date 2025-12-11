@@ -336,10 +336,7 @@ printerr52:
 	bra	printerr51
 
 printerr53:
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a0)+
-  .endif
-	move.b	#LF,(a0)+
+	writecrlf (a0)+
 	clr.b	(a0)
 printerr6:
 	lea.l	(-128,a5),a0

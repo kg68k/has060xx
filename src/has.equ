@@ -120,6 +120,15 @@ GETFPTR	.macro	adr,reg
 	add.l	(F_PTROFST+adr,a6),reg
 	.endm
 
+;----------------------------------------------------------------
+;	改行コードをバッファに書き込む
+writecrlf: .macro ea_aipi
+  .if UNIX_NEWLINE=0
+	move.b	#CR,ea_aipi
+  .endif
+	move.b	#LF,ea_aipi
+	.endm
+
 
 ;----------------------------------------------------------------
 ;	CPUタイプビット

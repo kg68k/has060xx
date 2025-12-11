@@ -2230,10 +2230,7 @@ prnsymtable4:
 	dbra	d0,prnsymtable4
 prnsymtable5:
 	dbra	d2,prnsymtable2
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a0)+
-  .endif
-	move.b	#LF,(a0)+
+	writecrlf (a0)+
 	clr.b	(a0)
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout			;1行分を表示
@@ -2242,10 +2239,7 @@ prnsymtable5:
 prnsymtable9:
 	cmp.w	d1,d2
 	beq	prnsymtable0
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a0)+
-  .endif
-	move.b	#LF,(a0)+
+	writecrlf (a0)+
 	clr.b	(a0)
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout			;最後の1行を表示
@@ -2382,10 +2376,7 @@ prnlineadv4:
 	move.b	#' ',(a0)+
 	dbra	d0,prnlineadv4
 	bsr	prn1code		;コード部を出力
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a0)+
-  .endif
-	move.b	#LF,(a0)+
+	writecrlf (a0)+
 	clr.b	(a0)
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout
@@ -2430,10 +2421,7 @@ prnfname1:
 	move.b	(a1)+,(a2)+
 	bne	prnfname1
 	move.b	#'>',(-1,a2)
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a2)+
-  .endif
-	move.b	#LF,(a2)+
+	writecrlf (a2)+
 	clr.b	(a2)
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout
@@ -2474,10 +2462,7 @@ prn1line1:
 prn1line2:
 	bsr	prn1code		;コード部を出力
 	bsr	prn1srce		;ソース部を出力
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a0)+
-  .endif
-	move.b	#LF,(a0)+
+	writecrlf (a0)+
 	clr.b	(a0)
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	prnlout
@@ -2673,10 +2658,7 @@ makesymmac1:
 	bsr	strcpy
 
 makesymfile7:
-  .if UNIX_NEWLINE=0
-	move.b	#CR,(a0)+
-  .endif
-	move.b	#LF,(a0)+
+	writecrlf (a0)+
 	clr.b	(a0)
 	movea.l	(LINEBUFPTR,a6),a0
 	bsr	prnlout

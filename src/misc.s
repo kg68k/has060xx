@@ -651,7 +651,7 @@ makeprndec4:				;d0.wを10進4桁の文字列に変換する
 	moveq.l	#-4,d1			;(4桁でゼロサプレスしない)
 	bra	convdec
 
-crlf_msg:	.dc.b	CR,LF,0
+crlf_msg:	.dc.b	CRLF,0
 	.even
 
 ;----------------------------------------------------------------
