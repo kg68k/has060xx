@@ -356,7 +356,6 @@ strcpy:
 warn_msg:	.dc.b	': Warning: ',0
 error_msg:	.dc.b	': Error: ',0
 
-crlf_msg::	.dc.b	CRLF,0
 	.even
 
 

@@ -7,6 +7,7 @@
 ;	$Id: error2.equ,v 1.8  1999 10/ 8(Fri) 21:04:55 M.Kamada Exp $
 ;
 ;		Copyright 1997-99  by M.Kamada
+;		Copyright 2025     by TcbnErik
 ;----------------------------------------------------------------
 
 
@@ -123,8 +124,6 @@ ilinterr		reg	ilinterr2
 offsymalignerr		reg	offsymalignerr2
 
 errout			reg	errout2
-
-crlf_msg		reg	crlf_msg2
 
 
 	.text

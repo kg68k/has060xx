@@ -116,7 +116,7 @@ asmmain6:
 	bsr	getfilename
 	movea.l	a1,a0
 	bsr	prnlout
-	lea.l	(main_crlf_msg,pc),a0
+	lea.l	(crlf_msg,pc),a0
 	bsr	prnlout
 	bsrl	makesymfile,d0		;シンボルファイルの作成
 	move.w	d0,-(sp)
@@ -135,8 +135,6 @@ asmmain9:
 ;----------------------------------------------------------------
 ;	アセンブラの表示メッセージ
 ;----------------------------------------------------------------
-main_crlf_msg:
-	.dc.b	CRLF,0
 
 title_msg::
 	.dc.b	'HAS060X.X ',version_x, ' ',copyright_x,CRLF
