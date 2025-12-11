@@ -878,7 +878,6 @@ option_w1:
 option_n:
 	st.b	(OPTIMIZE,a6)
 	st.b	(IGNORE_ERRATA,a6)
-	sf.b	(F43GTEST,a6)
 	rts
 
 ;----------------------------------------------------------------
@@ -970,7 +969,6 @@ option_c_1:
 option_c_0:
 	st.b	(OPTIMIZE,a6)		;前方参照の最適化を禁止
 	st.b	(IGNORE_ERRATA,a6)
-	sf.b	(F43GTEST,a6)
 	sf.b	(COMPATMODE,a6)		;v2非互換
 	st.b	(NOABSSHORT,a6)		;絶対ショートへの変換を禁止
 	st.b	(NOQUICK,a6)		;クイックイミディエイトへの変換を禁止
@@ -1190,7 +1188,6 @@ option_k_0:
 
 option_k_1:
 	st.b	(IGNORE_ERRATA,a6)
-	sf.b	(F43GTEST,a6)
 	rts
 
 ;----------------------------------------------------------------
