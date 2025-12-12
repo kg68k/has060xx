@@ -31,6 +31,7 @@ asmmain::
 	lea.l	(asmmain,pc,d0.l),sp	;lea.l (STACKBTM,pc),sp
 	move.l	#WORKBEGIN-asmmain,d0
 	lea.l	(asmmain,pc,d0.l),a6	;lea.l (WORKBEGIN,pc),a6
+
 	bsr	meminit			;メモリ領域の確保
 	bsr	workinit		;ワークエリアの初期化
 	bsr	g2asmode
@@ -277,6 +278,9 @@ workinit:
 
 	move.w	#4,(LOCALLENMAX,a6)
 	move.w	#10000,(LOCALNUMMAX,a6)
+
+	lea.l	(LOCSYMBUFEND,a6),a0
+	move.l	a0,(LOCSYMENDPTR,a6)
 
 	leawork	SYMHASHTBL,a0
 	move.l	a0,(SYMHASHPTR,a6)

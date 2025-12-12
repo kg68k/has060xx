@@ -329,9 +329,7 @@ defmaclocal:
 	bne	defmacro2		;rept/irp/irpc登録中は無視
 	movea.l	(LINEPTR,a6),a0
 	movea.l	(MACDEFEND,a6),a1
-	move.l	a6,d0
-	add.l	#LOCSYMBUF+LOCSYMBUFSIZE,d0
-	cmpa.l	d0,a1
+	cmpa.l	(LOCSYMENDPTR,a6),a1
 	bcc	defmac_locsymover
 	tst.b	(a0)
 	beq	defmaclocal9		;引数リストがない
@@ -365,9 +363,7 @@ defmacsizem:
 	bne	defmacro2		;rept/irp/irpc登録中は無視
 	movea.l	(LINEPTR,a6),a0
 	movea.l	(MACDEFEND,a6),a1
-	move.l	a6,d0
-	add.l	#LOCSYMBUF+LOCSYMBUFSIZE,d0
-	cmpa.l	d0,a1
+	cmpa.l	(LOCSYMENDPTR,a6),a1
 	bcc	defmac_locsymover
 	tst.b	(a0)
 	beq	defmacsizem9		;引数リストがない
@@ -478,9 +474,7 @@ defmacline7:				;置換すべき仮引数が見つからなかった
 defmacline71:
 ;@～をローカルシンボルとマクロの本体に登録
 	movea.l	(MACDEFEND,a6),a1
-	move.l	a6,d0
-	add.l	#LOCSYMBUF+LOCSYMBUFSIZE,d0
-	cmpa.l	d0,a1
+	cmpa.l	(LOCSYMENDPTR,a6),a1
 	bcc	defmac_locsymover
 	moveq.l	#$FE,d0			;(ローカルシンボルマーク)
 	move.b	d0,(a1)+		;ローカルシンボルに登録
