@@ -886,7 +886,7 @@ geteapar_idxreg3:
 geteapar_idxreg4:
 	cmpi.w	#'*'|OT_CHAR,d0		;Rn.?*
 	bne	geteapar_next1		;スケール値はなし
-	bra68	d1,exprerr_cannotscale	;68000にはスケール値はない
+	bra68	exprerr_cannotscale	;68000にはスケール値はない
 	lea.l	(RPNBUFEX,a6),a2	;Rn.?*n
 	bsr	geteaexpr		;スケール値を得る
 	tst.w	d0
@@ -961,7 +961,7 @@ geteapm5:				;サイズ指定が省略された場合
 	tst.w	d0
 	bpl	geteapm99		;式の値が得られない場合
 	sf.b	(OPTIONALPC,a1)		;定数の場合はOPCは無効
-	bra68	d1,geteapm8		;68000/68010は常に.w(確定)
+	bra68	geteapm8		;68000/68010は常に.w(確定)
 	move.l	(RPNBUF1,a1),d0
 	move.w	d0,d1
 	ext.l	d1
@@ -977,7 +977,7 @@ geteapm9:
 geteapm99:				;ディスプレースメントサイズが未確定の場合
 	tst.b	d2
 	bmi	geteapm99pc
-;	bra68	d1,getea_dspadrw	;68000/68010なら常に.w
+;	bra68	getea_dspadrw		;68000/68010なら常に.w
 ;					;(サプレスされる場合があるので確定しない)
 	st.b	(DSPADRCODE,a6)		;(実効アドレス変更のため命令コードを保存させる)
 	tst.b	(EXTSIZEFLG,a6)
@@ -991,7 +991,7 @@ geteapm99pc:				;PC間接の場合
 	bne	geteapm99pc1		;(d,PC)→xxxx.lの変換を行う場合
 	tst.b	(PCTOABSL,a6)
 	bne	geteapm99pc2
-	bra68	d1,getea_dsppcw		;68000/68010なら常に.w
+	bra68	getea_dsppcw		;68000/68010なら常に.w
 	st.b	(DSPADRCODE,a6)		;(実効アドレス変更のため命令コードを保存させる)
 	tst.b	(EXTSIZEFLG,a6)
 	beq	getea_dsppc		;デフォルトサイズは.w
@@ -1052,7 +1052,7 @@ geteapm_idx3:
 	bra	geteapm_idx8
 
 geteapm_idx5:				;サイズ指定が省略された場合
-	bra68	d1,geteapm_idx8		;68000/68010なら常に.s
+	bra68	geteapm_idx8		;68000/68010なら常に.s
 	tst.w	d0
 	bpl	geteapm_idx9		;式の値が得られない場合
 	move.l	(RPNBUF1,a1),d0
@@ -1069,7 +1069,7 @@ geteapm_idx9:
 	bra	getea_idxpc		;インデックス付きPC間接
 
 geteapm_bd:
-	bra68	d0,exprerr_fullformat	;68000/68010にはフルフォーマットはない
+	bra68	exprerr_fullformat	;68000/68010にはフルフォーマットはない
 	ori.w	#EXW_FULL,d3		;フルフォーマット
 	move.w	(RPNLEN1,a1),d0
 	beq	geteapm_bdnul		;ベースディスプレースメントがない
@@ -1123,7 +1123,7 @@ geteapm_bd99:				;ディスプレースメントサイズが未確定の場合
 	bra	geteapm_bdl		;デフォルトサイズは.l
 
 geteapm_od:
-	bra68	d0,exprerr_fullformat	;68000/68010にはフルフォーマットはない
+	bra68	exprerr_fullformat	;68000/68010にはフルフォーマットはない
 	tst.w	d4
 	bpl	geteapm_od1		;プリインデックス or インデックスレジスタサプレス
 	ori.w	#EXW_POSTIDX,d3		;ポストインデックス

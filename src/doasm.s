@@ -73,6 +73,32 @@ CHKLIM	.macro
 	bne	iloprerr
 	.endm
 
+;----------------------------------------------------------------
+;	ソフトウェアエミュレーション命令の設定と警告表示
+SOFTEMU	.macro	cpus
+	.fail	((cpus).ne.C060).and.((cpus).ne.(C040|C060))
+
+	or.w	#cpus,(SOFTFLAG,a6)
+	.if	(cpus)==C060
+	tst.b	(CPUIS060,a6)
+	.else
+	tst.w	(CPUIS040_060,a6)
+	.endif
+	beq	@skip
+	bsr	softwarn
+@skip:
+	.endm
+
+;----------------------------------------------------------------
+;	ソフトウェアエミュレーション命令の警告表示
+WARNSOFTEMU .macro dreg
+	move.w	(CPUTYPE,a6),dreg
+	and.w	(SOFTFLAG,a6),dreg
+	beq	@skip
+	bsr	softwarn
+@skip:
+	.endm
+
 
 ;----------------------------------------------------------------
 ;	パス1(命令のアセンブル)
@@ -670,8 +696,8 @@ fpead_imm2:
 	move.w	(CPUTYPE,a6),d0
 	and.w	#C040|C060,d0
 	beq	fpead_imm4
-	and.w	(SOFTFLAG,a6),d0
-	bne	fpead_imm4
+	and.w	(SOFTFLAG,a6),d0	;同じ行ですでに警告を表示しているなら省略する
+	bne	fpead_imm4		;(例えば68040でfint.x #imm,fpn)
 	bsr	softwarn
 fpead_imm4:
 	ori.w	#C040|C060,(SOFTFLAG,a6)
@@ -1012,14 +1038,13 @@ setfpop_tbl:				;サイズコードテーブル
 	ori.w	#$0040,d7
 	tst.w	(RPNLEN1,a1)
 	bpl	~orandeori_sr1		;定数でない
+
 	move.w	#$08E0,d1		;未定義のビットが1
-;000～010にはMがない
-	move.w	#C020|C030|C040|C060,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	~orandeori_sr01
+	bran68	@f
 	or.w	#$1000,d1		;000～010にはMがない
-~orandeori_sr01:
-	and.w	#C020|C030|C040,d0
+@@:
+	move.w	#C020|C030|C040,d0
+	and.w	(CPUTYPE,a6),d0
 	bne	~orandeori_sr02
 	or.w	#$4000,d1		;000～010と060にはT0がない
 ~orandeori_sr02:
@@ -1333,7 +1358,7 @@ setfpop_tbl:				;サイズコードテーブル
 					;CMPA.L #d16,Anの最適化も同時にスキップ
 	move.l	(RPNBUF1,a1),d1
 	bne	~sbadcpa1cp1
-	bra68	d0,~sbadcpa1cp1
+	bra68	~sbadcpa1cp1
 ;68020以上のときCMPA.{W|L} #0,An→TST.L An
 	and.w	#$0E00,d7
 	rol.w	#7,d7
@@ -1387,13 +1412,11 @@ setfpop_tbl:				;サイズコードテーブル
 	CHKLIM
 ~cmpi1:
 	movea.l	a5,a1
-	move.w	#C020|C030|C040|C060,d1
-	and.w	(CPUTYPE,a6),d1
-	bne	~cmpi0
+	bran68	@f
 	st.b	(ABSLTOOPCCAN,a6)	;cmpiは68000ではPC相対が使えない
-~cmpi0:
+@@:
 	bsr	geteamode		;実効アドレスオペランドを得る
-	bra68	d1,~cmpi050
+	bra68	~cmpi050
 	and.w	#EG_DATA&(.not.EA_IMM),d0	;データモード(#xx以外)
 	bra	~cmpi051
 
@@ -1633,8 +1656,7 @@ setfpop_tbl:				;サイズコードテーブル
 	bra	~move_frccr1
 
 ~move_frccr:				;move CCR,<ea>
-	move.w	(CPUTYPE,a6),d0
-	and.w	#C000,d0
+	tst.b	(CPUIS000,a6)
 	bne	iladrerr		;68000では使用できない
 	move.w	#$42C0,d7
 ~move_frccr1:
@@ -1851,7 +1873,7 @@ f43g_second1:
 					;(サイズ省略時も.Wなので不可)
 	tst.b	(OPTCLR,a6)
 	beq	~clr99			;CLRの最適化に対応しない
-	bran68	d1,~clr99		;68020以上ならば最適化しない
+	bran68	~clr99			;68020以上ならば最適化しない
 	move.w	#$7000,d7
 	move.w	(EACODE,a1),d1
 	SETREGH
@@ -1882,14 +1904,14 @@ f43g_second1:
 ;	tst	<ea>
 ~tst::
 	movea.l	a4,a1
-	bran68	d1,~tst0
+	bran68	@f
 	st.b	(ABSLTOOPCCAN,a6)	;tstは68000ではPC相対が使えない
-~tst0:
+@@:
 	bsr	geteamode		;実効アドレスオペランドを得る
-	bran68	d1,~tst1		;68000/68010以外ならすべてのモード
+	bran68	@f			;68000/68010以外ならすべてのモード
 	and.w	#EG_DATA&EG_ALT,d0	;データ・可変モード
 	beq	iladrerr
-~tst1:
+@@:
 	bsr	setopsize		;オペレーションサイズのセット
 	or.w	(EACODE,a1),d7
 	bsr	f43g_fifth		;5番目のチェック
@@ -1990,7 +2012,7 @@ f43g_second1:
 	SETREGH
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
 	bne	~chk1
-	bra68	d0,ilsizeerr_000_long	;68000/68010では.lは使えない
+	bra68	ilsizeerr_000_long	;68000/68010では.lは使えない
 	bra	~chk2
 
 ~chk1:
@@ -2104,12 +2126,7 @@ f43g_second1:
 	ror.w	#7,d0			;サイズフィールドはb10-b9
 	or.w	d0,d7
 	or.w	(EACODE,a1),d7
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~cmpchk21
-	bsr	softwarn
-~cmpchk21:
+	SOFTEMU	C060
 ;ソフトウェアエミュレーションなのでエラッタのチェックは不要
 	DSPOPOUT			;命令コードの出力
 	move.w	d1,d0
@@ -2135,8 +2152,7 @@ f43g_second1:
 ~asl_imm:
 	tst.b	(OPTASL,a6)
 	beq	~sftrot_imm		;ASLの最適化に対応しない
-	move.w	#C060,d0
-	and.w	(CPUTYPE,a6),d0
+	tst.b	(CPUIS060,a6)
 	bne	~sftrot_imm		;68060ならば最適化しない
 	tst.b	(RPNSIZE1,a1)
 	bpl	~sftrot_imm		;#immにサイズ指定があるので最適化しない
@@ -2513,7 +2529,7 @@ bfdataout6:
 	bra	eadataout
 
 ~divmul1:
-	bra68	d0,ilsizeerr_000_long	;68000/68010では.lは使えない
+	bra68	ilsizeerr_000_long	;68000/68010では.lは使えない
 ;divu/divs/mulu/muls.l <ea>,Dn
 	move.w	d7,d6
 	andi.w	#$4000,d7
@@ -2530,12 +2546,7 @@ bfdataout6:
 	bra	~divmul3
 
 ~divmul2:				;<ea>,Dh(Dr):Dl(Dq)
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~divmul4
-	bsr	softwarn
-~divmul4:
+	SOFTEMU	C060
 	or.w	#$0400,d6		;64bit
 ~divmul3:
 	or.w	d1,d6			;Dh(Dr)をセット
@@ -2615,12 +2626,7 @@ bfdataout6:
 	addq.w	#1,d0
 	ror.w	#7,d0
 	or.w	d0,d7			;オペレーションサイズのセット
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~cas21
-	bsr	softwarn
-~cas21:
+	SOFTEMU	C060
 ;ソフトウェアエミュレーションなのでエラッタのチェックは不要
 	OPOUT				;命令コードの出力
 	move.w	d6,d0
@@ -2632,11 +2638,11 @@ bfdataout6:
 ;----------------------------------------------------------------
 ;	link	An,#xx
 ~link::
-	bran68	d0,~link1
+	bran68	@f
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)	;68000/68010のlinkはワードのみ
 	beq	ilsizeerr_000_long	;.lなのでエラー
 	move.b	#SZ_WORD,(CMDOPSIZE,a6)
-~link1:
+@@:
 	bsr	getareg			;アドレスレジスタオペランドを得る
 	bmi	iladrerr
 	SETREGL
@@ -2803,12 +2809,11 @@ bfdataout6:
 	moveq.l	#0,d3			;ゲタ
 ;				-(SP)
 	move.w	#%0100_0000_11_100_111,d0	;MOVE.W SR,-(SP)
-	move.w	#C000,d6
-	and.w	(CPUTYPE,a6),d6
-	bne	~movep950
+	tst.b	(CPUIS000,a6)
+	beq	@f
 ;				-(SP)
 	move.w	#%0100_0010_11_100_111,d0	;MOVE.W CCR,-(SP)
-~movep950:
+@@:
 	bsr	wrt1wobj
 ;d7.w=0000_ddd_1_w_s_001_aaa
 	tst.b	d7			;wをテスト
@@ -2855,9 +2860,7 @@ bfdataout6:
 	beq	~movep90dsp1		;ディスプレースメントがオーバーフローしていない
 ;ディスプレースメントがオーバーフローしている
 ;020～060のときは(bd,An)を出力する
-	move.w	#C020|C030|C040|C060,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	~movep90dsp2		;020～060のときは(bd,An)を出力する
+	bran68	~movep90dsp2		;020～060のときは(bd,An)を出力する
 ;020～060ではないので,Anを8増やしてディスプレースメントを8減らす
 ;d6.w=0000_ddd_000_000_aaa
 	moveq.l	#%0000_000_000_000_111,d0
@@ -2935,9 +2938,7 @@ bfdataout6:
 	beq	~movep91dsp1		;ディスプレースメントがオーバーフローしていない
 ;ディスプレースメントがオーバーフローしている
 ;020～060のときは(bd,An)を出力する
-	move.w	#C020|C030|C040|C060,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	~movep91dsp2		;020～060のときは(bd,An)を出力する
+	bran68	~movep91dsp2		;020～060のときは(bd,An)を出力する
 ;020～060ではないので,Anを8増やしてディスプレースメントを8減らす
 ;d6.w=0000_ddd_000_000_aaa
 	moveq.l	#%0000_000_000_000_111,d0
@@ -3003,12 +3004,7 @@ bfdataout6:
 	bra	wrt1wobj
 
 ~movep99:
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~movep10
-	bsr	softwarn
-~movep10:
+	SOFTEMU	C060
 ;ソフトエミュレーションなのでエラッタのチェックは不要
 	bsr	getopsize		;サイズを得る
 	cmpi.b	#SZ_WORD,d0
@@ -3101,11 +3097,9 @@ getdspadr1:
 ~bcc::
 ;68000/68010にはロングディスプレースメントはない
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
-	bne	~bcc00
-	move.w	#C000|C010,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	ilsizeerr_000_bccl
-~bcc00:
+	bne	@f
+	bra68	ilsizeerr_000_bccl
+@@:
 	movea.l	a4,a1
 	bsr	geteamode_noopc		;実効アドレスオペランドを得る
 	cmp.w	#EA_ABSL,d0
@@ -3375,14 +3369,13 @@ insigbitchk:
 	and.w	(RPNBUF1+2,a1),d0
 	bne	insigbitwarn
 ;000～010にはMがない
-	move.w	#C020|C030|C040|C060,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	insigbitchk1
+	bran68	@f
 	btst.b	#12-8,(RPNBUF1+3-1,a1)	;000～010にはMがない
 	bne	insigbitwarn
-insigbitchk1:
+@@:
 ;000～010と060にはT0がない
-	and.w	#C020|C030|C040,d0
+	move.w	#C020|C030|C040,d0
+	and.w	(CPUTYPE,a6),d0
 	bne	insigbitchk2
 	btst.b	#14-8,(RPNBUF1+3-1,a1)	;000～010と060にはT0がない
 	bne	insigbitwarn
@@ -3492,11 +3485,7 @@ getabsl9:
 	or.w	(FPCPID,a6),d7		;コプロセッサID
 
 	bsr	getfpopr		;<ea>/FPオペランドを得る
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~ftst1
-	bsr	softwarn
-~ftst1:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3532,11 +3521,7 @@ getabsl9:
 	lsr.w	#3,d1
 	or.w	d1,d6
 ~fabsneg2:
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fabsneg3
-	bsr	softwarn
-~fabsneg3:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3592,11 +3577,7 @@ getabsl9:
 	lsr.w	#3,d1
 	or.w	d1,d6
 ~funary2:
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~funary3
-	bsr	softwarn
-~funary3:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3618,11 +3599,7 @@ getabsl9:
 	bmi	iladrerr
 	lsl.w	#7,d1
 	or.w	d1,d6
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fcmp1
-	bsr	softwarn
-~fcmp1:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3657,11 +3634,7 @@ getabsl9:
 	bmi	iladrerr
 	lsl.w	#7,d1
 	or.w	d1,d6
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fopr1
-	bsr	softwarn
-~fopr1:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3706,12 +3679,7 @@ fpeadataout_nop:
 	bmi	iladrerr
 	lsl.w	#7,d1			;FPs
 	or.w	d1,d6
-	move.w	#C040|C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~fsincos1
-	bsr	softwarn
-~fsincos1:
+	SOFTEMU	C040|C060
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3771,11 +3739,7 @@ getfpopr6:
 	beq	iladrerr
 	or.w	(EACODE,a1),d7
 	bsr	setfpopsize		;浮動小数点オペレーションサイズのセット
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fmove10
-	bsr	softwarn
-~fmove10:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3809,11 +3773,7 @@ getfpopr6:
 	bne	~fmove6
 	bsr	getkfactor		;.pの場合,kファクタを得る
 ~fmove6:
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fmove11
-	bsr	softwarn
-~fmove11:
+	WARNSOFTEMU d0
 	DSPOPOUT
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -3972,11 +3932,7 @@ getfpopr6:
 	bne	ilsizeerr_fmovemfpn	;.xでなければエラー
 ~fmovem10:
 	or.w	(EACODE,a1),d7
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fmovem11
-	bsr	softwarn
-~fmovem11:
+	WARNSOFTEMU d0
 	bsr	f43g_fourth		;4番目と5番目のチェック
 	DSPOPOUT			;命令コードの出力
 	move.w	d6,d0
@@ -4029,11 +3985,7 @@ getfpopr6:
 	beq	iladrerr
 ~fmovem_c7:
 	or.w	(EACODE,a1),d7
-	move.w	(CPUTYPE,a6),d0
-	and.w	(SOFTFLAG,a6),d0
-	beq	~fmovem_c10
-	bsr	softwarn
-~fmovem_c10:
+	WARNSOFTEMU d0
 	bsr	f43g_fourth		;4番目と5番目のチェック
 	DSPOPOUT
 	move.w	d6,d0
@@ -4079,12 +4031,7 @@ getfpopr6:
 	lsl.w	#7,d1
 	or.w	d1,d6
 ;fmovecrはソフトウェアエミュレーション
-	move.w	#C040|C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~fmovecr1
-	bsr	softwarn
-~fmovecr1:
+	SOFTEMU	C040|C060
 	OPOUT				;命令コードの出力
 	move.w	d6,d0
 	bra	wrt1wobj		;コプロセッサ命令ワードの出力
@@ -4149,12 +4096,7 @@ getfpopr6:
 	bne	iladrerr		;絶対ロングでなければエラー
 ;fdbccは68060ではソフトウェアエミュレーション
 ;cpdbccもここを通るがこのままでよい
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~fdbcc1
-	bsr	softwarn
-~fdbcc1:
+	SOFTEMU	C060
 	OPOUT				;命令コードの出力
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ条件ワードの出力
@@ -4289,12 +4231,7 @@ getfpopr6:
 ~fscc99:
 ;fsccは68060ではソフトウェアエミュレーション
 ;cpsccもここを通るがこのままでよい
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~fscc1
-	bsr	softwarn
-~fscc1:
+	SOFTEMU	C060
 	DSPOPOUT			;命令コードの出力
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ条件ワードの出力
@@ -4311,12 +4248,7 @@ getfpopr6:
 	bsr	gettrapccopr
 ;ftrapccは68060ではソフトウェアエミュレーション
 ;cptrapccもここを通るがこのままでよい
-	move.w	#C060,d0
-	or.w	d0,(SOFTFLAG,a6)
-	and.w	(CPUTYPE,a6),d0
-	beq	~ftrapcc1
-	bsr	softwarn
-~ftrapcc1:
+	SOFTEMU	C060
 	move.w	d6,d0
 	bsr	wrt1wobj		;コプロセッサ条件ワードの出力
 	bra	eadataout
@@ -4375,11 +4307,10 @@ getcache9:
 ;	pmove	MRn,<ea>/<ea>,MRn	(68851/68030)
 ~pmove::
 	move.l	#((EG_CTRL&EG_ALT)<<16)|(EG_CTRL&EG_ALT),d5
-	move.w	(CPUTYPE,a6),d1		;68030では MRn,<ea>/<ea>,MRn とも制御・可変モード
-	and.w	#CMMU,d1
-	beq	~pmove1
+	tst.b	(CPUIS030,a6)		;68030では MRn,<ea>/<ea>,MRn とも制御・可変モード
+	bne	@f
 	move.l	#(EG_ALT<<16)|$FFFF,d5	;68851では MRn,<ea> は可変モード/<ea>,MRn はすべて
-~pmove1:
+@@:
 	bsr	getmreg
 	bmi	~pmove5
 	or.w	#$0200,d7		;MRn,<ea>
@@ -4558,9 +4489,8 @@ getmreg6:
 	move.b	(a1)+,d0
 	bpl	getmreg7
 	moveq.l	#SZ_QUAD,d0		;CRP,SRP,DRPの場合
-	move.w	(CPUTYPE,a6),d1
-	and.w	#CMMU,d1
-	beq	getmreg7		;68030なら.qのみ
+	tst.b	(CPUIS030,a6)
+	bne	getmreg7		;68030なら.qのみ
 	cmpi.b	#SZ_DOUBLE,(CMDOPSIZE,a6)
 	beq	getmreg8		;68851なら.qか.d
 getmreg7:
@@ -4618,11 +4548,11 @@ getmtbl:
 	.even
 
 ;----------------------------------------------------------------
-;	pflusha				(68851/68030/68040)
+;	pflusha				(68851/68030/68040/68060)
 ~pflusha::
-	move.w	(CPUTYPE,a6),d1
-	and.w	#C040|C060,d1
-	bne	~pflushan
+	tst.w	(CPUIS040_060,a6)
+	bne	~pflushan		;68040/68060のpflusha
+
 	addq.l	#asm1skipofst,(sp)	;行末のチェックは行わない
 	move.w	#$F000,d0		;68851/68030のpflusha
 	bsr	wrt1wobj		;命令コードの出力
@@ -4630,23 +4560,23 @@ getmtbl:
 	bra	wrt1wobj		;コプロセッサコマンドワードの出力
 
 ;----------------------------------------------------------------
-;	pflushan			(68040)
+;	pflushan			(68040/68060)
 ~pflushan::
 	OPOUT
 	addq.l	#asm1skipofst,(sp)	;行末のチェックは行わない
 	rts
 
 ;----------------------------------------------------------------
-;	pflush	<fc>,#xx/<fc>,#xx,<ea>/(An)	(68851/68030/68040)
+;	pflush	<fc>,#xx/<fc>,#xx,<ea>/(An)	(68851/68030/68040/68060)
 ~pflush::
-	move.w	(CPUTYPE,a6),d1
-	and.w	#C040|C060,d1
-	bne	~pflushn
+	tst.w	(CPUIS040_060,a6)
+	bne	~pflushn		;68040/68060のpflush
+
 	move.w	#$3000,d7		;68851/68030のpflush
 	bra	~pflushs
 
 ;----------------------------------------------------------------
-;	pflushn/plpaw/plpar	(An)	(68040)
+;	pflushn/plpaw/plpar	(An)	(68040/68060)
 ~pflushn::
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
@@ -4668,12 +4598,11 @@ getmtbl:
 	bne	iladrerr		;#xxでなければエラー
 	tst.w	(RPNLEN1,a1)
 	bpl	exprerr			;定数が得られなければエラー
-	moveq.l	#7,d0			;68030では0～7
-	move.w	(CPUTYPE,a6),d1
-	and.w	#CMMU,d1
-	beq	~pflushs1
-	moveq.l	#15,d0			;68881では0～15
-~pflushs1:
+	moveq.l	#7,d0			;68030(pflush)では0～7
+	tst.b	(CPUIS030,a6)
+	bne	@f
+	moveq.l	#15,d0			;68881(pflush/pflushs)では0～15
+@@:
 	move.l	(RPNBUF1,a1),d1
 	cmp.l	d0,d1
 	bhi	ilvalueerr
@@ -4722,9 +4651,9 @@ getmtbl:
 ;----------------------------------------------------------------
 ;	ptestw/ptestr	<fc>,<ea>,#xx/<fc>,<ea>,#xx,An/(An)	(68851/68030/68040)
 ~ptestwr::
-	move.w	(CPUTYPE,a6),d1
-	and.w	#C040,d1
-	bne	~ptestwr40
+	tst.b	(CPUIS040,a6)
+	bne	~ptestwr40		;68040のptestw/ptestr
+
 	bsr	getfc			;fcを得る 68851/68030のptestw/ptestr
 	or.w	d1,d7
 	move.w	d7,d6			;コプロセッサコマンドワード
@@ -4775,18 +4704,20 @@ getmtbl:
 	OPOUTrts
 
 ;----------------------------------------------------------------
+;	68851/68030のFC(function code)を得る
+;	
 getfc:
 	move.w	(a0)+,d0
-	moveq.l	#$0000,d1
+	moveq.l	#%00000,d1
 	cmp.w	#REG_SFC|OT_REGISTER,d0	;SFC
 	beq	getfc9
-	moveq.l	#$0001,d1
+	moveq.l	#%00001,d1
 	cmp.w	#REG_DFC|OT_REGISTER,d0	;DFC
 	beq	getfc9
 	subq.l	#2,a0
 	bsr	getdreg			;データレジスタオペランドを得る
 	bmi	getfc5
-	or.w	#$0008,d1
+	or.w	#%01000,d1		;%01RRR
 	rts
 
 getfc5:
@@ -4797,15 +4728,14 @@ getfc5:
 	tst.w	(RPNLEN1,a1)
 	bpl	exprerr			;定数が得られなければエラー
 	moveq.l	#7,d0			;68030では0～7
-	move.w	(CPUTYPE,a6),d1
-	and.w	#CMMU,d1
-	beq	getfc6
+	tst.b	(CPUIS030,a6)
+	bne	@f
 	moveq.l	#15,d0			;68881では0～15
-getfc6:
+@@:
 	move.l	(RPNBUF1,a1),d1
 	cmp.l	d0,d1
 	bhi	ilvalueerr
-	or.w	#$0010,d1
+	or.w	#%10000,d1		;%1DDDD(68851)または%10XXX(68030)
 getfc9:
 	rts
 

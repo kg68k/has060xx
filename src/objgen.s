@@ -558,7 +558,7 @@ dispadr:				;04xx (d,An)
 	beq	dispadr_w
 dispadr_l:				;ディスプレースメントがロングワードなので
 	addq.l	#4,(LOCATION,a6)	;ベースディスプレースメント扱いになる
-	bra68	d0,dispadr_lerr
+	bra68	dispadr_lerr
 	move.w	#EXW_FULL|EXW_BDL|EXW_IS,d0	;ロングワードの場合の拡張ワード
 	bsr	out1wobj		;拡張ワードを出力する
 	move.w	d2,d0
@@ -878,7 +878,7 @@ outpcdisp_w:
 	bra	prnpccode
 
 outpcdisp_l:
-	bra68	d0,ilrelerr_outside	;68000/68010なら32bitオフセットは使用できない
+	bra68	ilrelerr_outside	;68000/68010なら32bitオフセットは使用できない
 	move.l	d1,d0
 	bsr	out1lobj
 	bra	prnpccode

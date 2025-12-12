@@ -470,7 +470,7 @@ dispadr5:				;最適化対象コード
 dispadr6:
 	move.l	d1,d0			;(tst.l d1 & move.w d1,d0)
 	beq	dispadr5_nul
-	bra68	d4,dispadr5_w		;68000/68010なら0でなければ.w
+	bra68	dispadr5_w		;68000/68010なら0でなければ.w
 	ext.l	d0
 	cmp.l	d0,d1
 	beq	dispadr5_w

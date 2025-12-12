@@ -83,17 +83,15 @@ tolower	.macro	reg
 
 ;----------------------------------------------------------------
 ;	68000/68010ならジャンプする
-bra68	.macro	reg,label
-	move.b	(CPUTYPE,a6),reg
-	andi.b	#(C000|C010)>>8,reg
+bra68	.macro	label
+	tst.w	(CPUIS000_010,a6)
 	bne	label
 	.endm
 
 ;----------------------------------------------------------------
 ;	68000/68010でないならジャンプする
-bran68	.macro	reg,label
-	move.b	(CPUTYPE,a6),reg
-	andi.b	#(C000|C010)>>8,reg
+bran68	.macro	label
+	tst.w	(CPUIS000_010,a6)
 	beq	label
 	.endm
 

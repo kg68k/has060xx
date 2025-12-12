@@ -1618,19 +1618,32 @@ cputype_set::
 	bmi	cputype_set9
 
 	move.w	d0,(CPUTYPE,a6)
-	bra	~~cpu_setsymbol
+	bsr	cpu_setsymbol
+	bra	setcpuisflags
+
+setcpuisflags:
+	movem.l	d0-d1/a0,-(sp)
+	.fail	(C060.ne.(1<<13)).or.(C000.ne.(1<<8))
+	lsr.w	#8,d0
+	lea.l	(CPUIS000,a6),a0
+	moveq.l	#6-1,d1			;CPUIS000 .. CPUIS060
+@@:	lsr.w	#1,d0
+	scs.b	(a0)+
+	dbra	d1,@b
+	movem.l	(sp)+,d0-d1/a0
+cputype_set9:
+	rts
 
 ;---------------------------------------------------------------
 ;<d1.l:CPU番号(68000など)
-~~cpu_setsymbol:
+cpu_setsymbol:
 	tst.l	(CPUSYMBOL,a6)
-	beq	~~cpu_setsymbol9
+	beq	cpu_setsymbol9
 	move.l	a1,-(sp)
 	movea.l	(CPUSYMBOL,a6),a1
 	move.l	d1,(SYM_VALUE,a1)
 	movea.l	(sp)+,a1
-~~cpu_setsymbol9:
-cputype_set9:
+cpu_setsymbol9:
 	rts
 
 ;---------------------------------------------------------------
@@ -1655,7 +1668,7 @@ cputype_set9:
 ;<d1.l:CPU番号(68000など)
 ;>d0.l:0=正常終了,-1=エラー
 cputype_update::
-	movem.l	d1-d2,-(sp)
+	movem.l	d1-d2/a0,-(sp)
 	bsr	cputype_set
 	move.l	d0,d2			;CPUタイプ(C000など)
 	bmi	98f			;エラー
@@ -1666,9 +1679,7 @@ cputype_update::
 	move.l	d1,d0			;CPU番号(68000など)
 	bsr	wrtd0l
 ;--------------------------------
-	move.l	d2,d0			;CPUTYPE
-	and.w	#C000|C010,d0
-	bne	1f
+	bra68	1f
 	tst.b	(EXTSHORT,a6)
 	bne	2f
 1:
@@ -1686,17 +1697,14 @@ cputype_update::
 	move.l	#4,(EXTLEN,a6)
 3:
 ;--------------------------------
-	move.l	d2,d0			;CPUTYPE
-	and.w	#C040|C060,d0
+	tst.w	(CPUIS040_060,a6)
 	beq	3f
 ;68040/68060のとき
 ;FPUIDを1にする
 	move.w	#1<<9,(FPCPID,a6)
 3:
 ;--------------------------------
-	move.l	d2,d0			;CPUTYPE
-	and.w	#C020|C030|C040|C060,d0
-	bne	2f
+	bran68	2f
 ;68000/68010のとき
 ;浮動小数点命令を書けないのでF43G対策を終了する
 	bsr	f43gcut			;F43G対策のシーケンスをカットする
@@ -1712,7 +1720,6 @@ cputype_update::
 ;IGNORE_ERRATAがONでもレコードは初期化すること
 ;(-k1 -m68060 -k0のとき-k0ではレコードを初期化しないから)
 ;レコードが初期化されていなければ初期化する
-	movem.l	d0/a0,-(sp)
 	lea.l	(F43GREC,a6),a0
 	move.l	a0,(F43GPTR,a6)
 	moveq.l	#5-1,d0
@@ -1728,13 +1735,12 @@ cputype_update::
 	move.l	a0,(16*4,a0)
 	lea.l	(F43GREC+16*4,a6),a0
 	move.l	a0,(-16*4+4,a0)
-	movem.l	(sp)+,d0/a0
 19:
 3:
 ;--------------------------------
 	moveq.l	#0,d0
 98:	tst.l	d0
-	movem.l	(sp)+,d1-d2
+	movem.l	(sp)+,d1-d2/a0
 	rts
 
 
