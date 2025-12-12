@@ -36,7 +36,6 @@ asmmain::
 	bsr	workinit		;ワークエリアの初期化
 	bsr	g2asmode
 	bsr	defressym		;予約済みシンボルの初期化
-	bsr	cpuinit			;CPUモードの初期化
 	bsr	makeprndate		;日時文字列の作成
 	bsr	docmdline		;コマンドラインの解釈
 	bsr	predefinesymbol		;プレデファインシンボルの定義
@@ -274,6 +273,7 @@ workinit:
 
 	bsr	option_j_all
 
+	move.l	#68000,(ICPUNUMBER,a6)
 	move.w	#1<<9,(FPCPID,a6)
 
 	move.w	#4,(LOCALLENMAX,a6)
@@ -411,14 +411,6 @@ symbol_has:	.dc.b	'__HAS__',0
 symbol_has060:	.dc.b	'__HAS060__',0
 symbol_has060x:	.dc.b	'__HAS060X__',0
 	.even
-
-
-;----------------------------------------------------------------
-;	CPUモードの初期化
-;----------------------------------------------------------------
-cpuinit:
-	move.l	#68000,(ICPUNUMBER,a6)
-	rts
 
 
 ;----------------------------------------------------------------
