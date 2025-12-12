@@ -269,7 +269,7 @@ workinit:
 	lea.l	(REQFILPTR,a6),a0
 	move.l	a0,(REQFILEND,a6)
 	move.l	#6,(NUMOFSECT,a6)
-	move.b	#-1,(WARNLEVEL,a6)
+	st.b	(WARNLEVEL,a6)		;-w255相当(全通知) 厳密にするならmove.b #4,...
 
 	bsr	option_j_all
 
