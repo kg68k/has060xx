@@ -278,11 +278,9 @@ workinit:
 	move.w	#4,(LOCALLENMAX,a6)
 	move.w	#10000,(LOCALNUMMAX,a6)
 
-	move.l	#SYMHASHTBL,d0
-	lea.l	(a6,d0.l),a0
+	leawork	SYMHASHTBL,a0
 	move.l	a0,(SYMHASHPTR,a6)
-	move.l	#CMDHASHTBL,d0
-	lea.l	(a6,d0.l),a0
+	leawork	CMDHASHTBL,a0
 	move.l	a0,(CMDHASHPTR,a6)
 
 	clr.w	(SYMTBLCOUNT,a6)

@@ -104,11 +104,17 @@ bsrl	.macro	adr,reg
 	.endm
 
 ;----------------------------------------------------------------
-;	32ビットの相対lea
+;	a6レジスタ(WORKBEGIN)からの16ビットの相対lea
 llea	.macro	adr,reg
-@currentpc:
-	lea.l	(@currentpc,pc),reg
-	adda.l	#adr-@currentpc,reg
+	lea.l	(adr-WORKBEGIN,a6),reg
+	.endm
+
+;----------------------------------------------------------------
+;	a6レジスタ(WORKBEGIN)からの32ビットの相対lea
+;	ワークの後ろの方の(d16,a6)で届かないラベル用
+leawork	.macro	adr,reg
+	movea.l	a6,reg
+	adda.l	#adr,reg
 	.endm
 
 ;----------------------------------------------------------------
