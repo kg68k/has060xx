@@ -258,7 +258,7 @@ tablebody	.macro
 	optbln	'rte',	    ~noopr,	$4E73,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
 	optbln	'trapv',    ~noopr,	$4E76,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
 	optbln	'rtr',	    ~noopr,	$4E77,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
-	optbl	'stop',     ~stoprtd,	$4E72,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
+	optbl	'stop',     ~stop,	$4E72,C000|C010|C020|C030|C040|C060,SZNO,       SZNO
 	optbl	'lpstop',   ~lpstop,	$F800,			       C060,    SZW,    SZNO
 
 	optbl	'rtd',	    ~rtd,	$4E74,	   C010|C020|C030|C040|C060,SZNO,       SZNO

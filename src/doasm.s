@@ -1026,7 +1026,7 @@ setfpop_tbl:				;サイズコードテーブル
 	clr.b	(CMDOPSIZE,a6)		;move.b #SZ_BYTE,(CMDOPSIZE,a6)
 	tst.w	(RPNLEN1,a1)
 	bpl	~orandeori_sr1		;定数でない
-	move.w	#$00E0,d1		;未定義のビットが1
+	move.w	#$00E0,d0		;未定義のビットが1
 	cmp.w	#$0200,d7		;andi to ccr
 	beq	~orandeori_sr04
 	bra	~orandeori_sr03
@@ -1039,27 +1039,18 @@ setfpop_tbl:				;サイズコードテーブル
 	tst.w	(RPNLEN1,a1)
 	bpl	~orandeori_sr1		;定数でない
 
-	move.w	#$08E0,d1		;未定義のビットが1
-	bran68	@f
-	or.w	#$1000,d1		;000～010にはMがない
-@@:
-	move.w	#C020|C030|C040,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	~orandeori_sr02
-	or.w	#$4000,d1		;000～010と060にはT0がない
-~orandeori_sr02:
-;d1.w:未定義のビットが1
+	bsr	getsrinvalidbits	;d0.w:未定義のビットが1
 	cmp.w	#$0240,d7		;andi to sr
 	beq	~orandeori_sr04
 ~orandeori_sr03:
-	and.w	(RPNBUF1+2,a1),d1
+	and.w	(RPNBUF1+2,a1),d0
 	beq	~orandeori_sr1
 	bra	~orandeori_sr05
 
 ~orandeori_sr04:
-	not.w	d1
-	or.w	(RPNBUF1+2,a1),d1
-	not.w	d1
+	not.w	d0
+	or.w	(RPNBUF1+2,a1),d0
+	not.w	d0
 	beq	~orandeori_sr1
 ~orandeori_sr05:
 	bsr	insigbitwarn
@@ -1691,8 +1682,9 @@ setfpop_tbl:				;サイズコードテーブル
 	move.w	d6,d0
 	and.w	#EA_IMM,d0
 	beq	~move_tosrccr209
-	move.w	d7,d0			;$44C0=ccr,$46C0=sr
-	bsr	insigbitchk
+	cmpi.w	#$46C0,d7
+	seq	d0			;$00=ccr,$ff=sr
+	bsr	insigbitchksrccr
 ~move_tosrccr209:
 	or.w	(EACODE,a1),d7
 	bsr	f43g_fifth		;5番目のチェック(ソース)
@@ -3320,7 +3312,7 @@ gettrapccopr5:				;オペランドのないtrapcc
 
 ;----------------------------------------------------------------
 ;	stop	#xx
-~stoprtd::
+~stop::
 	move.b	#SZ_WORD,(CMDOPSIZE,a6)
 	movea.l	a4,a1
 	bsr	geteamode		;実効アドレスオペランドを得る
@@ -3356,31 +3348,33 @@ gettrapccopr5:				;オペランドのないtrapcc
 	bra	eadataout
 
 ;----------------------------------------------------------------
+
+insigbitchksrccr:
+	tst.b	d0			;$00=ccr,$ff=sr
+	bne	insigbitchksr
+;insigbitchkccr:
+	moveq.l	#.not.%0001_1111,d0	;%000X_NZVC
+	bra	insigbitchk
+
 insigbitchksr:
-	move.w	#$46C0,d0
-;d0:$44C0=ccr,$46C0=sr
+	bsr	getsrinvalidbits
 insigbitchk:
 	tst.w	(RPNLEN1,a1)
-	bpl	insigbitchk2
-	sub.w	#$4600,d0
-	subx.w	d0,d0			;$FFFF=ccr,$0000=sr
-	clr.b	d0			;$FF00=ccr,$0000=sr
-	or.w	#$08E0,d0		;$FFE0=ccr,$08E0=sr
+	bpl	@f			;定数でない
 	and.w	(RPNBUF1+2,a1),d0
 	bne	insigbitwarn
-;000～010にはMがない
-	bran68	@f
-	btst.b	#12-8,(RPNBUF1+3-1,a1)	;000～010にはMがない
-	bne	insigbitwarn
-@@:
-;000～010と060にはT0がない
-	move.w	#C020|C030|C040,d0
-	and.w	(CPUTYPE,a6),d0
-	bne	insigbitchk2
-	btst.b	#14-8,(RPNBUF1+3-1,a1)	;000～010と060にはT0がない
-	bne	insigbitwarn
-insigbitchk2:
-	rts
+@@:	rts
+
+;現在のCPUでSRに割り当てのないビットを得る
+;	out:d0.w=未定義のビットが1
+getsrinvalidbits:
+	move	#.notw.%1010_0111_0001_1111,d0	;68000/68010 T0なし Mなし
+	bra68	@f
+	move	#.notw.%1011_0111_0001_1111,d0	;68060 T0なし Mあり
+	tst.b	(CPUIS060,a6)
+	bne	@f
+	move	#.notw.%1111_0111_0001_1111,d0	;68020/68030/68040 T0あり Mあり
+@@:	rts
 
 ;----------------------------------------------------------------
 ;	callm	#xx,<ea>		(68020)
