@@ -291,13 +291,13 @@ workinit:
 	lea.l	(SYMTBLBEGIN,a6),a0
 	move.l	a0,(SYMTBLCURBGN,a6)
 
+	lea.l	(LINEBUF,a6),a0
+	move.l	a0,(LINEBUFPTR,a6)
+	leawork	OPRBUF,a0
+	move.l	a0,(OPRBUFPTR,a6)
+
 	move.l	(TEMPPTR,a6),d0
 	doquad	d0			;ロングワード境界に合わせる
-	move.l	d0,(LINEBUFPTR,a6)	;処理中の行の読み込みバッファ
-	add.l	#MAXLINELEN,d0
-	move.l	d0,(OPRBUFPTR,a6)	;オペランドの中間コード変換バッファ/文字列処理用ワーク
-	add.l	#MAXLINELEN*2,d0
-
 	move.l	(MEMLIMIT,a6),d1
 	sub.l	d0,d1			;d1=未使用領域のサイズ
 	move.l	d1,d2
