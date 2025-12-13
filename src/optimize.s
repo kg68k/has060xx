@@ -1454,8 +1454,7 @@ calctmpexpr:
 	movea.l	d0,a1
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a1)	;(ST_VALUE or ST_LOCAL)
 	bhi	calctmpexpr9		;数値シンボルでない
-	cmpi.b	#SA_DEFINE,(SYM_ATTRIB,a1)
-	blo	calctmpexpr9		;未定義シンボル
+	brsym_undet (SYM_ATTRIB,a1),calctmpexpr9	;未定義シンボル
 
 	clr.w	d0
 	move.b	(SYM_SECTION,a1),d0

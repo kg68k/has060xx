@@ -857,13 +857,14 @@ macexlsym1:
 macexlsym2:
 	tst.w	d0
 	bmi	macexlsym9		;登録されていない
+
 	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
-					;数値シンボルか?
-	bne	macexlsym9
-	cmpi.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;シンボルは定義済みか?
-	blo	macexlsym9
-	tst.b	(SYM_SECTION,a1)	;シンボルは定数か?
-	bne	macexlsym9
+	bne	macexlsym9		;数値シンボルではない
+	brsym_undet (SYM_ATTRIB,a1),macexlsym9	;値が定まっていない
+	tst.b	(SYM_SECTION,a1)
+	bne	macexlsym9		;値が定数ではない
+
+	;シンボルは値の定まった定数
 	exg.l	a0,a2
 	move.l	(SYM_VALUE,a1),d0	;シンボルの値
 	moveq.l	#0,d1			;(左詰め)
@@ -1016,13 +1017,14 @@ getmacparasym:				;シンボル値
 	bsr	isdefdsym		;その語はシンボルとして登録されているか?
 	tst.w	d0
 	bmi	getmacparasym9		;登録されていない
+
 	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
-					;数値シンボルか?
-	bne	getmacparasym9
-	cmpi.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;シンボルは定義済みか/
-	blo	getmacparasym9
-	tst.b	(SYM_SECTION,a1)	;シンボルは定数か?
-	bne	getmacparasym9
+	bne	getmacparasym9		;数値シンボルではない
+	brsym_undet (SYM_ATTRIB,a1),getmacparasym9	;値が定まっていない
+	tst.b	(SYM_SECTION,a1)
+	bne	getmacparasym9		;値が定数ではない
+
+	;シンボルは値の定まった定数
 	move.l	(SYM_VALUE,a1),d0	;シンボルの値
 	moveq.l	#0,d1			;(左詰め)
 	movea.l	a0,a1

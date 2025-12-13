@@ -38,6 +38,50 @@ SA_DEFINE	equ	2	;定義されて値が定まった
 SA_PREDEFINE	equ	3	;定義されて値が定まっており再定義できない
 
 ;----------------------------------------------------------------
+;	シンボル定義属性分岐マクロ
+
+	.fail	SA_UNDEF.ne.0
+brsym_undef	.macro ea,label
+	tst.b	ea
+	beq	label
+	.endm
+
+brsym_not_undef	.macro ea,label
+	tst.b	ea
+	bne	label
+	.endm
+
+brsym_nodet	.macro ea,label
+	cmpi.b	#SA_NODET,ea
+	beq	label
+	.endm
+
+brsym_define	.macro ea,label
+	cmpi.b	#SA_DEFINE,ea
+	beq	label
+	.endm
+
+brsym_predef	.macro ea,label
+	cmpi.b	#SA_PREDEFINE,ea
+	beq	label
+	.endm
+
+;値が定まっていない(SA_UNDEF/SA_NODET)なら分岐する
+;	(SA_DEFINE/SA_PREDEFINEは分岐しない)
+brsym_undet	.macro ea,label
+	cmpi.b	#SA_DEFINE,ea
+	bcs	label
+	.endm
+
+;値が定まっている(SA_DEFINE/SA_PREDEFINE)なら分岐する
+;	(SA_UNDEF/SA_NODETは分岐しない)
+brsym_determ	.macro ea,label
+	cmpi.b	#SA_DEFINE,ea
+	bcc	label
+	.endm
+
+
+;----------------------------------------------------------------
 ;	SYM_FIRST シンボル定義方法(ST_VALUEのみ)
 ;----------------------------------------------------------------
 

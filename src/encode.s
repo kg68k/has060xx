@@ -53,11 +53,11 @@ deflabel8:
 	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
 					;シンボルのタイプ
 	bne	deflabel00		;タイプの異なるシンボルと重複している
+
 ;offsymのときはプレデファインシンボルでなければ二重定義エラーを出さない
-	tst.b	(SYM_ATTRIB,a1)		;(cmpi.b #SA_UNDEF,(SYMATTRIB,a1))
-	beq	deflabel81		;未定義なので問題なし
-	cmpi.b	#SA_PREDEFINE,(SYM_ATTRIB,a1)
-	beq	redeferr_predefine	;プレデファインシンボルだった
+	brsym_undef (SYM_ATTRIB,a1),deflabel81		;未定義なら問題なし
+	brsym_predef (SYM_ATTRIB,a1),redeferr_predefine	;プレデファインシンボルだった
+
 ;SA_NODET/SA_DEFINE
 	tst.b	(OFFSYMMOD,a6)
 	beq	redeferr		;offsym中でないので二重定義エラー

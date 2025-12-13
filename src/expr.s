@@ -290,12 +290,11 @@ convrpnnum_defined1:
 	bra	convrpnnum_defined9
 
 convrpnnum_defined2:
-	move.w	#OT_VALUEB,d0
 	move.l	(a0)+,a3
-	move.b	(SYM_ATTRIB,a3),d0	;cmpi.b #SA_UNDEF,SYM_ATTRIB(a3)
-	neg.b	d0
-	subx.l	d0,d0
-	rts
+	moveq.l	#0,d0			;.defined.未定義シンボル=0
+	brsym_undef (SYM_ATTRIB,a3),@f
+	moveq.l	#-1,d0			;.defined.定義済みシンボル=-1
+@@:	rts
 
 ;.sizeof.()
 convrpnnum_sizeof:
@@ -628,8 +627,7 @@ calcrpnref:
 ;	シンボル
 calcrpnsym:
 	movea.l	(a1)+,a0
-	cmpi.b	#SA_NODET,(SYM_ATTRIB,a0)
-	bls	calcrpnundef		;未定義シンボル
+	brsym_undet (SYM_ATTRIB,a0),calcrpnundef	;値が定まっていない
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a0)
 	bcs	calcrpnsym1
 	moveq.l	#0,d0			;外部参照シンボル
@@ -687,13 +685,12 @@ calcrpnlocctr0:
 	ble	calcrpnlocctr2
 	move.l	a1,-(sp)
 	movea.l	(OFFSYMTMP,a6),a1
-	cmpi.b	#SA_DEFINE,(SYM_ATTRIB,a1)
-	beq	calcrpnlocctr3
+	brsym_define (SYM_ATTRIB,a1),@f
+
 	movea.l	a1,a0
 	movea.l	(sp)+,a1
 	bra	calcrpnundef
-
-calcrpnlocctr3:
+@@:
 	add.l	(OFFSYMVAL,a6),d0	;+初期値
 	sub.l	(SYM_VALUE,a1),d0	;-仮シンボル値
 	movea.l	(sp)+,a1
