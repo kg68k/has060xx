@@ -367,7 +367,7 @@ getmaccmd22:
 	bne	getmaccmd20		;	〃
 getmaccmd90:
 	move.l	a1,(CMDTBLPTR,a6)	;シンボルテーブルへのポインタ
-	sf.b	(ISMACRO,a6)
+	clr.b	(ISMACRO,a6)
 	moveq.l	#0,d0
 	movem.l	(sp)+,d2-d4/a1-a3
 	rts

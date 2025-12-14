@@ -166,7 +166,7 @@ deflabel_offsym2:
 encodeline::
 	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	a0,a2
-	sf.b	(LABXDEF,a6)
+	clr.b	(LABXDEF,a6)
 	move.w	#-1,(LABNAMELEN,a6)
 	bsr	skipspc
 	move.b	(a0),d0			;行が終了
@@ -283,7 +283,7 @@ encodeline11:
 	cmpi.b	#':',(a1)
 	bne	encodecmd3		;xxxx: xxxx
 	bsr	deflabel		;xxxx: xxxx: 最初のラベルを定義
-	sf.b	(LABXDEF,a6)
+	clr.b	(LABXDEF,a6)
 	bra	encodeline10
 
 ;----------------------------------------------------------------
@@ -375,7 +375,7 @@ encodecmd9:
 	tst.b	(ISIFSKIP,a6)		;ifスキップ中のエラー→命令を飛ばして何もしない
 	beq	badopeerr
 encodecmd99:				;命令がない場合
-	sf.b	(ISMACRO,a6)
+	clr.b	(ISMACRO,a6)
 	clr.l	(CMDTBLPTR,a6)
 	move.l	a0,(LINEPTR,a6)
 	rts

@@ -32,7 +32,7 @@ asmpass2::
 	move.b	#SZ_LONG|ESZ_OPT,(OPTMOREFLG,a6)
 asmpass21:
 	addq.b	#1,(OPTCOUNT,a6)
-	sf.b	(OPTFLAG,a6)
+	clr.b	(OPTFLAG,a6)
 	lea.l	(TEMPFILPTR,a6),a1
 	bsr	frewind			;テンポラリファイル先頭に移動
 	bsr	resetlocctr		;ロケーションカウンタの初期化
@@ -360,7 +360,7 @@ aligncmd:				;14xx アラインメントの調整
 sectchg:				;15xx セクション変更
 ;offsymでシンボルなしのときも0になってしまうが
 ;パス2以降では二重定義エラーは出ないはずなので無視する
-	sf.b	(OFFSYMMOD,a6)
+	clr.b	(OFFSYMMOD,a6)
 	move.l	a5,(LOCATION,a6)
 	move.l	a4,(LOCOFFSET,a6)
 	bsr	chgsection

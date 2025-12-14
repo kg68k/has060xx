@@ -40,10 +40,10 @@ asmpass3::
 	bsr	createopen		;オブジェクトファイルのオープン
 
 	clr.l	(NUMOFERR,a6)
-	sf.b	(ISASMEND,a6)
+	clr.b	(ISASMEND,a6)
 	clr.l	(DSBSIZE,a6)
 	clr.l	(OBJLENCTR,a6)
-	sf.b	(ISOBJOUT,a6)
+	clr.b	(ISOBJOUT,a6)
 	clr.w	(OBJCONCTR,a6)
 
 	clr.w	(IFNEST,a6)
@@ -51,9 +51,9 @@ asmpass3::
 	clr.w	(MACNEST,a6)
 	clr.w	(MACREPTNEST,a6)
 	clr.w	(MACLOCSMAX,a6)
-	sf.b	(ISNLIST,a6)
+	clr.b	(ISNLIST,a6)
 	clr.w	(PAGEFLG,a6)
-	sf.b	(ISMACDEF,a6)
+	clr.b	(ISMACDEF,a6)
 
 	move.l	(ICPUNUMBER,a6),d1
 	bsr	cputype_set		;CPUTYPEとCPUSYMBOLの値を初期化
@@ -142,8 +142,8 @@ outaligninfo1:
 ;----------------------------------------------------------------
 outxrefdef:
 	clr.l	(XREFSYMNO,a6)
-	sf.b	(ISXDEFMOD,a6)
-	sf.b	(ISUNDEFSYM,a6)
+	clr.b	(ISXDEFMOD,a6)
+	clr.b	(ISUNDEFSYM,a6)
 
 	move.l	(SYMTBLBEGIN,a6),d3
 	beq	outxrefdef9		;シンボルが一つもない
@@ -272,7 +272,7 @@ isnonxdefsymbol:
 xdefmodify:
 	tst.b	(ISXDEFMOD,a6)
 	beq	xdefmodify9		;外部定義シンボルの修正は不要
-	sf.b	(ISUNDEFSYM,a6)
+	clr.b	(ISUNDEFSYM,a6)
 
 	move.l	(SYMTBLBEGIN,a6),d3
 	beq	xdefmodify9		;シンボルが一つもない
@@ -351,7 +351,7 @@ dopass315:
 	move.w	d0,d1
 	bne	dopass315
 dopass32:
-	sf.b	(ISOBJOUT,a6)		;(offsetセクションで終了した時のため)
+	clr.b	(ISOBJOUT,a6)		;(offsetセクションで終了した時のため)
 	bsr	outobj1w		;0000:オブジェクトファイル終了
 	bsr	scdout			;SCDデータの出力
 	lea.l	(OBJFILPTR,a6),a1
@@ -866,7 +866,7 @@ outpcbra:				;bra/cpbra命令
 	bra	ilrelerr_const		;定数ならエラー
 
 outpcdisp:				;PC間接アドレッシング
-	sf.b	d3
+	clr.b	d3
 	bsr	tmpreadsymex1
 	move.w	d0,d4			;値のセクション
 	beq	outpcdisp1		;定数の場合
@@ -1167,7 +1167,7 @@ dcbcmd5:				;PRNファイル出力時、データが128bytes以上の場合
 dcbcmd6:
 	movem.l	d0-d3,-(sp)
 	bsr	outobjexpr		;データを出力
-	sf.b	(MAKEPRN,a6)		;(PRNファイルに出力されるのは最初の1つだけ)
+	clr.b	(MAKEPRN,a6)		;(PRNファイルに出力されるのは最初の1つだけ)
 	movem.l	(sp)+,d0-d3
 	dbra	d3,dcbcmd6
 	clr	d3
@@ -1247,7 +1247,7 @@ fdcbcmd7:
 	move.l	(a1)+,d0
 	bsr	out1lobj		;データを出力
 	dbra	d1,fdcbcmd7
-	sf.b	(MAKEPRN,a6)		;(PRNファイルに出力されるのは最初の1つだけ)
+	clr.b	(MAKEPRN,a6)		;(PRNファイルに出力されるのは最初の1つだけ)
 	dbra	d3,fdcbcmd6
 	clr	d3
 	subq.l	#1,d3
@@ -1285,9 +1285,9 @@ sectchg:				;15xx セクション変更
 	bsr	chgsection
 ;offsymでシンボルなしのときも0になってしまうが
 ;パス2以降では二重定義エラーは出ないはずなので無視する
-	sf.b	(OFFSYMMOD,a6)
+	clr.b	(OFFSYMMOD,a6)
 	move.l	(LOCATION,a6),(LTOPLOC,a6)	;prnlineで使う
-	sf.b	(ISOBJOUT,a6)
+	clr.b	(ISOBJOUT,a6)
 	or.w	#$2000,d0		;20xx 0000 0000 :セクション変更
 	bsr	outobj1w
 	moveq.l	#0,d0
@@ -1426,7 +1426,7 @@ prnctrl:				;1Axx リスト出力制御
 	rts
 
 prnlist:				;.list
-	sf.b	(ISNLIST,a6)
+	clr.b	(ISNLIST,a6)
 	rts
 
 prnnlist:				;.nlist
@@ -1434,7 +1434,7 @@ prnnlist:				;.nlist
 	rts
 
 prnsall:				;.sall
-	sf.b	(ISLALL,a6)
+	clr.b	(ISLALL,a6)
 	rts
 
 prnlall:				;.lall
@@ -1610,7 +1610,7 @@ mdefbgn:				;26xx マクロ等定義開始
 
 ;----------------------------------------------------------------
 mdefend:				;27xx マクロ等定義終了
-	sf.b	(ISMACDEF,a6)
+	clr.b	(ISMACDEF,a6)
 	rts
 
 
@@ -2406,7 +2406,7 @@ prnline1:
 ;	仮出力済みのときは出力せずに仮出力済みフラグをリセット
 	tst.b	(PADVFLG,a6)
 	beq	prnline2
-	sf.b	(PADVFLG,a6)
+	clr.b	(PADVFLG,a6)
 	rts
 
 prnline2:
@@ -2420,7 +2420,7 @@ initprnlptr:
 ;----------------------------------------------------------------
 ;	PRNファイルのファイル名行を表示する
 prnfname::
-	sf.b	(PFILFLG,a6)
+	clr.b	(PFILFLG,a6)
 	movea.l	(OPRBUFPTR,a6),a2
 	move.b	#'<',(a2)+		;'< ～ >'
 	movea.l	(INPFILE,a6),a0

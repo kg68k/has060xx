@@ -896,7 +896,7 @@ pseudo_redeferr_a1:
 ;offsymの終了はセクションの変更が完了してから行うこと
 ;d0=セクション
 	move.b	(OFFSYMMOD,a6),-(sp)
-	sf.b	(OFFSYMMOD,a6)
+	clr.b	(OFFSYMMOD,a6)
 	bsr	chgsection
 	or.w	#T_SECT,d0		;セクション変更
 	bsr	wrtobjd0w
@@ -1006,7 +1006,7 @@ offsymtailchk01:
 ;	.offset	<式>
 ~~offset::
 	move.b	(OFFSYMMOD,a6),-(sp)
-	sf.b	(OFFSYMMOD,a6)
+	clr.b	(OFFSYMMOD,a6)
 	bsr	calcconst
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
@@ -1137,7 +1137,7 @@ skipfault1:
 
 skipfault9:
 	clr.w	(IFNEST,a6)		;処理を強制終了させる
-	sf.b	(ISIFSKIP,a6)
+	clr.b	(ISIFSKIP,a6)
 	bra	misiferr_eof
 
 skipfif:				;if/iff/ifdef/ifndef
@@ -1166,7 +1166,7 @@ skipfendif1:
 	subq.w	#1,(IFNEST,a6)
 	moveq.l	#0,d0
 skipfend:
-	sf.b	(ISIFSKIP,a6)
+	clr.b	(ISIFSKIP,a6)
 	move.w	#-1,(LABNAMELEN,a6)
 	rts
 
@@ -1679,7 +1679,7 @@ cputype_update::
 1:
 ;68000/68010または外部参照のデフォルトがワードのとき
 ;ディスプレースメントのサイズをワードにする
-	sf.b	(EXTSIZEFLG,a6)
+	clr.b	(EXTSIZEFLG,a6)
 	move.b	#SZ_WORD,(EXTSIZE,a6)
 	move.l	#2,(EXTLEN,a6)
 	bra	3f
@@ -1702,7 +1702,7 @@ cputype_update::
 ;68000/68010のとき
 ;浮動小数点命令を書けないのでF43G対策を終了する
 	bsr	f43gcut			;F43G対策のシーケンスをカットする
-	sf.b	(F43GTEST,a6)		;F43G対策を行わない
+	clr.b	(F43GTEST,a6)		;F43G対策を行わない
 	bra	3f
 2:
 ;68020/68030/68040/68060のとき

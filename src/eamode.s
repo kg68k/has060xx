@@ -826,7 +826,7 @@ geteapar_pcreg1:
 	moveq.l	#-1,d2			;PC間接指定
 	cmp.w	#REG_OPC|OT_REGISTER,d0
 	beq	geteapar_next
-	sf.b	(OPTIONALPC,a1)
+	clr.b	(OPTIONALPC,a1)
 	cmp.w	#REG_PC|OT_REGISTER,d0
 	beq	geteapar_next
 	move.w	#$01FF,d2		;PC間接ベースレジスタサプレス(ZPC)
@@ -960,7 +960,7 @@ geteapm3:
 geteapm5:				;サイズ指定が省略された場合
 	tst.w	d0
 	bpl	geteapm99		;式の値が得られない場合
-	sf.b	(OPTIONALPC,a1)		;定数の場合はOPCは無効
+	clr.b	(OPTIONALPC,a1)		;定数の場合はOPCは無効
 	bra68	geteapm8		;68000/68010は常に.w(確定)
 	move.l	(RPNBUF1,a1),d0
 	move.w	d0,d1
@@ -1006,7 +1006,7 @@ geteapm99pc2:
 	tst.b	(PCTOABSLCAN,a6)
 	bne	geteapm99pc3
 ;絶対ロングで確定する
-	sf.b	(OPTIONALPC,a1)
+	clr.b	(OPTIONALPC,a1)
 	move.b	#EAD_ABSLW,(EADTYPE,a1)
 	move.b	#SZ_LONG,(OPTSIZESET,a1)
 	bra	getea_absl

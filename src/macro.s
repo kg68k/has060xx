@@ -127,7 +127,7 @@
 	beq	iloprerr		;引数がない
 	lea.l	(LOCSYMBUF,a6),a1	;(仮引数リスト登録バッファ)
 	st.b	(a1)+			;$FF $00 $01
-	sf.b	(a1)+
+	clr.b	(a1)+
 	move.b	#$01,(a1)+
 	bsr	getpara			;仮引数を得る
 	clr.b	(a1)
@@ -286,8 +286,8 @@ defmacro9:
 					;処理を強制終了させる
 	move.w	#T_MDEFEND,d0		;マクロ等定義終了
 	bsr	wrtobjd0w
-	sf.b	(ISIFSKIP,a6)
-	sf.b	(ISMACDEF,a6)
+	clr.b	(ISIFSKIP,a6)
+	clr.b	(ISMACDEF,a6)
 	bra	mismacerr_eof
 
 ;----------------------------------------------------------------
@@ -307,10 +307,10 @@ defmacend:
 defmacend1:
 	movea.l	(TEMPPTR,a6),a0
 	st.b	(a0)+			;終了コード $FF $00 $00
-	sf.b	(a0)+
-	sf.b	(a0)+
+	clr.b	(a0)+
+	clr.b	(a0)+
 	move.l	a0,(TEMPPTR,a6)
-	sf.b	(ISIFSKIP,a6)
+	clr.b	(ISIFSKIP,a6)
 	tst.b	(MACMODE,a6)
 	bne	defmacend9		;rept/irp/irpc定義の場合
 	movea.l	(MACSYMPTR,a6),a0
@@ -319,7 +319,7 @@ defmacend9:
 	move.w	#-1,(LABNAMELEN,a6)	;endm行にラベルがあったら無視する
 	move.w	#T_MDEFEND,d0		;マクロ等定義終了
 	bsr	wrtobjd0w
-	sf.b	(ISMACDEF,a6)
+	clr.b	(ISMACDEF,a6)
 	rts
 
 ;----------------------------------------------------------------
@@ -352,8 +352,8 @@ defmac_locsymover:
 	st.b	(ISASMEND,a6)		;処理を強制終了させる
 	move.w	#T_MDEFEND,d0		;マクロ等定義終了
 	bsr	wrtobjd0w
-	sf.b	(ISIFSKIP,a6)
-	sf.b	(ISMACDEF,a6)
+	clr.b	(ISIFSKIP,a6)
+	clr.b	(ISMACDEF,a6)
 	bra	toomanylocsymerr
 
 ;----------------------------------------------------------------
@@ -641,7 +641,7 @@ exmacsetup3:				;マクロ展開の場合
 exmacsetup4:				;irp/irpc展開の場合
 	movea.l	(MACPARAPTR,a6),a0
 	st.b	(a0)+			;(第一引数)$FF $00 $01
-	sf.b	(a0)+
+	clr.b	(a0)+
 	move.b	#$01,(a0)+
 	bsr	strcpy			;引数リストから1つ得る
 	move.l	a1,(IRPPARAPTR,a6)

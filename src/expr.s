@@ -33,7 +33,7 @@ convrpn::
 	movem.l	d2/a1-a3,-(sp)
 	move.l	a0,-(sp)
 	move.l	sp,(EXPRSPSAVE,a6)
-	sf.b	(EXPRISSTR,a6)
+	clr.b	(EXPRISSTR,a6)
 	ffst.b	SZ_NONE,(EXPRSIZE,a6)
 	lea.l	(RPNSTACK,a6),a2
 	moveq.l	#0,d1

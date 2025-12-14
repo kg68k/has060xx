@@ -111,11 +111,11 @@ asmpass1::
 	bsr	createopen		;テンポラリファイルをオープンする
 	bsr	setsymdebfile		;'-g'スイッチ指定時のファイル名準備
 
-	sf.b	(ISASMEND,a6)
+	clr.b	(ISASMEND,a6)
 	clr.l	(LINENUM,a6)
-	sf.b	(ISOBJOUT,a6)
+	clr.b	(ISOBJOUT,a6)
 	clr.w	(OBJCONCTR,a6)
-	sf.b	(ISIFSKIP,a6)
+	clr.b	(ISIFSKIP,a6)
 
 	clr.w	(IFNEST,a6)
 	clr.w	(INCLDNEST,a6)
@@ -124,7 +124,7 @@ asmpass1::
 	clr.w	(MACLOCSMAX,a6)
 	clr.w	(SCDATTRIB,a6)		;(SCDATTRIB & SCDATRPREV)
 	clr.w	(SCDLN,a6)
-	sf.b	(ISMACDEF,a6)
+	clr.b	(ISMACDEF,a6)
 
 	move.l	(TEMPPTR,a6),d0		;数字ローカルラベルの番号のテーブルを初期化
 	doquad	d0
@@ -230,7 +230,7 @@ asmline2:
 	move.l	(SYM_FUNC,a1),a2
 	clr.w	(SOFTFLAG,a6)
 	clr.b	(ABSLTOOPCCAN,a6)
-	sf.b	(PCTOABSLCAN,a6)
+	clr.b	(PCTOABSLCAN,a6)
 	jsr	(a2)			;処理ルーチンへジャンプ
 asm1skipbase:
 	tst.w	(a0)
@@ -1589,7 +1589,7 @@ setfpop_tbl:				;サイズコードテーブル
 	st.b	(DSPADRDEST,a6)
 	movea.l	a5,a1
 	bsr	eadataout		;デスティネーションのデータ
-	sf.b	(DSPADRDEST,a6)
+	clr.b	(DSPADRDEST,a6)
 	rts
 
 ~move_a:				;move <ea>,An → movea
@@ -1949,7 +1949,7 @@ f43g_second1:
 	bmi	~pea99			;定数(jmp $FF0038など)
 ;jmp/jsr label
 ~jmpjsr_to_jbrajbsr:
-	sf.b	(OPTIONALPC,a1)		;OPCの処理が行われないようにする
+	clr.b	(OPTIONALPC,a1)		;OPCの処理が行われないようにする
 	cmp.w	#$4E80,d7		;jsrか?
 	beq	~jmpjsr_jbsr
 ;jmp label
@@ -3218,7 +3218,7 @@ getdspadr1:
 	bmi	ilrelerr_const		;<label>が定数ならエラー
 	move.b	#EAD_DSPPC,(EADTYPE,a1)	;(d,PC)と同じ処理を行う
 	move.b	#SZ_WORD,(RPNSIZE1,a1)	;サイズは必ず.w
-	sf.b	(OPTIONALPC,a1)		;OPCの処理が行われないようにする
+	clr.b	(OPTIONALPC,a1)		;OPCの処理が行われないようにする
 	bra	eadataout
 
 ;----------------------------------------------------------------
@@ -4098,7 +4098,7 @@ getfpopr6:
 	bmi	ilrelerr_const		;<label>が定数ならエラー
 	move.b	#EAD_DSPPC,(EADTYPE,a1)	;(d,PC)と同じ処理を行う
 	move.b	#SZ_WORD,(RPNSIZE1,a1)	;サイズは必ず.w
-	sf.b	(OPTIONALPC,a1)		;OPCの処理が行われないようにする
+	clr.b	(OPTIONALPC,a1)		;OPCの処理が行われないようにする
 	bra	eadataout
 
 ;----------------------------------------------------------------

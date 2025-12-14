@@ -64,7 +64,7 @@ resetlocctr::
 	move.l	d0,(LOCOFFSET,a6)
 	move.b	d0,(ORGNUM,a6)
 	move.b	#SECT_TEXT,(SECTION,a6)	;textセクションにする
-	sf.b	(OFFSYMMOD,a6)
+	clr.b	(OFFSYMMOD,a6)
 	movem.l	(sp)+,d0-d1/a0-a2
 	rts
 

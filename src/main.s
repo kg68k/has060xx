@@ -917,7 +917,7 @@ option_c:
 	bcc	usage			;0～4でない
 ;-c4 すべての最適化を許可
 option_c_4:
-	sf.b	(OPTIMIZE,a6)		;前方参照の最適化を許可
+	clr.b	(OPTIMIZE,a6)		;前方参照の最適化を許可
 ;拡張された最適化を許可
 	st.b	(OPTCLR,a6)		;CLRを最適化する
 	st.b	(OPTMOVEA,a6)		;MOVEAを最適化する
@@ -933,11 +933,11 @@ option_c_4:
 	st.b	(OPTJMPJSR,a6)		;jmp/jsrを最適化する
 ;v2互換を解除
 option_c_2off:
-	sf.b	(COMPATMODE,a6)		;v2非互換
-	sf.b	(NOABSSHORT,a6)		;絶対ショートへの変換を許可
-	sf.b	(NOQUICK,a6)		;クイックイミディエイトへの変換を許可
-	sf.b	(NONULDISP,a6)		;ディスプレースメントの削除を許可
-	sf.b	(NOBRACUT,a6)		;分岐命令の削除を許可
+	clr.b	(COMPATMODE,a6)		;v2非互換
+	clr.b	(NOABSSHORT,a6)		;絶対ショートへの変換を許可
+	clr.b	(NOQUICK,a6)		;クイックイミディエイトへの変換を許可
+	clr.b	(NONULDISP,a6)		;ディスプレースメントの削除を許可
+	clr.b	(NOBRACUT,a6)		;分岐命令の削除を許可
 	rts
 
 ;-c3 v3互換
@@ -961,25 +961,25 @@ option_c_1:
 option_c_0:
 	st.b	(OPTIMIZE,a6)		;前方参照の最適化を禁止
 	st.b	(IGNORE_ERRATA,a6)
-	sf.b	(COMPATMODE,a6)		;v2非互換
+	clr.b	(COMPATMODE,a6)		;v2非互換
 	st.b	(NOABSSHORT,a6)		;絶対ショートへの変換を禁止
 	st.b	(NOQUICK,a6)		;クイックイミディエイトへの変換を禁止
 	st.b	(NONULDISP,a6)		;ディスプレースメントの削除を禁止
 	st.b	(NOBRACUT,a6)		;分岐命令の削除を禁止
 ;拡張された最適化を禁止
 option_c_exoff:
-	sf.b	(OPTCLR,a6)		;CLRを最適化する
-	sf.b	(OPTMOVEA,a6)		;MOVEAを最適化する
-	sf.b	(OPTADDASUBA,a6)	;ADDA/CMPA/SUBAを最適化する
-	sf.b	(OPTCMPA,a6)		;ADDA/CMPA/SUBAを最適化する
-	sf.b	(OPTLEA,a6)		;LEAを最適化する
-	sf.b	(OPTASL,a6)		;ASLを最適化する
-	sf.b	(OPTCMP0,a6)		;CMP.bwl #0,Dn→TST.bwl Dn
-	sf.b	(OPTMOVE0,a6)		;MOVE.bw #0,Dn→CLR.bw Dn
-	sf.b	(OPTCMPI0,a6)		;CMPI.bwl #0,<ea>→TST.bwl <ea>
-	sf.b	(OPTSUBADDI0,a6)	;ADDI/SUBI #d3,<ea>→ADDQ/SUBQ #d3,<ea>
-	sf.b	(OPTBSR,a6)		;直後へのbsrをpeaにする
-	sf.b	(OPTJMPJSR,a6)		;jmp/jsrを最適化する
+	clr.b	(OPTCLR,a6)		;CLRを最適化する
+	clr.b	(OPTMOVEA,a6)		;MOVEAを最適化する
+	clr.b	(OPTADDASUBA,a6)	;ADDA/CMPA/SUBAを最適化する
+	clr.b	(OPTCMPA,a6)		;ADDA/CMPA/SUBAを最適化する
+	clr.b	(OPTLEA,a6)		;LEAを最適化する
+	clr.b	(OPTASL,a6)		;ASLを最適化する
+	clr.b	(OPTCMP0,a6)		;CMP.bwl #0,Dn→TST.bwl Dn
+	clr.b	(OPTMOVE0,a6)		;MOVE.bw #0,Dn→CLR.bw Dn
+	clr.b	(OPTCMPI0,a6)		;CMPI.bwl #0,<ea>→TST.bwl <ea>
+	clr.b	(OPTSUBADDI0,a6)	;ADDI/SUBI #d3,<ea>→ADDQ/SUBQ #d3,<ea>
+	clr.b	(OPTBSR,a6)		;直後へのbsrをpeaにする
+	clr.b	(OPTJMPJSR,a6)		;jmp/jsrを最適化する
 	rts
 
 option_c_x::
@@ -1106,7 +1106,7 @@ option_b4:
 	bsr	option_b2_1		;4→6(allはmemを含む)
 	bsr	option_b1_0
 option_b4_1:
-	sf.b	(PCTOABSLNOTALL,a6)
+	clr.b	(PCTOABSLNOTALL,a6)
 	rts
 
 option_b3:
@@ -1120,15 +1120,15 @@ option_b2:
 	bsr	option_b4_0
 	bsr	option_b2_1
 option_b1_0:
-	sf.b	(LONGABS,a6)
-	sf.b	(BRATOJBRA,a6)
+	clr.b	(LONGABS,a6)
+	clr.b	(BRATOJBRA,a6)
 	rts
 
 option_b1:
 	bsr	option_b4_0
 	bsr	option_b1_1
 option_b2_0:
-	sf.b	(PCTOABSL,a6)
+	clr.b	(PCTOABSL,a6)
 	rts
 
 option_b0:
@@ -1174,8 +1174,8 @@ option_k:
 	bhi	usage
 	beq	option_k_1
 option_k_0:
-	sf.b	(IGNORE_ERRATA,a6)
-	sf.b	(OPTIMIZE,a6)
+	clr.b	(IGNORE_ERRATA,a6)
+	clr.b	(OPTIMIZE,a6)
 	rts
 
 option_k_1:
@@ -1202,7 +1202,7 @@ option_y_1:
 	rts
 
 option_y_0:
-	sf.b	(PREDEFINE,a6)
+	clr.b	(PREDEFINE,a6)
 	rts
 
 ;----------------------------------------------------------------
