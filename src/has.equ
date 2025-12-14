@@ -133,6 +133,30 @@ writecrlf: .macro ea_aipi
 	move.b	#LF,ea_aipi
 	.endm
 
+;----------------------------------------------------------------
+;	即値0との比較
+ztst:	.macro	value,ea
+	.sizem	sz
+	.fail	(value).ne.0
+	tst&sz	ea
+	.endm
+
+;----------------------------------------------------------------
+;	即値0の書き込み
+zclr:	.macro	value,ea
+	.sizem	sz
+	.fail	(value).ne.0
+	clr&sz	ea
+	.endm
+
+;----------------------------------------------------------------
+;	即値$ffの書き込み(バイトサイズのみ)
+ffst:	.macro	value,ea
+	.sizem	sz
+	.fail	(value).ne.$ff
+	st&sz	ea
+	.endm
+
 
 ;----------------------------------------------------------------
 ;	CPUタイプビット

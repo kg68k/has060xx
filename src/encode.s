@@ -50,8 +50,7 @@ deflabel7:
 
 deflabel8:
 	move.l	a1,(ERRMESSYM,a6)
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
-					;シンボルのタイプ
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)	;シンボルのタイプ
 	bne	deflabel00		;タイプの異なるシンボルと重複している
 
 ;offsymのときはプレデファインシンボルでなければ二重定義エラーを出さない
@@ -115,7 +114,7 @@ deflabel_offsym:
 	move.w	#RPN_SYMBOL,(a1)+
 	move.l	(OFFSYMTMP,a6),(a1)+	;-仮シンボル
 	move.w	#OP_SUB|RPN_OPERATOR,(a1)+	;オペレータ
-	clr.w	(a1)			;エンドコード(move.w #RPN_END,(a1))
+	zclr.w	RPN_END,(a1)		;エンドコード
 	lea.l	(RPNBUF,a6),a1
 	bsr	calcrpn
 	movea.l	a2,a1
@@ -308,7 +307,7 @@ encodecmd4:
 	tst.l	(CMDTBLPTR,a6)
 	beq	encodecmd99		;命令がない
 encodecmd5:				;オペレーションサイズを得る
-	st.b	(CMDOPSIZE,a6)		;(move.b #SZ_NONE,(CMDOPSIZE,a6))
+	ffst.b	SZ_NONE,(CMDOPSIZE,a6)
 	movea.l	a1,a0
 	cmpi.b	#'.',(a0)
 	bne	encodecmd7		;オペレーションサイズがない
@@ -482,7 +481,7 @@ encodeopr3:
 	cmp.b	#'!',d0
 	beq	encodeinreal		;浮動小数点実数内部表記
 encodeopr5:
-	clr.b	(a2)+			;1文字のキャラクタ(move.b #OT_CHAR>>8,(a2)+)
+	zclr.b	OT_CHAR>>8,(a2)+	;1文字のキャラクタ
 	move.b	d0,(a2)+
 	cmp.b	#',',d0
 	bne	encodeopr1
@@ -499,7 +498,7 @@ encodeopr9:				;オペランド終了チェック
 	bra	encodeopr1
 
 encodeopr99:				;オペランドが終了した
-	clr.w	(a2)			;(move.w #OT_EOL,(a2))
+	zclr.w	OT_EOL,(a2)
 	rts
 
 ;----------------------------------------------------------------

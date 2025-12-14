@@ -300,7 +300,7 @@ calcfex_symbol:				;シンボル
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a1)	;(ST_VALUE or ST_LOCAL)
 	bhi	exprerr
 	brsym_undet (SYM_ATTRIB,a1),exprerr	;値が定まっていない
-	tst.b	(SYM_SECTION,a1)	;(cmpi.b #SECT_ABS,(SYM_SECTION,a1))
+	ztst.b	SECT_ABS,(SYM_SECTION,a1)
 	bne	exprerr			;定数でない
 	move.l	(SYM_VALUE,a1),d0
 	bsr	ltox

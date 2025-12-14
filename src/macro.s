@@ -858,7 +858,7 @@ macexlsym2:
 	tst.w	d0
 	bmi	macexlsym9		;登録されていない
 
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	macexlsym9		;数値シンボルではない
 	brsym_undet (SYM_ATTRIB,a1),macexlsym9	;値が定まっていない
 	tst.b	(SYM_SECTION,a1)
@@ -1018,7 +1018,7 @@ getmacparasym:				;シンボル値
 	tst.w	d0
 	bmi	getmacparasym9		;登録されていない
 
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	getmacparasym9		;数値シンボルではない
 	brsym_undet (SYM_ATTRIB,a1),getmacparasym9	;値が定まっていない
 	tst.b	(SYM_SECTION,a1)

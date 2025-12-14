@@ -355,8 +355,7 @@ predefinesymbol:
 	moveq.l	#0,d0
 	lea.l	(symbol_cpu,pc),a0
 	bsr	def_predefinesymbol
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
-					;シンボルのタイプ
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)	;シンボルのタイプ
 	bne	@f			;定義できなかった(念のため)
 	move.l	a1,(CPUSYMBOL,a6)
 @@:
@@ -394,13 +393,12 @@ def_predefinesymbol:
 	move.l	d0,-(sp)
 	moveq.l	#ST_VALUE,d2		;数値シンボル
 	bsr	defstrsymbol		;新しく登録する
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
-					;シンボルのタイプ
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)	;シンボルのタイプ
 	bne	@f			;定義できなかった(念のため)
 
 	move.b	#SA_PREDEFINE,(SYM_ATTRIB,a1)	;プレデファインシンボル
-	clr.b	(SYM_SECTION,a1)	;セクション番号
-	move.l	(sp),(SYM_VALUE,a1)	;値
+	zclr.b	SECT_ABS,(SYM_SECTION,a1)	;セクション番号
+	move.l	(sp),(SYM_VALUE,a1)		;値
 @@:	addq.l	#4,sp
 	rts
 
@@ -775,9 +773,9 @@ option_s1:
 	movea.l	a2,a0
 	moveq.l	#ST_VALUE,d2		;数値シンボル
 	bsr	defstrsymbol		;新しく登録する
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
-					;シンボルのタイプ
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)	;シンボルのタイプ
 	bne	usage			;タイプの異なるシンボルと重複している
+
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;定義済シンボル
 	clr.b	(SYM_SECTION,a1)	;セクション番号
 	move.l	(sp)+,(SYM_VALUE,a1)	;シンボル値

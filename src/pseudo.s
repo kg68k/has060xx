@@ -246,7 +246,7 @@ dodcnum:				;パラメータ式
 	bne	dodcnum1		;式に後続するサイズ指定がない
 	move.w	(a0)+,d0		;式に後続するサイズ
 dodcnum11:
-	tst.b	d0			;cmp.b #SZ_BYTE,d0
+	ztst.b	SZ_BYTE,d0
 	bne	dodcnum0
 	move.b	#SZ_SHORT,d0		;.b→.s
 	bra	dodcnum3
@@ -479,7 +479,7 @@ getdcreal6:
 ~~ds_0:
 	move.b	(CMDOPSIZE,a6),d0
 	bmi	~~ds_w
-	tst.b	d0			;cmp.b #SZ_BYTE,d0
+	ztst.b	SZ_BYTE,d0
 	beq	~~ds_b
 	cmp.b	#SZ_WORD,d0
 	beq	~~ds_w
@@ -599,7 +599,7 @@ defltopsym:
 	bne	defsymbol		;未登録なら新しく登録する
 	cmp.b	(SYM_TYPE,a1),d2	;シンボルのタイプ
 	bne	defltopsym02		;タイプの異なるシンボルと重複している
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	defltopsym99
 	brsym_predef (SYM_ATTRIB,a1),defltopsym01	;プレデファインシンボルを再定義しようとした
 defltopsym99:
@@ -611,7 +611,7 @@ defltopsym01:
 	bra	redeferr_predefine
 
 defltopsym02:
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	pseudo_ilsymerr_a1	;タイプの異なるシンボルと重複している
 	brsym_not_undef (SYM_ATTRIB,a1),pseudo_ilsymerr_a1
 					;タイプの異なるシンボルと重複している
@@ -653,8 +653,7 @@ pseudo_redeferr_a1:
 	bne	redeferr_set
 	bsr	redefwarn_set
 ~~set1:
-	.fail	SYM1ST_SET.ne.$ff
-	st.b	(SYM_FIRST,a1)
+	ffst.b	SYM1ST_SET,(SYM_FIRST,a1)
 	moveq.l	#-1,d2
 	bra	~~equ1
 
@@ -665,8 +664,7 @@ pseudo_redeferr_a1:
 	bsr	defltopsym		;行頭のシンボルを定義する
 	brsym_not_undef (SYM_ATTRIB,a1),pseudo_redeferr_a1	;定義済シンボルならエラー
 
-	.fail	SYM1ST_OTHER.ne.$00
-	sf.b	(SYM_FIRST,a1)
+	zclr.b	SYM1ST_OTHER,(SYM_FIRST,a1)
 	moveq.l	#0,d2
 ~~equ1:
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
@@ -814,7 +812,7 @@ pseudo_redeferr_a1:
 	cmp.w	#OT_SYMBOL,d0
 	bne	iloprerr		;シンボル以外の記述はエラー
 	move.l	(a1)+,a0		;シンボルテーブルへのポインタ
-	tst.b	(SYM_TYPE,a0)		;cmpi.b #ST_VALUE,(SYM_TYPE,a0)
+	ztst.b	ST_VALUE,(SYM_TYPE,a0)
 	bne	iloprerr		;数値シンボルでないのでエラー
 	brsym_predef (SYM_ATTRIB,a0),~~globl_predef
 					;プレデファインシンボルは外部宣言できない
@@ -862,7 +860,7 @@ pseudo_redeferr_a1:
 	cmp.w	#OT_SYMBOL,d0
 	bne	iloprerr		;シンボル以外の記述はエラー
 	move.l	(a1)+,a0		;シンボルテーブルへのポインタ
-	tst.b	(SYM_TYPE,a0)		;cmpi.b #ST_VALUE,(SYM_TYPE,a0)
+	ztst.b	ST_VALUE,(SYM_TYPE,a0)
 	bne	iloprerr		;数値シンボルでないのでエラー
 	brsym_not_undef (SYM_ATTRIB,a0),pseudo_redeferr_a0
 					;定義済シンボルならエラー
@@ -942,7 +940,7 @@ pseudo_redeferr_a1:
 	bne	iloprerr_pseudo_tail	;行が終了していない
 ;初期値を与えるシンボルの状態を確認する
 ;定義済みでもエラーにしない
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	pseudo_ilsymerr_a1	;タイプの異なるシンボルと重複している
 	brsym_predef (SYM_ATTRIB,a1),pseudo_redeferr_a1
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)

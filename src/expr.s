@@ -34,12 +34,12 @@ convrpn::
 	move.l	a0,-(sp)
 	move.l	sp,(EXPRSPSAVE,a6)
 	sf.b	(EXPRISSTR,a6)
-	move.b	#SZ_NONE,(EXPRSIZE,a6)
+	ffst.b	SZ_NONE,(EXPRSIZE,a6)
 	lea.l	(RPNSTACK,a6),a2
 	moveq.l	#0,d1
 	clr.b	(a2)+			;スタックボトムを設定
 	bsr	convrpndo
-	clr.w	(a1)			;エンドコード(move.w #RPN_END,(a1))
+	zclr.w	RPN_END,(a1)		;エンドコード
 	tst.w	d0
 	bpl	convrpn1
 	move.l	(sp),a0			;式変換に失敗したのでポインタを戻す

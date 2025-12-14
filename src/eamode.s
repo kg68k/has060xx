@@ -1184,7 +1184,7 @@ getea_reg:
 	rts
 
 getea_reg1:
-	tst.b	(CMDOPSIZE,a6)		;cmpi.b #SZ_BYTE,(CMDOPSIZE,a6)
+	ztst.b	SZ_BYTE,(CMDOPSIZE,a6)
 	beq	ilsizeerr		;オペレーションサイズが.bならエラー
 	move.w	#EA_AN,d0		;アドレスレジスタ直接
 	rts

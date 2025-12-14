@@ -155,7 +155,7 @@ outxrefdef1:
 	sub.w	(SYMTBLCOUNT,a6),d2	;最後のブロックの場合
 
 outxrefdef2:
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	outxrefdef7		;数値シンボル以外なら何もしない
 
 	move.b	(SYM_EXTATR,a1),d0
@@ -284,7 +284,7 @@ xdefmodify1:
 	sub.w	(SYMTBLCOUNT,a6),d2	;最後のブロックの場合
 
 xdefmodify2:
-	tst.b	(SYM_TYPE,a0)		;cmpi.b #ST_VALUE,(SYM_TYPE,a0)
+	ztst.b	ST_VALUE,(SYM_TYPE,a0)
 	bne	xdefmodify7		;数値シンボル以外なら何もしない
 
 	cmpi.b	#SECT_XDEF,(SYM_EXTATR,a0)
@@ -2107,7 +2107,7 @@ makesymptr1:
 	bne	makesymptr2		;まだ続きのブロックがある
 	sub.w	(SYMTBLCOUNT,a6),d2	;最後のブロックの場合
 makesymptr2:
-	tst.b	(SYM_TYPE,a1)		;cmpi.b #ST_VALUE,(SYM_TYPE,a1)
+	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	makesymptr5		;数値シンボル以外なら何もしない
 	brsym_undet (SYM_ATTRIB,a1),makesymptr5	;値が確定していなければ何もしない
 
@@ -2318,7 +2318,7 @@ prnundefsym1:
 	sub.w	(SYMTBLCOUNT,a6),d2	;最後のブロックの場合
 
 prnundefsym2:
-	tst.b	(SYM_TYPE,a2)		;cmpi.b #ST_VALUE,(SYM_TYPE,a2)
+	ztst.b	ST_VALUE,(SYM_TYPE,a2)
 	bne	prnundefsym7		;数値シンボル以外なら何もしない
 	brsym_determ (SYM_ATTRIB,a2),prnundefsym8	;確定済みシンボル
 prnundefsym3:

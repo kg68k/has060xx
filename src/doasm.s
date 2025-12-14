@@ -183,7 +183,7 @@ asm1loop92:
 
 	moveq.l	#SECT_TEXT,d0
 	bsr	chgsection		;.textセクションに戻す
-	clr.w	d0			;move.w #T_EOF,d0
+	zclr.w	T_EOF,d0
 	bsr	wrtobjd0w		;ファイル終了
 	lea.l	(TEMPFILPTR,a6),a1
 	bra	fflush			;テンポラリファイルをフラッシュする
@@ -559,7 +559,7 @@ ead_abslw7:
 ead_imm0:
 	cmp.b	#SZ_LONG,(CMDOPSIZE,a6)
 	bne	ead_imm01
-	tst.b	(EAIMMCNT,a1)		;(cmpi.b #1-1,(EAIMMCNT,a1))
+	ztst.b	1-1,(EAIMMCNT,a1)
 	bne	iloprerr		;.lでオペランドが2つ以上あればエラー
 ead_imm01:
 	tst.w	(RPNLEN1,a1)
@@ -1023,7 +1023,7 @@ setfpop_tbl:				;サイズコードテーブル
 ;	cmp.b	#SZ_BYTE,d0		;上でd0.bにmove.bした直後なのでtst.bは不要
 	bne	ilsizeerr_ccr
 ~orandeori_ccr1:
-	clr.b	(CMDOPSIZE,a6)		;move.b #SZ_BYTE,(CMDOPSIZE,a6)
+	zclr.b	SZ_BYTE,(CMDOPSIZE,a6)
 	tst.w	(RPNLEN1,a1)
 	bpl	~orandeori_sr1		;定数でない
 	move.w	#$00E0,d0		;未定義のビットが1
@@ -1129,7 +1129,7 @@ setfpop_tbl:				;サイズコードテーブル
 	bra	iladrerr
 
 ~cmp_a:					;cmp <ea>,An → cmpa
-	tst.b	(CMDOPSIZE,a6)		;cmpi.b #SZ_BYTE,(CMDOPSIZE,a6)
+	ztst.b	SZ_BYTE,(CMDOPSIZE,a6)
 	beq	ilsizeerr_an		;.bならエラー
 	move.w	#$B0C0,d7
 	bra	~sbadcpa1
@@ -1201,7 +1201,7 @@ setfpop_tbl:				;サイズコードテーブル
 	bra	~subaddq1
 
 ~subadd_a:				;sub/add <ea>,An → suba/adda
-	tst.b	(CMDOPSIZE,a6)		;cmpi.b #SZ_BYTE,(CMDOPSIZE,a6)
+	ztst.b	SZ_BYTE,(CMDOPSIZE,a6)
 	beq	ilsizeerr_an		;.bならエラー
 	or.w	#$00C0,d7
 	move.w	(EACODE,a5),d1
@@ -1593,7 +1593,7 @@ setfpop_tbl:				;サイズコードテーブル
 	rts
 
 ~move_a:				;move <ea>,An → movea
-	tst.b	(CMDOPSIZE,a6)		;cmpi.b #SZ_BYTE,(CMDOPSIZE,a6)
+	ztst.b	SZ_BYTE,(CMDOPSIZE,a6)
 	beq	ilsizeerr_an		;.bならエラー
 	move.w	#$2040,d7
 	move.w	(EACODE,a5),d1
@@ -1617,10 +1617,10 @@ setfpop_tbl:				;サイズコードテーブル
 ;MOVE.bw #0,Dn
 	moveq.l	#7,d0
 	and.w	(EACODE,a5),d0		;レジスタ
-	tst.b	(CMDOPSIZE,a6)		;cmpi.b #SZ_BYTE,(CMDOPSIZE,a6)
-	beq	~move_q0b
+	ztst.b	SZ_BYTE,(CMDOPSIZE,a6)
+	beq	@f
 	or.w	#$0040,d0		;.bでなければワード(サイズが省略された場合も含む)
-~move_q0b:
+@@:
 	or.w	#$4200,d0		;CLR.bw Dn
 	bra	wrt1wobj
 
@@ -2236,17 +2236,17 @@ f43g_second1:
 	bsr	geteamode		;実効アドレスオペランドを得る
 	move.b	#SZ_LONG,d1		;<ea>がDnの場合サイズは.l
 	cmp.w	#EA_DN,d0
-	beq	~btst2
-	clr.b	d1			;move.b #SZ_BYTE,d1
-					;<ea>がDn以外の場合サイズは.b
+	beq	@f
+
+	zclr.b	SZ_BYTE,d1		;<ea>がDn以外の場合サイズは.b
 	and.w	d6,d0			;データ(btst)/データ・可変(bchg/bclr/bset)モード
 	beq	iladrerr
-~btst2:
+@@:
 	move.b	(CMDOPSIZE,a6),d6
 	bmi	~btst3
 	cmp.b	d1,d6
 	beq	~btst3
-	tst.b	d1			;cmp.b #SZ_BYTE,d1
+	ztst.b	SZ_BYTE,d1
 	beq	ilsizeerr_bitmem
 	bra	ilsizeerr_bitreg
 ~btst3:
@@ -2268,25 +2268,25 @@ f43g_second1:
 	bsr	geteamode		;実効アドレスオペランドを得る
 	move.b	#SZ_LONG,d1		;<ea>がDnの場合サイズは.l
 	cmp.w	#EA_DN,d0
-	beq	~btst6
-	clr.b	d1			;move.b #SZ_BYTE,d1
-					;<ea>がDn以外の場合サイズは.b
+	beq	@f
+
+	zclr.b	SZ_BYTE,d1		;<ea>がDn以外の場合サイズは.b
 	and.w	#.not.EA_IMM,d6		;#xx,#xxはエラー
 	and.w	d6,d0			;データ(btst)/データ・可変(bchg/bclr/bset)モード
 	beq	iladrerr
-~btst6:
+@@:
 	move.b	(CMDOPSIZE,a6),d6
 	bmi	~btst7
 	cmp.b	d1,d6
 	beq	~btst7
-	tst.b	d1			;cmp.b #SZ_BYTE,d1
+	ztst.b	SZ_BYTE,d1
 	beq	ilsizeerr_bitmem
 	bra	ilsizeerr_bitreg
 ~btst7:
 	or.w	(EACODE,a1),d7
 	bsr	f43g_fifth		;5番目のチェック
 	DSPOPOUT
-	clr.b	(CMDOPSIZE,a6)		;move.b #SZ_BYTE,(CMDOPSIZE,a6)
+	zclr.b	SZ_BYTE,(CMDOPSIZE,a6)
 	movea.l	a4,a1
 	bsr	eadataout		;ビット番号を出力
 	movea.l	a5,a1
@@ -3124,7 +3124,7 @@ getdspadr1:
 	move.b	(CMDOPSIZE,a6),d0
 	cmp.b	#SZ_SHORT,d0
 	beq	~bcc_size2
-	tst.b	d0			;cmp.b #SZ_BYTE,d0
+	ztst.b	SZ_BYTE,d0
 	bne	~bcc_size1
 	move.b	#SZ_SHORT,(CMDOPSIZE,a6)	;SZ_BYTE→SZ_SHORT
 	bra	~bcc_size2
@@ -3388,7 +3388,7 @@ getsrinvalidbits:
 	bsr	geteamode		;実効アドレスオペランドを得る
 	and.w	#EG_CTRL,d0		;制御モード
 	beq	iladrerr
-	clr.b	(CMDOPSIZE,a6)		;move.b #SZ_BYTE,(CMDOPSIZE,a6)
+	zclr.b	SZ_BYTE,(CMDOPSIZE,a6)
 	or.w	(EACODE,a1),d7
 	DSPOPOUT
 	movea.l	a4,a1
