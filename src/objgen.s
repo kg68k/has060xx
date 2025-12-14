@@ -201,13 +201,9 @@ outglobl:				;globlシンボルの出力
 	brsym_undef (SYM_ATTRIB,a1),outxref0	;未定義なら外部参照にする
 
 outxdef0:
-;??で始まるシンボルを外部定義にしない
-	movea.l	(SYM_NAME,a1),a0	;文字列の先頭
-	cmpi.b	#'?',(a0)+
-	bne	@f
-	cmpi.b	#'?',(a0)+
-	beq	outxrefdef8
-@@:
+	bsr	isnonxdefsymbol		;??から始まるシンボルとプレデファインシンボルを
+	beq	outxrefdef8		;外部定義にしない
+
 	move.b	#SECT_XDEF,(SYM_EXTATR,a1)
 outxdef:				;外部定義シンボルの出力
 	brsym_determ (SYM_ATTRIB,a1),outxdef1
@@ -253,6 +249,22 @@ outsymbol:				;シンボルの出力
 	move.b	(LEADINGSYMCHAR,a6),d0
 	beq	wrtstr
 	bra	wrtstr_with_leading_char
+
+;スイッチ-dで外部定義にしないシンボルか調べる
+isnonxdefsymbol:
+	movea.l	(SYM_NAME,a1),a0	;文字列の先頭
+	moveq.l	#'?',d0
+	cmp.b	(a0)+,d0
+	bne	@f
+	cmp.b	(a0)+,d0
+	beq	9f			;??で始まるシンボル
+@@:
+	brsym_predef (SYM_ATTRIB,a1),9f	;プレデファインシンボル
+
+	moveq.l	#-1,d0			;それ以外は外部定義にする
+	rts
+9:	moveq.l	#0,d0			;外部定義にしない
+	rts
 
 ;----------------------------------------------------------------
 ;	外部定義シンボルの修正
