@@ -1285,7 +1285,7 @@ sectchg:				;15xx セクション変更
 	bsr	chgsection
 ;offsymでシンボルなしのときも0になってしまうが
 ;パス2以降では二重定義エラーは出ないはずなので無視する
-	clr.b	(OFFSYMMOD,a6)
+	zclr.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	move.l	(LOCATION,a6),(LTOPLOC,a6)	;prnlineで使う
 	clr.b	(ISOBJOUT,a6)
 	or.w	#$2000,d0		;20xx 0000 0000 :セクション変更
@@ -1309,7 +1309,7 @@ offsymcmd1:
 	move.l	d0,(OFFSYMSYM,a6)
 	bsr	tmpreadd0l		;仮シンボルを読み出す
 	move.l	d0,(OFFSYMTMP,a6)
-	move.b	#1,(OFFSYMMOD,a6)	;offsymでシンボルあり
+	move.b	#OSM_HAS_SYMBOL,(OFFSYMMOD,a6)	;offsymでシンボルあり
 	clr.l	(LOCATION,a6)
 	clr.l	(LTOPLOC,a6)		;prnlineで使う
 	rts
@@ -2446,8 +2446,9 @@ prn1line:
 	bsr	convdec			;'xxxxx '(行番号)
 	move.b	#' ',(a0)+
 	move.l	(LTOPLOC,a6),d0
-	tst.b	(OFFSYMMOD,a6)
-	ble	prn1line02
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
+	ble	prn1line02		;OSM_NOT_OFFSYM or OSM_NO_SYMBOL
+
 	movea.l	(OFFSYMTMP,a6),a1
 	brsym_define (SYM_ATTRIB,a1),prn1line01
 	moveq.l	#0,d0			;エラーのときは0にしておく

@@ -58,7 +58,7 @@ deflabel8:
 	brsym_predef (SYM_ATTRIB,a1),redeferr_predefine	;プレデファインシンボルだった
 
 ;SA_NODET/SA_DEFINE
-	tst.b	(OFFSYMMOD,a6)
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	beq	redeferr		;offsym中でないので二重定義エラー
 	tst.b	(SYM_FIRST,a1)		;SYM1ST_OFFSYMか?
 	bgt	deflabel81
@@ -69,11 +69,11 @@ deflabel81:
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	redeferr		;.xref/.commシンボルだった
 deflabel85:
-	tst.b	(OFFSYMMOD,a6)
-	beq	deflabel850
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
+	beq	@f
 	bgt	deflabel_offsym		;offsymでシンボルあり
 	move.b	#SYM1ST_OFFSYM,(SYM_FIRST,a1)	;offsymのシンボル
-deflabel850:
+@@:
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;定義済シンボル
 	move.l	(LTOPLOC,a6),d0		;ロケーションカウンタ値
 	move.l	d0,(SYM_VALUE,a1)

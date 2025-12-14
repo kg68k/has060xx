@@ -72,7 +72,7 @@ iloprerr_pseudo_tail:
 ;----------------------------------------------------------------
 ;	.align	<式>[,<パディング値>]
 ~~align::
-	tst.b	(OFFSYMMOD,a6)
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	bgt	offsymalignerr		;.offsymでシンボル指定があるときアラインメント処理できない
 	bsr	calcconst
 	move.l	d1,d2
@@ -137,7 +137,7 @@ iloprerr_pseudo_tail:
 ;----------------------------------------------------------------
 ;	.quad
 ~~quad::
-	tst.b	(OFFSYMMOD,a6)
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	bgt	offsymalignerr		;.offsymでシンボル指定があるときアラインメント処理できない
 	move.w	#T_ALIGN|2,d0		;.quad = .align 4(=2^2)
 	moveq.l	#4,d1
@@ -146,7 +146,7 @@ iloprerr_pseudo_tail:
 ;----------------------------------------------------------------
 ;	.even
 ~~even::
-	tst.b	(OFFSYMMOD,a6)
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	bgt	offsymalignerr		;.offsymでシンボル指定があるときアラインメント処理できない
 	btst.b	#0,(LOCATION+3,a6)
 	beq	~~even1
@@ -896,7 +896,7 @@ pseudo_redeferr_a1:
 ;offsymの終了はセクションの変更が完了してから行うこと
 ;d0=セクション
 	move.b	(OFFSYMMOD,a6),-(sp)
-	clr.b	(OFFSYMMOD,a6)
+	zclr.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	bsr	chgsection
 	or.w	#T_SECT,d0		;セクション変更
 	bsr	wrtobjd0w
@@ -927,7 +927,7 @@ pseudo_redeferr_a1:
 ~~offsym::
 	move.b	(OFFSYMMOD,a6),-(sp)
 	move.l	(OFFSYMTMP,a6),-(sp)
-	st.b	(OFFSYMMOD,a6)		;offsymでシンボルなし
+	ffst.b	OSM_NO_SYMBOL,(OFFSYMMOD,a6)	;offsymでシンボルなし
 	bsr	calcconst		;d1=初期値
 	cmpi.w	#','|OT_CHAR,(a0)
 	bne	~~offsym1
@@ -971,7 +971,7 @@ pseudo_redeferr_a1:
 	bsr	wrtd0l
 	move.l	a1,d0			;仮シンボル
 	bsr	wrtd0l
-	move.b	#1,(OFFSYMMOD,a6)	;初期値をシンボルに与える
+	move.b	#OSM_HAS_SYMBOL,(OFFSYMMOD,a6)	;初期値をシンボルに与える
 	bra	~~offsym2
 
 ~~offsym1:
@@ -986,7 +986,7 @@ pseudo_redeferr_a1:
 ;offsymが正常に終了しているかどうか確認する
 ;a1を破壊する
 offsymtailchk::
-	tst.b	(OFFSYMMOD,a6)
+	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	ble	offsymtailchk9		;offsymでないか,シンボルがない
 offsymtailchk1:
 	movea.l	(OFFSYMTMP,a6),a1
@@ -1006,7 +1006,7 @@ offsymtailchk01:
 ;	.offset	<式>
 ~~offset::
 	move.b	(OFFSYMMOD,a6),-(sp)
-	clr.b	(OFFSYMMOD,a6)
+	zclr.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	bsr	calcconst
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない

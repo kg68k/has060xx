@@ -360,7 +360,7 @@ aligncmd:				;14xx アラインメントの調整
 sectchg:				;15xx セクション変更
 ;offsymでシンボルなしのときも0になってしまうが
 ;パス2以降では二重定義エラーは出ないはずなので無視する
-	clr.b	(OFFSYMMOD,a6)
+	zclr.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	move.l	a5,(LOCATION,a6)
 	move.l	a4,(LOCOFFSET,a6)
 	bsr	chgsection
@@ -380,7 +380,7 @@ offsymcmd:				;37xx .offsym
 	move.l	d0,(OFFSYMSYM,a6)
 	bsr	tmpreadd0l		;仮シンボルを読み出す
 	move.l	d0,(OFFSYMTMP,a6)
-	move.b	#1,(OFFSYMMOD,a6)	;offsymでシンボルあり
+	move.b	#OSM_HAS_SYMBOL,(OFFSYMMOD,a6)	;offsymでシンボルあり
 	suba.l	a5,a5
 	suba.l	a4,a4
 	rts
