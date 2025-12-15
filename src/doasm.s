@@ -243,13 +243,14 @@ asm1skipofst	equ	(*)-asm1skipbase
 	beq	asm1nofp
 ;5番目の命令ならば1番目に付けたNOPを有効にする
 	movea.l	(F43GPTR,a6),a0
-	btst.b	#4,(12,a0)		;5番目の命令か?
+	btst.b	#4,(F43GR_NTH,a0)	;5番目の命令か?
 	beq	asm1notfifth
-	movea.l	(a0),a0			;1番目
+
+	movea.l	(F43GR_NEXT,a0),a0	;1番目
 ;一致したのでT_NOPDEATHをT_NOPALIVEに変更する
 	movem.l	d1/a1,-(sp)
 	move.w	#T_NOPALIVE+1,d0
-	move.l	(8,a0),d1		;T_NOPDEATHの位置
+	move.l	(F43GR_TNOP,a0),d1	;T_NOPDEATHの位置
 	lea.l	(TEMPFILPTR,a6),a1
 	bsr	fmodifyw
 	movem.l	(sp)+,d1/a1
@@ -257,10 +258,10 @@ asm1skipofst	equ	(*)-asm1skipbase
 asm1notfifth:
 ;<a0.l:F43GPTR(a6)
 ;次のレコードを用意する
-	movea.l	(a0),a0			;次のレコード
+	movea.l	(F43GR_NEXT,a0),a0	;次のレコード
 	move.l	a0,(F43GPTR,a6)
-;	clr.l	8(a0)
-	clr.w	(12,a0)
+;	clr.l	(F43GR_TNOP,a0)
+	clr.w	(F43GR_NTH,a0)		;F43GR_AREG
 asm1nofp:
 
 asmline9:
@@ -593,16 +594,18 @@ f43g_fifthadr::
 ;any form of address register indirect addressing mode
 	move.l	a0,-(sp)
 	movea.l	(F43GPTR,a6),a0
-	movea.l	(4,a0),a0		;直前のレコード
-	btst.b	#3,(12,a0)
+	movea.l	(F43GR_PREV,a0),a0	;直前のレコード
+	btst.b	#3,(F43GR_NTH,a0)
 	beq	f43g_fifth2		;直前が4番目ではない
-	movea.l	(4,a0),a0		;3番目のレコード
+
+	movea.l	(F43GR_PREV,a0),a0	;3番目のレコード
 	move.w	(EACODE,a1),d0		;今回のレジスタ番号(下位3ビット)
-	btst.b	d0,(13,a0)		;3番目のレジスタ番号と比較
+	btst.b	d0,(F43GR_AREG,a0)	;3番目のレジスタ番号と比較
 	beq	f43g_fifth2		;レジスタ番号が異なる
+
 	movea.l	(F43GPTR,a6),a0
-	or.b	#%10000,(12,a0)		;5番目に該当する
-;	bset.b	d0,13(a0)		;レジスタ番号(不要)
+	or.b	#%10000,(F43GR_NTH,a0)	;5番目に該当する
+;	bset.b	d0,(F43GR_AREG,a0)	;レジスタ番号(不要)
 f43g_fifth2:
 	movea.l	(sp)+,a0
 f43g_fifth1:
@@ -626,17 +629,19 @@ f43g_fourth::
 ;any form of address register indirect addressing mode
 	move.l	a0,-(sp)
 	movea.l	(F43GPTR,a6),a0
-	movea.l	(4,a0),a0		;直前のレコード
+	movea.l	(F43GR_PREV,a0),a0	;直前のレコード
 	moveq.l	#%01100,d0
-	and.b	(12,a0),d0
+	and.b	(F43GR_NTH,a0),d0
 	beq	f43g_fourth2		;直前が3番目と4番目のいずれでもない
-	movea.l	(4,a0),a0		;2つ前のレコード
-	btst.b	d7,(13,a0)		;2つ前のレジスタ番号と比較
+
+	movea.l	(F43GR_PREV,a0),a0	;2つ前のレコード
+	btst.b	d7,(F43GR_AREG,a0)	;2つ前のレジスタ番号と比較
 	beq	f43g_fourth2		;レジスタ番号が異なる
+
 	movea.l	(F43GPTR,a6),a0
 	add.b	d0,d0
-	or.b	d0,(12,a0)		;4番目または5番目に該当する
-;	bset.b	d7,13(a0)		;レジスタ番号(不要)
+	or.b	d0,(F43GR_NTH,a0)	;4番目または5番目に該当する
+;	bset.b	d7,(F43GR_AREG,a0)	;レジスタ番号(不要)
 f43g_fourth2:
 	movea.l	(sp)+,a0
 f43g_fourth1:
@@ -1800,16 +1805,17 @@ f43g_second::
 ;movea.l {mem},an
 	move.l	a0,-(sp)		;a0は破壊しないこと
 	movea.l	(F43GPTR,a6),a0
-	movea.l	(4,a0),a0		;直前のレコード
+	movea.l	(F43GR_PREV,a0),a0	;直前のレコード
 	moveq.l	#%00011,d0
-	and.b	(12,a0),d0
+	and.b	(F43GR_NTH,a0),d0
 	beq	~movea7			;直前が1番目と2番目のいずれでもない
-	movea.l	(a0),a0			;今回のレコード
+
+	movea.l	(F43GR_NEXT,a0),a0	;今回のレコード
 	add.b	d0,d0
-	or.b	d0,(12,a0)		;2番目または3番目に該当する
+	or.b	d0,(F43GR_NTH,a0)	;2番目または3番目に該当する
 	move.w	d7,d0
 	rol.w	#7,d0
-	bset.b	d0,(13,a0)		;デスティネーションのレジスタ番号
+	bset.b	d0,(F43GR_AREG,a0)	;デスティネーションのレジスタ番号
 ~movea7:
 	movea.l	(sp)+,a0
 ~movea6:
@@ -3645,8 +3651,8 @@ fpeadataout_nop:
 	move.l	a0,-(sp)		;a0を破壊しないこと
 	movea.l	(F43GPTR,a6),a0
 	GETFPTR	TEMPFILPTR,d0		;現在のファイルポインタ
-	move.l	d0,(8,a0)		;T_NOPDEATHを挿入した位置
-	ori.b	#%00001,(12,a0)		;1番目の命令に該当する
+	move.l	d0,(F43GR_TNOP,a0)	;T_NOPDEATHを挿入した位置
+	ori.b	#%00001,(F43GR_NTH,a0)	;1番目の命令に該当する
 	movea.l	(sp)+,a0
 	move.w	#T_NOPDEATH+1,d0
 	bsr	wrtobjd0w

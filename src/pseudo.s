@@ -162,10 +162,10 @@ f43gcut::
 	beq	f43gcut1
 	move.l	a0,-(sp)
 	movea.l	(F43GPTR,a6),a0
-	movea.l	(a0),a0			;次のレコード
+	movea.l	(F43GR_NEXT,a0),a0	;次のレコード
 	move.l	a0,(F43GPTR,a6)
-;	clr.l	(8,a0)
-	clr.w	(12,a0)
+;	clr.l	(F43GR_TNOP,a0)
+	clr.w	(F43GR_NTH,a0)		;F43GR_AREG
 	movea.l	(sp)+,a0
 f43gcut1:
 	rts
@@ -1716,19 +1716,22 @@ cputype_update::
 ;レコードが初期化されていなければ初期化する
 	lea.l	(F43GREC,a6),a0
 	move.l	a0,(F43GPTR,a6)
-	moveq.l	#5-1,d0
+	moveq.l	#F43GR_COUNT-1,d0
 11:
-;	clr.l	(8,a0)
-	clr.w	(12,a0)
-	lea.l	(-16,a0),a0
-	move.l	a0,(16+4,a0)
-	lea.l	(16*2,a0),a0
-	move.l	a0,(-16,a0)
+;	clr.l	(F43GR_TNOP,a0)
+	clr.w	(F43GR_NTH,a0)		;F43GR_AREG
+	lea.l	(-F43GR_LEN,a0),a0
+	move.l	a0,(F43GR_LEN+F43GR_PREV,a0)	;直前のレコードへのポインタを設定
+	lea.l	(F43GR_LEN*2,a0),a0
+	move.l	a0,(-F43GR_LEN+F43GR_NEXT,a0)	;直後のレコードへのポインタを設定
 	dbra	d0,11b
-	lea.l	(F43GREC,a6),a0
-	move.l	a0,(16*4,a0)
-	lea.l	(F43GREC+16*4,a6),a0
-	move.l	a0,(-16*4+4,a0)
+
+	;上のループ処理では「配列末尾の直後」と「配列先頭の直前」
+	;が正しくないので修正する
+	lea.l	(F43GREC,a6),a0		;末尾の直後を先頭のレコードとする
+	move.l	a0,(F43GR_LEN*(F43GR_COUNT-1)+F43GR_NEXT,a0)
+	lea.l	(F43GREC+16*4,a6),a0	;先頭の直前を末尾のレコードとする
+	move.l	a0,(-F43GR_LEN*(F43GR_COUNT-1)+F43GR_PREV,a0)
 19:
 3:
 ;--------------------------------
