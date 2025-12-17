@@ -3,8 +3,6 @@
 ;		ファイル入出力
 ;		< file.s >
 ;
-;	$Id: file.s,v 1.4  1999  2/27(Sat) 23:41:32 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
 ;			  2025     by TcbnErik

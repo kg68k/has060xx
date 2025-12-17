@@ -4,8 +4,6 @@
 ;		サイズ・レジスタ名
 ;		< register.equ >
 ;
-;	$Id: register.equ,v 1.6  1999  2/27(Sat) 23:44:40 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
 ;			  2025     by TcbnErik

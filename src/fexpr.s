@@ -3,8 +3,6 @@
 ;		浮動小数点演算
 ;		< fexpr.s >
 ;
-;	$Id: fexpr.s,v 1.9  2016-01-01 12:00:00  M.Kamada Exp $
-;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
 ;		          2025       by TcbnErik

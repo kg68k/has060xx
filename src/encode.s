@@ -3,8 +3,6 @@
 ;		行のコード化と解釈
 ;		< encode.s >
 ;
-;	$Id: encode.s,v 3.2  1999 10/ 8(Fri) 21:48:40 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1997-99  by M.Kamada
 ;			  2025     by TcbnErik

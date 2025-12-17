@@ -3,8 +3,6 @@
 ;		エラーハンドル
 ;		< error2.s >
 ;
-;	$Id: error2.s,v 2.0  2016-01-01 12:00:00  M.Kamada Exp $
-;
 ;		Copyright 1997-2016  by M.Kamada
 ;		Copyright 2025       by TcbnErik
 ;----------------------------------------------------------------

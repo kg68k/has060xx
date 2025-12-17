@@ -3,8 +3,6 @@
 ;		逆ポーランド式変換と演算
 ;		< expr.s >
 ;
-;	$Id: expr.s,v 2.3  2016-01-01 12:00:00  M.Kamada Exp $
-;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
 ;		          2025       by TcbnErik

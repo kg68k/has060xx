@@ -3,8 +3,6 @@
 ;		シンボル管理
 ;		< symbol.s >
 ;
-;	$Id: symbol.s,v 1.8  1999 10/ 8(Fri) 21:49:32 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1999     by M.Kamada
 ;			  2025     by TcbnErik

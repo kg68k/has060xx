@@ -3,8 +3,6 @@
 ;		オペコード名テーブル
 ;		< opname.s >
 ;
-;	$Id: opname.s,v 2.7  1999  2/27(Sat) 23:43:43 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
 ;			  2025     by TcbnErik

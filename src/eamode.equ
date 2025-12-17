@@ -4,10 +4,9 @@
 ;		実効アドレスモード
 ;		< eamode.equ >
 ;
-;	$Id: eamode.equ,v 1.2  1999  2/27(Sat) 23:38:34 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1999     by M.Kamada
+;			  2025     by TcbnErik
 ;----------------------------------------------------------------
 
 

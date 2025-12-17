@@ -3,8 +3,6 @@
 ;		マクロ展開処理
 ;		< macro.s >
 ;
-;	$Id: macro.s,v 2.2  1999 10/ 8(Fri) 21:51:41 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;		          1997-99  by M.Kamada
 ;			  2025     by TcbnErik

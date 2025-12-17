@@ -3,8 +3,6 @@
 ;		レジスタ名テーブル
 ;		< regname.s >
 ;
-;	$Id: regname.s,v 1.7  1999  6/ 9(Wed) 21:05:13 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1996-99  by M.Kamada
 ;			  2025     by TcbnErik

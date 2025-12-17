@@ -3,8 +3,6 @@
 ;		エラー・ワーニング処理
 ;		< error.s >
 ;
-;	$Id: error.s,v 2.4  2016-01-01 12:00:00  M.Kamada Exp $
-;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;		          1997-2016  by M.Kamada
 ;		          2025       by TcbnErik

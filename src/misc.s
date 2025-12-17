@@ -3,8 +3,6 @@
 ;		汎用サブルーチン/アボート処理
 ;		< misc.s >
 ;
-;	$Id: misc.s,v 2.2  2016-01-01 12:00:00  M.Kamada Exp $
-;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
 ;			  2025       by TcbnErik

@@ -4,8 +4,6 @@
 ;		シンボル構造定義
 ;		< symbol.equ >
 ;
-;	$Id: symbol.equ,v 1.5  1999  3/ 3(Wed) 14:36:30 M.Kamada Exp $
-;
 ;		Copyright 1990-94  by Y.Nakamura
 ;			  1999     by M.Kamada
 ;			  2025     by TcbnErik

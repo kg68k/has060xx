@@ -3,8 +3,6 @@
 ;		アドレッシングモードの解釈
 ;		< eamode.s >
 ;
-;	$Id: eamode.s,v 2.8  2016-01-01 12:00:00  M.Kamada Exp $
-;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
 ;			  2025       by TcbnErik
