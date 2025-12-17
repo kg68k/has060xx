@@ -18,8 +18,11 @@
 ;----------------------------------------------------------------
 ;	レジスタ名テーブル
 ;----------------------------------------------------------------
+	.fail	sizeofCPUTYPE.ne.2
+
 regtbl	.macro	regname,regcode,type
-	.dc.b	regname,0,((type)>>8).and.$FF,(type).and.$FF,regcode
+	.fail	(type).and.$ff		;下位バイトは現在使用していないので省略
+	.dc.b	regname,0,(type)>>8,regcode
 	.endm
 
 reg_tbl::

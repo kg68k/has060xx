@@ -61,8 +61,9 @@ defressym2:
 	move.l	a0,(a3)+		;$04 SYM_NAME
 	move.w	#ST_REGISTER<<8,(a3)+	;$08 SYM_TYPE,$09 空き
 ;a2が奇数番地のことがあるので.wにしないこと
+	.fail	sizeofCPUTYPE.ne.2
 	move.b	(a2)+,(a3)+		;$0A SYM_ARCH
-	move.b	(a2)+,(a3)+		;$0B (廃止)
+	clr.b	(a3)+			;$0B 下位バイトのデータは省略しているので$00にする
 	move.b	(a2)+,(a3)+		;$0C SYM_REGNO
 	addq.l	#3,a3			;$10 ロングワード境界に合わせる
 	tst.b	(a2)
@@ -86,10 +87,11 @@ defressym4:
 	move.b	#ST_OPCODE,(a3)+	;$08 SYM_TYPE
 	move.b	(a2)+,(a3)+		;$09 SYM_NOOPR
 ;a2が奇数番地のことがあるので.wや.lにしないこと
+	.fail	sizeofCPUTYPE.ne.2
 	move.b	(a2)+,(a3)+		;$0A SYM_ARCH
-	move.b	(a2)+,(a3)+		;$0B (廃止)
+	clr.b	(a3)+			;$0B 下位バイトのデータは省略しているので$00にする
 	move.b	(a2)+,(a3)+		;$0C SYM_SIZE
-	move.b	(a2)+,(a3)+		;$0D (廃止)
+	clr.b	(a3)+			;$0D (廃止)
 	move.w	(a4)+,(a3)+		;$0E SYM_OPCODE
 	move.l	(a4)+,d0
 	lea.l	(-4,a4,d0.l),a0
