@@ -481,7 +481,7 @@ getdcreal6:
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
 	tst.l	d1
-	bmi	ds_iloprerr_ds_negative
+	bmi	iloprerr_ds_negative	;すべてのセクションで、長さが負数ならエラー
 ~~ds_0:
 	move.b	(CMDOPSIZE,a6),d0
 	bmi	~~ds_w
@@ -516,15 +516,6 @@ getdcreal6:
 	bsr	wrtobjd0w
 	move.l	d1,d0
 	bra	wrtd0l			;長さ(バイト単位)
-
-ds_iloprerr_ds_negative:
-	move.b	(SECTION,a6),d0
-	subq.b	#SECT_TEXT,d0
-	beq	iloprerr_ds_negative
-	subq.b	#SECT_DATA-SECT_TEXT,d0
-	beq	iloprerr_ds_negative
-	bsr	ds_negative_warn
-	bra	~~ds_0
 
 ;----------------------------------------------------------------
 ;	.fpid	<式>	(0～7)

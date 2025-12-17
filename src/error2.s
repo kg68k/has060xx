@@ -27,7 +27,6 @@ insigbitwarn2::		bra	insigbitwarn
 indexszwarn2::		bra	indexszwarn
 redefwarn_set2::	bra	redefwarn_set
 redefwarn_offsym2::	bra	redefwarn_offsym
-ds_negative_warn2::	bra	ds_negative_warn
 internalfpwarn2::	bra	internalfpwarn
 
 forcederr2::		bra	forcederr

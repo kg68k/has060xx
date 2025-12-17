@@ -26,7 +26,6 @@ insigbitwarn		reg	insigbitwarn2
 indexszwarn		reg	indexszwarn2
 redefwarn_set		reg	redefwarn_set2
 redefwarn_offsym	reg	redefwarn_offsym2
-ds_negative_warn	reg	ds_negative_warn2
 
 forcederr		reg	forcederr2
 redeferr		reg	redeferr2

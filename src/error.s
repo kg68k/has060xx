@@ -44,7 +44,6 @@ warntbl	.macro
 	warn	1,1,indexszwarn,	'インデックスのサイズが指定されていません'
 	warn	1,1,redefwarn_set,	'シンボル %s を .set(=) で上書きしました'
 	warn	1,1,redefwarn_offsym,	'シンボル %s を .offsym で上書きしました'
-	warn	1,1,ds_negative_warn,	'%s の引数が負数です'
 	warn	1,1,internalfpwarn,	'整数を単精度浮動小数点数の内部表現と見なします'
 
 	.endm
