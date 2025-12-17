@@ -148,19 +148,19 @@ isdefdsym3:
 	move.b	(SYM_TYPE,a1),d3	;シンボルタイプ
 	bpl	isdefdsym5		;ユーザー定義シンボル
 	move.w	(SYM_ARCH,a1),d3	;予約シンボル(命令/レジスタ名)の場合
-	beq	isdefdsym35		;疑似命令の場合
+	beq	@f			;疑似命令の場合
 	and.w	(CPUTYPE,a6),d3
 	beq	isdefdsym3		;現在のCPUタイプと合致しないので無視
-isdefdsym35:
+@@:
 	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	movea.l	(SYM_NAME,a1),a3
-isdefdsym4:
+@@:
 	move.b	(a2)+,d0
 ;	tolower	d0			;予約シンボルは大文字・小文字を区別しない
 	ori.w	#$20,d0			;(0～9,A～Z以外の文字は考慮しなくてよい)
 	cmp.b	(a3)+,d0
-	dbne	d2,isdefdsym4
+	dbne	d2,@b
 	bne	isdefdsym3		;シンボル名が一致しなかった
 	tst.b	(a3)
 	bne	isdefdsym3		;	〃
@@ -174,9 +174,9 @@ isdefdsym5:				;ユーザー定義シンボル
 	move.w	d1,d2			;文字列長-1
 	movea.l	a0,a2			;文字列へのポインタ
 	movea.l	(SYM_NAME,a1),a3
-isdefdsym6:
+@@:
 	cmpm.b	(a2)+,(a3)+
-	dbne	d2,isdefdsym6
+	dbne	d2,@b
 	bne	isdefdsym3		;シンボル名が一致しなかった
 	tst.b	(a3)
 	bne	isdefdsym3		;	〃
@@ -475,6 +475,10 @@ defsymbol1:
 	movea.l	a0,a1
 	move.b	d2,(SYM_TYPE,a1)
 	move.l	a2,(SYM_NAME,a1)
+
+if SA_UNDEF.ne.0
+  move.b #SA_UNDEF,(SYM_ATTRIB,a1)
+.endif
 
 .if SYM1ST_OTHER.ne.0
   cmpi.b #ST_VALUE,d2

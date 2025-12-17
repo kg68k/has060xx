@@ -32,7 +32,8 @@ ST_OPCODE	equ	-2	;命令名
 ;----------------------------------------------------------------
 ;	SYM_ATTRIB シンボル定義属性
 ;----------------------------------------------------------------
-SA_UNDEF	equ	0	;使用されたが定義されていない
+SA_REFUNDEF	equ	$ff	;使用されたが定義されていない
+SA_UNDEF	equ	0	;シンボルテーブルに登録されたが未使用、未定義
 SA_NODET	equ	1	;定義されたが値が定まっていない
 SA_DEFINE	equ	2	;定義されて値が定まった
 SA_PREDEFINE	equ	3	;定義されて値が定まっており再定義できない
@@ -40,46 +41,61 @@ SA_PREDEFINE	equ	3	;定義されて値が定まっており再定義できない
 ;----------------------------------------------------------------
 ;	シンボル定義属性分岐マクロ
 
-	.fail	SA_UNDEF.ne.0
-brsym_undef	.macro ea,label
-	tst.b	ea
-	beq	label
-	.endm
+brsym: .macro arg1,arg2,arg3,arg4,arg5
+	.sizem sz,argc
+	.fail (arg1!=SA_REFUNDEF).and.((arg1<SA_UNDEF).or.(SA_PREDEFINE<arg1))
 
-brsym_not_undef	.macro ea,label
-	tst.b	ea
-	bne	label
-	.endm
+	.if argc==3
+		.if arg1==SA_REFUNDEF
+			tst.b arg2
+			bmi&sz arg3
+		.elif arg1==SA_UNDEF
+			tst.b arg2
+			beq&sz arg3
+		.else
+			cmpi.b #arg1,arg2
+			beq&sz arg3
+		.endif
+	.elif argc==4
+		.if arg1==SA_REFUNDEF.and.arg2==SA_UNDEF
+			tst.b arg3
+			ble&sz arg4
+		.elif arg1==SA_DEFINE.and.arg2==SA_PREDEFINE
+			cmpi.b #SA_DEFINE,arg3
+			bge&sz arg4
+		.else
+			.fail 1  ;属性2種 未対応の組み合わせ
+		.endif
+	.elif argc==5
+		.if arg1==SA_REFUNDEF.and.arg2==SA_UNDEF.and.arg3==SA_NODET
+			cmpi.b #SA_NODET,arg4
+			ble&sz arg5
+		.elif arg1==SA_NODET.and.arg2==SA_DEFINE.and.arg3==SA_PREDEFINE
+			tst.b arg4
+			bgt&sz arg5
+		.else
+			.fail 1  ;属性3種 未対応の組み合わせ
+		.endif
+	.else
+		.fail 1  ;引数の数が正しくない
+	.endif
+.endm
 
-brsym_nodet	.macro ea,label
-	cmpi.b	#SA_NODET,ea
-	beq	label
-	.endm
+brsym_not: .macro arg1,arg2,arg3
+	.sizem sz,argc
+	.fail (arg1!=SA_REFUNDEF).and.((arg1<SA_UNDEF).or.(SA_PREDEFINE<arg1))
 
-brsym_define	.macro ea,label
-	cmpi.b	#SA_DEFINE,ea
-	beq	label
-	.endm
-
-brsym_predef	.macro ea,label
-	cmpi.b	#SA_PREDEFINE,ea
-	beq	label
-	.endm
-
-;値が定まっていない(SA_UNDEF/SA_NODET)なら分岐する
-;	(SA_DEFINE/SA_PREDEFINEは分岐しない)
-brsym_undet	.macro ea,label
-	cmpi.b	#SA_DEFINE,ea
-	bcs	label
-	.endm
-
-;値が定まっている(SA_DEFINE/SA_PREDEFINE)なら分岐する
-;	(SA_UNDEF/SA_NODETは分岐しない)
-brsym_determ	.macro ea,label
-	cmpi.b	#SA_DEFINE,ea
-	bcc	label
-	.endm
-
+	.if argc==3
+		.if arg1==SA_UNDEF
+			tst.b arg2
+			bne&sz arg3
+		.else
+			.fail 1  ;未対応の属性
+		.endif
+	.else
+		.fail 1  ;引数の数が正しくない
+	.endif
+.endm
 
 ;----------------------------------------------------------------
 ;	SYM_FIRST シンボル定義方法(ST_VALUEのみ)

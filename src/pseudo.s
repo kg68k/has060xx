@@ -466,8 +466,11 @@ getdcreal6:
 ;----------------------------------------------------------------
 ;	.ds[.<サイズ>]	<長さ>
 ~~ds::
+	;ここで行頭のラベルを定義しているのは、HAS060.X v3.09+60での.OFFSET
+	;セクションでDSの引数に行頭のシンボルを使えない不具合の修正によるもの
 	bsr	deflabel		;行頭のラベルを定義
 	move.w	#-1,(LABNAMELEN,a6)
+
 	bsr	encodeopr
 	bsr	calcopr
 	tst.w	d0
@@ -601,7 +604,8 @@ defltopsym:
 	bne	defltopsym02		;タイプの異なるシンボルと重複している
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	defltopsym99
-	brsym_predef (SYM_ATTRIB,a1),defltopsym01	;プレデファインシンボルを再定義しようとした
+	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),defltopsym01
+					;プレデファインシンボルを再定義しようとした
 defltopsym99:
 	moveq.l	#-1,d2
 	rts
@@ -613,7 +617,7 @@ defltopsym01:
 defltopsym02:
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	pseudo_ilsymerr_a1	;タイプの異なるシンボルと重複している
-	brsym_not_undef (SYM_ATTRIB,a1),pseudo_ilsymerr_a1
+	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a1),pseudo_ilsymerr_a1
 					;タイプの異なるシンボルと重複している
 	move.l	a1,(ERRMESSYM,a6)
 	bra	ilsymerr_lookfor	;シンボルの前方参照の条件と矛盾している
@@ -645,7 +649,8 @@ pseudo_redeferr_a1:
 ~~set::
 	moveq.l	#ST_VALUE,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
-	brsym_undef (SYM_ATTRIB,a1),~~set1	;未定義
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),~~set1
+					;未定義
 	tst.b	(SYM_FIRST,a1)		;SYM1ST_SETか?
 	blt	~~set1			;setで定義されている
 	move.l	a1,(ERRMESSYM,a6)
@@ -662,8 +667,8 @@ pseudo_redeferr_a1:
 ~~equ::
 	moveq.l	#ST_VALUE,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
-	brsym_not_undef (SYM_ATTRIB,a1),pseudo_redeferr_a1	;定義済シンボルならエラー
-
+	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a1),pseudo_redeferr_a1
+					;定義済シンボルならエラー
 	zclr.b	SYM1ST_OTHER,(SYM_FIRST,a1)
 	moveq.l	#0,d2
 ~~equ1:
@@ -814,18 +819,23 @@ pseudo_redeferr_a1:
 	move.l	(a1)+,a0		;シンボルテーブルへのポインタ
 	ztst.b	ST_VALUE,(SYM_TYPE,a0)
 	bne	iloprerr		;数値シンボルでないのでエラー
-	brsym_predef (SYM_ATTRIB,a0),~~globl_predef
+	brsym	SA_PREDEFINE,(SYM_ATTRIB,a0),~~globl_predef
 					;プレデファインシンボルは外部宣言できない
 	move.b	(SYM_EXTATR,a0),d1
 	beq	@f
 	cmp.b	#SECT_COMM,d1
 	bne	pseudo_redeferr_a0	;すでに外部宣言されている(.comm以外)
 @@:
-	brsym_undef (SYM_ATTRIB,a0),@f	;未定義シンボル
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a0),@f
+					;未定義シンボル
 	cmpi.b	#SECT_XREF,d2
 	beq	pseudo_redeferr_a0	;定義済シンボルに対する.xrefはエラー
 @@:
 	move.b	d2,(SYM_EXTATR,a0)	;外部宣言属性をセット
+
+	brsym_not SA_UNDEF,(SYM_ATTRIB,a0),@f	;最終的に定義されなかったら外部定義
+	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a0)	;されるよう、参照済みの扱いにしておく
+@@:
 	cmpi.b	#SECT_XDEF,d2
 	bne	~~globl5
 	move.w	#T_XDEF,d0
@@ -862,7 +872,7 @@ pseudo_redeferr_a1:
 	move.l	(a1)+,a0		;シンボルテーブルへのポインタ
 	ztst.b	ST_VALUE,(SYM_TYPE,a0)
 	bne	iloprerr		;数値シンボルでないのでエラー
-	brsym_not_undef (SYM_ATTRIB,a0),pseudo_redeferr_a0
+	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a0),pseudo_redeferr_a0
 					;定義済シンボルならエラー
 
 ;プレデファインシンボルは上で弾かれるのでこのままでよい
@@ -886,6 +896,10 @@ pseudo_redeferr_a1:
 	bne	iloprerr_pseudo_tail	;行が終了していない
 	movea.l	(sp)+,a0
 	move.l	d1,(SYM_VALUE,a0)	;コモンエリアサイズをセット
+
+	brsym_not SA_UNDEF,(SYM_ATTRIB,a0),@f
+	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a0)	;たぶん省略しても平気
+@@:
 	rts
 
 ;---------------------------------------------------------------
@@ -942,7 +956,7 @@ pseudo_redeferr_a1:
 ;定義済みでもエラーにしない
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	pseudo_ilsymerr_a1	;タイプの異なるシンボルと重複している
-	brsym_predef (SYM_ATTRIB,a1),pseudo_redeferr_a1
+	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),pseudo_redeferr_a1
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	pseudo_redeferr_a1	;.xref/.commシンボルだった
 	move.l	a1,(OFFSYMSYM,a6)	;初期値を与えるシンボル
@@ -992,7 +1006,7 @@ offsymtailchk1:
 	movea.l	(OFFSYMTMP,a6),a1
 ;a1=セクション変更前の仮のシンボル
 offsymtailchk2:
-	brsym_nodet (SYM_ATTRIB,a1),offsymtailchk01
+	brsym	SA_NODET,(SYM_ATTRIB,a1),offsymtailchk01
 					;値が定まっていなければエラー
 ;仮シンボルはST_LOCALなのでobjgen.sでエラーメッセージが出ることはない
 offsymtailchk9:
@@ -1501,8 +1515,11 @@ skipfend:
 ;---------------------------------------------------------------
 ;	.comment	<文字列>
 ~~comment::
+	;ここで行頭のラベルを定義しているのは、HAS.X v2.50での.commentの仕様をAS2
+	;に合わせるという変更によるもの(それ以前は行頭のラベルが定義されなかった)
 	bsr	deflabel		;行頭にラベルがあったら定義しておく
 	move.w	#-1,(LABNAMELEN,a6)
+
 	movea.l	(OPRBUFPTR,a6),a1
 	tst.b	(a0)
 	beq	~~comment85		;文字列がなければ次の一行のみをコメントとする

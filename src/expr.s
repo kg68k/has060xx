@@ -116,6 +116,10 @@ convrpnnum_sym:				;シンボル
 	move.l	(a0)+,a3
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a3)	;(ST_VALUE or ST_LOCAL)
 	bhi	convrpnnum_sym9		;数値シンボルでない
+
+	brsym_not SA_UNDEF,(SYM_ATTRIB,a3),@f
+	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a3)	;未定義のシンボルが参照された
+@@:
 	move.w	#RPN_SYMBOL,(a1)+	;シンボル
 	move.l	a3,(a1)+
 	addq.w	#3,d1
@@ -292,7 +296,7 @@ convrpnnum_defined1:
 convrpnnum_defined2:
 	move.l	(a0)+,a3
 	moveq.l	#0,d0			;.defined.未定義シンボル=0
-	brsym_undef (SYM_ATTRIB,a3),@f
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a3),@f
 	moveq.l	#-1,d0			;.defined.定義済みシンボル=-1
 @@:	rts
 
@@ -627,9 +631,11 @@ calcrpnref:
 ;	シンボル
 calcrpnsym:
 	movea.l	(a1)+,a0
-	brsym_undet (SYM_ATTRIB,a0),calcrpnundef	;値が定まっていない
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a0),calcrpnundef
+					;値が定まっていない
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a0)
 	bcs	calcrpnsym1
+
 	moveq.l	#0,d0			;外部参照シンボル
 	move.l	d0,(a2)+
 	move.b	(SYM_EXTATR,a0),d0
@@ -685,7 +691,7 @@ calcrpnlocctr0:
 	ble	calcrpnlocctr2		;OSM_NOT_OFFSYM or OSM_NO_SYMBOL
 	move.l	a1,-(sp)
 	movea.l	(OFFSYMTMP,a6),a1
-	brsym_define (SYM_ATTRIB,a1),@f
+	brsym	SA_DEFINE,(SYM_ATTRIB,a1),@f
 
 	movea.l	a1,a0
 	movea.l	(sp)+,a1

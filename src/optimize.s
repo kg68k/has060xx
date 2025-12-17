@@ -26,7 +26,7 @@
 asmpass2::
 	move.b	#2,(ASMPASS,a6)
 	tst.b	(OPTIMIZE,a6)
-	bne	asmpass29		;/nの指定があったので何もしない
+	bne	asmpass29		;-nの指定があったので何もしない
 
 	clr.b	(OPTCOUNT,a6)
 	move.b	#SZ_LONG|ESZ_OPT,(OPTMOREFLG,a6)
@@ -1454,8 +1454,8 @@ calctmpexpr:
 	movea.l	d0,a1
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a1)	;(ST_VALUE or ST_LOCAL)
 	bhi	calctmpexpr9		;数値シンボルでない
-	brsym_undet (SYM_ATTRIB,a1),calctmpexpr9	;未定義シンボル
-
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a1),calctmpexpr9
+					;未定義シンボル
 	clr.w	d0
 	move.b	(SYM_SECTION,a1),d0
 	beq	calctmpexpr2

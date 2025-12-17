@@ -156,7 +156,7 @@ outxrefdef1:
 
 outxrefdef2:
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
-	bne	outxrefdef7		;数値シンボル以外なら何もしない
+	bne	outxrefdef7		;数値シンボル以外
 
 	move.b	(SYM_EXTATR,a1),d0
 	cmpi.b	#SECT_XDEF,d0
@@ -168,14 +168,16 @@ outxrefdef2:
 	tst.b	d0
 	bne	outcomm			;コモンシンボル
 
-	brsym_undef (SYM_ATTRIB,a1),outxrefdef3
-	tst.b	(ALLXDEF,a6)		;定義済シンボルの場合
-	bne	outxdef0		;/dオプションがあれば外部定義にする
+	brsym	SA_REFUNDEF,(SYM_ATTRIB,a1),@f
+	brsym	SA_UNDEF,(SYM_ATTRIB,a1),outxrefdef8
+;定義済シンボルの場合
+	tst.b	(ALLXDEF,a6)
+	bne	outxdef_by_d		;-dオプションがあれば外部定義にする
 	bra	outxrefdef8
-
-outxrefdef3:
-	tst.b	(ALLXREF,a6)		;未定義シンボルの場合
-	bne	outxref0		;/uオプションがあれば外部参照にする
+;未定義シンボルの場合
+@@:
+	tst.b	(ALLXREF,a6)
+	bne	outxref_by_u		;-uオプションがあれば外部参照にする
 outxrefdef5:
 	st.b	(ISUNDEFSYM,a6)		;未定義シンボルの場合
 outxrefdef8:
@@ -198,17 +200,24 @@ outxrefdef7:
 	bra	outxrefdef8
 
 outglobl:				;globlシンボルの出力
-	brsym_undef (SYM_ATTRIB,a1),outxref0	;未定義なら外部参照にする
-
-outxdef0:
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),outxref_by_globl
+					;未定義なら外部参照にする
+outxdef_by_d:
 	bsr	isnonxdefsymbol		;??から始まるシンボルとプレデファインシンボルを
 	beq	outxrefdef8		;外部定義にしない
 
 	move.b	#SECT_XDEF,(SYM_EXTATR,a1)
-outxdef:				;外部定義シンボルの出力
-	brsym_determ (SYM_ATTRIB,a1),outxdef1
-	brsym_undef (SYM_ATTRIB,a1),outxrefdef5	;未定義ならエラー
+;外部定義シンボルの出力
+outxdef:
+	;.xdefでここに飛んできた場合は??から始まるシンボルか調べていないので
+	;.xdef ??0001 のようにすると外部定義できてしまう
 
+	brsym	SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a1),outxdef1
+		;プレデファインシンボルは.xdefでエラーになるので
+		;ここで調べなくてよいが、一応含めておく
+
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),outxrefdef5
+					;未定義ならエラー
 	;SA_NODET
 	st.b	(ISUNDEFSYM,a6)
 	st.b	(ISXDEFMOD,a6)		;未確定値なので後で修正する
@@ -219,7 +228,10 @@ outxdef1:
 	bsr	outsymbol
 	bra	outxrefdef8
 
-outxref0:
+outxref_by_u:
+	brsym	SA_UNDEF,(SYM_ATTRIB,a1),outxrefdef8
+		;.defined.シンボル名 で参照されただけなら外部参照にはしない
+outxref_by_globl:
 	move.b	#SECT_XREF,(SYM_EXTATR,a1)
 outxref:				;外部参照シンボルの出力
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)
@@ -259,7 +271,7 @@ isnonxdefsymbol:
 	cmp.b	(a0)+,d0
 	beq	9f			;??で始まるシンボル
 @@:
-	brsym_predef (SYM_ATTRIB,a1),9f	;プレデファインシンボル
+	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),9f	;プレデファインシンボル
 
 	moveq.l	#-1,d0			;それ以外は外部定義にする
 	rts
@@ -284,12 +296,14 @@ xdefmodify1:
 	sub.w	(SYMTBLCOUNT,a6),d2	;最後のブロックの場合
 
 xdefmodify2:
+	brsym	SA_UNDEF,(SYM_ATTRIB,a0),xdefmodify5
 	ztst.b	ST_VALUE,(SYM_TYPE,a0)
-	bne	xdefmodify7		;数値シンボル以外なら何もしない
+	bne	xdefmodify7		;数値シンボル以外
 
 	cmpi.b	#SECT_XDEF,(SYM_EXTATR,a0)
 	beq	xdefdomodify		;外部定義シンボル
-	brsym_not_undef (SYM_ATTRIB,a0),xdefmodify5
+	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a0),xdefmodify5
+	;SA_REFUNDEF
 xdefmodify3:
 	st.b	(ISUNDEFSYM,a6)		;未定義シンボルの場合
 xdefmodify5:
@@ -305,12 +319,11 @@ xdefmodify7:
 	bne	xdefmodify5
 	tst.b	(SYM_FSIZE,a0)
 	bpl	xdefmodify5
-	st.b	(ISUNDEFSYM,a6)		;未定義の浮動小数点実数シンボルの場合
-	bra	xdefmodify5
+	bra	xdefmodify3		;未定義の浮動小数点実数シンボルの場合
 
 xdefdomodify:
-	brsym_undet (SYM_ATTRIB,a0),xdefmodify3	;未確定ならエラー
-
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a0),xdefmodify3
+					;未確定ならエラー
 	lea.l	(OBJFILPTR,a6),a1
 	move.l	(SYM_NEXT,a0),d1
 	move.w	#$B200,d0		;B2[セクション番号] [値] シンボル名～ 00
@@ -1406,8 +1419,8 @@ xdefcmd9:
 xdefcmd:				;19xx .xdef
 	bsr	tmpreadd0l		;シンボルへのポインタ
 	movea.l	d0,a1
-	brsym_not_undef (SYM_ATTRIB,a1),xdefcmd9	;定義済み
-
+	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a1),xdefcmd9
+					;定義済み
 ;xdefされたシンボルが未定義
 ;ローカルシンボルは外部定義できないので考えなくてよい
 	move.l	a1,(ERRMESSYM,a6)
@@ -2109,7 +2122,8 @@ makesymptr1:
 makesymptr2:
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	makesymptr5		;数値シンボル以外なら何もしない
-	brsym_undet (SYM_ATTRIB,a1),makesymptr5	;値が確定していなければ何もしない
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a1),makesymptr5
+					;値が確定していなければ何もしない
 
 	move.l	a1,(a3)+		;シンボルへのポインタ
 	cmp.l	a3,a4
@@ -2318,9 +2332,13 @@ prnundefsym1:
 	sub.w	(SYMTBLCOUNT,a6),d2	;最後のブロックの場合
 
 prnundefsym2:
+	brsym	SA_UNDEF,(SYM_ATTRIB,a2),prnundefsym8
 	ztst.b	ST_VALUE,(SYM_TYPE,a2)
-	bne	prnundefsym7		;数値シンボル以外なら何もしない
-	brsym_determ (SYM_ATTRIB,a2),prnundefsym8	;確定済みシンボル
+	bne	prnundefsym7		;数値シンボル以外
+
+	brsym	SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a2),prnundefsym8
+					;確定済みシンボル
+	;SA_REFUNDEF/SA_NODET
 prnundefsym3:
 	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	(SYM_NAME,a2),a1
@@ -2450,7 +2468,7 @@ prn1line:
 	ble	prn1line02		;OSM_NOT_OFFSYM or OSM_NO_SYMBOL
 
 	movea.l	(OFFSYMTMP,a6),a1
-	brsym_define (SYM_ATTRIB,a1),prn1line01
+	brsym	SA_DEFINE,(SYM_ATTRIB,a1),prn1line01
 	moveq.l	#0,d0			;エラーのときは0にしておく
 	bra	prn1line02
 
@@ -2576,6 +2594,13 @@ makesymfile1:
 makesymfile2:
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a2)
 	beq	makesymfile8		;ローカルシンボルなら何もしない
+
+	;未使用未定義のシンボルは無視する(.defined.や.regのオペランド)
+	;ただしマクロ等はSA_UNDEFのまま定義されるのでSYM_ATTRIBを見ず常に出力する
+	ztst.b	ST_VALUE,(SYM_TYPE,a2)
+	bne	@f
+	brsym	SA_UNDEF,(SYM_ATTRIB,a2),makesymfile8
+@@:
 	movea.l	(LINEBUFPTR,a6),a0
 	movea.l	(SYM_NAME,a2),a1
 	moveq.l	#16,d1
@@ -2601,7 +2626,7 @@ makesymfile5:
 	beq	makesymreg
 	cmp.b	#ST_MACRO,d0
 	beq	makesymmac
-	brsym_undet (SYM_ATTRIB,a2),makesymundef
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a2),makesymundef
 
 	lea.l	(symabs_msg,pc),a1
 	move.b	(SYM_EXTATR,a2),d0
@@ -2731,8 +2756,8 @@ getsymdata:
 	movea.l	d0,a0
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a0)	;(ST_VALUE or ST_LOCAL)
 	bhi	exprerr			;数値シンボルでない
-	brsym_undet (SYM_ATTRIB,a0),getsymdata01	;未定義シンボル
-
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a0),getsymdata01
+					;未定義シンボル
 	clr.w	d0
 	move.b	(SYM_SECTION,a0),d0
 	move.l	(SYM_VALUE,a0),d1

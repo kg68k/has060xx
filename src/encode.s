@@ -39,25 +39,23 @@ deflabel::
 	bne	deflabel9		;.if不成立部の読み飛ばし中なので定義の必要なし
 	move.w	(LABNAMELEN,a6),d1
 	bmi	deflabel9		;定義するラベルがない
+
 	movea.l	(LABNAMEPTR,a6),a0
-deflabel7:
 	bsr	isdefdsym
 	tst.w	d0
-	beq	deflabel8		;すでに登録済
-	moveq.l	#ST_VALUE,d2		;数値シンボル
-	bsr	defsymbol		;新しく登録する
-	bra	deflabel85
+	bne	deflable_new		;未登録
 
-deflabel8:
+;登録済なら上書きできるか確認する
 	move.l	a1,(ERRMESSYM,a6)
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)	;シンボルのタイプ
 	bne	deflabel00		;タイプの異なるシンボルと重複している
 
-;offsymのときはプレデファインシンボルでなければ二重定義エラーを出さない
-	brsym_undef (SYM_ATTRIB,a1),deflabel81		;未定義なら問題なし
-	brsym_predef (SYM_ATTRIB,a1),redeferr_predefine	;プレデファインシンボルだった
-
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),deflabel81
+					;未定義なら問題なし
+	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),redeferr_predefine
+					;プレデファインシンボルだった
 ;SA_NODET/SA_DEFINE
+;offsymのときはプレデファインシンボルでなければ二重定義エラーを出さない
 	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	beq	redeferr		;offsym中でないので二重定義エラー
 	tst.b	(SYM_FIRST,a1)		;SYM1ST_OFFSYMか?
@@ -68,6 +66,11 @@ deflabel8:
 deflabel81:
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	redeferr		;.xref/.commシンボルだった
+	bra	deflabel85
+
+deflable_new:
+	moveq.l	#ST_VALUE,d2		;数値シンボル
+	bsr	defsymbol		;新しく登録する
 deflabel85:
 	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
 	beq	@f
@@ -78,10 +81,10 @@ deflabel85:
 	move.l	(LTOPLOC,a6),d0		;ロケーションカウンタ値
 	move.l	d0,(SYM_VALUE,a1)
 	cmpi.b	#SECT_TEXT,(SECTION,a6)
-	bne	deflabel851
+	bne	@f
 	move.l	d0,(LASTSYMLOC,a6)	;テキストセクションで最後に
 					;ラベルに定義したロケーションカウンタ値
-deflabel851:
+@@:
 	move.b	(ORGNUM,a6),(SYM_ORGNUM,a1)
 	move.b	(SECTION,a6),(SYM_SECTION,a1)	;セクション番号
 	beq	deflabel88		;(定数ならT_SYMDEFは不要)

@@ -299,12 +299,19 @@ calcfex_symbol:				;シンボル
 	beq	calcfex_symreal
 	cmpi.b	#ST_LOCAL,(SYM_TYPE,a1)	;(ST_VALUE or ST_LOCAL)
 	bhi	exprerr
-	brsym_undet (SYM_ATTRIB,a1),exprerr	;値が定まっていない
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a1),calcfex_symref
+					;値が定まっていない
 	ztst.b	SECT_ABS,(SYM_SECTION,a1)
 	bne	exprerr			;定数でない
+
 	move.l	(SYM_VALUE,a1),d0
 	bsr	ltox
 	bra	calcfex_size
+
+calcfex_symref:
+	brsym_not SA_UNDEF,(SYM_ATTRIB,a1),@f
+	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a1)	;未定義のシンボルが参照された
+@@:	bra	exprerr
 
 calcfex_symreal:
 	move.b	(SYM_FSIZE,a1),d7	;シンボルのサイズ

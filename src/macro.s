@@ -860,7 +860,9 @@ macexlsym2:
 
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	macexlsym9		;数値シンボルではない
-	brsym_undet (SYM_ATTRIB,a1),macexlsym9	;値が定まっていない
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a1),macexlsym_ref
+					;値が定まっていない
+;SA_DEFINE/SA_PREDEFINE
 	tst.b	(SYM_SECTION,a1)
 	bne	macexlsym9		;値が定数ではない
 
@@ -875,6 +877,10 @@ macexlsym2:
 	exg.l	a0,a2
 	bra	macexline1
 
+macexlsym_ref:
+	brsym_not SA_UNDEF,(SYM_ATTRIB,a1),@f
+	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a1)	;未定義のシンボルが参照された
+@@:
 macexlsym9:
 	exg.l	a0,a2
 	move.b	#'%',(a0)+
@@ -1020,7 +1026,8 @@ getmacparasym:				;シンボル値
 
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	getmacparasym9		;数値シンボルではない
-	brsym_undet (SYM_ATTRIB,a1),getmacparasym9	;値が定まっていない
+	brsym	SA_REFUNDEF,SA_UNDEF,SA_NODET,(SYM_ATTRIB,a1),getmacparasym_ref
+					;値が定まっていない
 	tst.b	(SYM_SECTION,a1)
 	bne	getmacparasym9		;値が定数ではない
 
@@ -1038,6 +1045,11 @@ getmacparasym:				;シンボル値
 getmacparasym9:
 	movem.l	(sp)+,d1/a1
 	bra	getmacpara0
+
+getmacparasym_ref:
+	brsym_not SA_UNDEF,(SYM_ATTRIB,a1),getmacparasym9
+	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a1)	;未定義のシンボルが参照された
+	bra	getmacparasym9
 
 getmacparars:				;'<～>'の間の文字列はそのまま通す
 	addq.l	#1,a0
