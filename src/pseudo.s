@@ -72,8 +72,9 @@ iloprerr_pseudo_tail:
 ;----------------------------------------------------------------
 ;	.align	<式>[,<パディング値>]
 ~~align::
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	bgt	offsymalignerr		;.offsymでシンボル指定があるときアラインメント処理できない
+	;.offsymでシンボル指定があるときアラインメント処理できない
+	brosm	OSM_HAS_SYMBOL,offsymalignerr
+
 	bsr	calcconst
 	move.l	d1,d2
 	moveq.l	#2,d0
@@ -137,8 +138,9 @@ iloprerr_pseudo_tail:
 ;----------------------------------------------------------------
 ;	.quad
 ~~quad::
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	bgt	offsymalignerr		;.offsymでシンボル指定があるときアラインメント処理できない
+	;.offsymでシンボル指定があるときアラインメント処理できない
+	brosm	OSM_HAS_SYMBOL,offsymalignerr
+
 	move.w	#T_ALIGN|2,d0		;.quad = .align 4(=2^2)
 	moveq.l	#4,d1
 	bra	~~align4
@@ -146,14 +148,15 @@ iloprerr_pseudo_tail:
 ;----------------------------------------------------------------
 ;	.even
 ~~even::
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	bgt	offsymalignerr		;.offsymでシンボル指定があるときアラインメント処理できない
+	;.offsymでシンボル指定があるときアラインメント処理できない
+	brosm	OSM_HAS_SYMBOL,offsymalignerr
+
 	btst.b	#0,(LOCATION+3,a6)
-	beq	~~even1
+	beq	@f
 	moveq.l	#0,d0
 	bsr	wrt1bobj		;$00を出力して偶数境界に合わせる
 	addq.l	#1,(LTOPLOC,a6)
-~~even1:
+@@:
 	rts
 
 ;----------------------------------------------------------------
@@ -1000,8 +1003,7 @@ pseudo_redeferr_a1:
 ;offsymが正常に終了しているかどうか確認する
 ;a1を破壊する
 offsymtailchk::
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	ble	offsymtailchk9		;offsymでないか,シンボルがない
+	brosm_not OSM_HAS_SYMBOL,offsymtailchk9	;offsymでないか,シンボルがない
 offsymtailchk1:
 	movea.l	(OFFSYMTMP,a6),a1
 ;a1=セクション変更前の仮のシンボル

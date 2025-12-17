@@ -2464,8 +2464,7 @@ prn1line:
 	bsr	convdec			;'xxxxx '(行番号)
 	move.b	#' ',(a0)+
 	move.l	(LTOPLOC,a6),d0
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	ble	prn1line02		;OSM_NOT_OFFSYM or OSM_NO_SYMBOL
+	brosm_not OSM_HAS_SYMBOL,prn1line02
 
 	movea.l	(OFFSYMTMP,a6),a1
 	brsym	SA_DEFINE,(SYM_ATTRIB,a1),prn1line01

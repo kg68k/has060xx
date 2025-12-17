@@ -54,8 +54,8 @@ deflabel::
 					;プレデファインシンボルだった
 ;SA_NODET/SA_DEFINE
 ;offsymのときはプレデファインシンボルでなければ二重定義エラーを出さない
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	beq	redeferr		;offsym中でないので二重定義エラー
+	brosm	OSM_NOT_OFFSYM,redeferr	;offsym中でないので二重定義エラー
+
 	tst.b	(SYM_FIRST,a1)		;SYM1ST_OFFSYMか?
 	bgt	deflabel81
 	tst.b	(OWOFFSYM,a6)		;offsymのシンボルでない
@@ -70,9 +70,9 @@ deflable_new:
 	moveq.l	#ST_VALUE,d2		;数値シンボル
 	bsr	defsymbol		;新しく登録する
 deflabel85:
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	beq	@f
-	bgt	deflabel_offsym		;offsymでシンボルあり
+	brosm	OSM_NOT_OFFSYM,@f
+	brosm	OSM_HAS_SYMBOL,deflabel_offsym	;offsymでシンボルあり
+
 	move.b	#SYM1ST_OFFSYM,(SYM_FIRST,a1)	;offsymのシンボル
 @@:
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;定義済シンボル

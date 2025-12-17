@@ -685,8 +685,8 @@ calcrpnlocctr:
 calcrpnlocctr1:
 	move.l	(LTOPLOC,a6),d0		;'*'
 calcrpnlocctr0:
-	ztst.b	OSM_NOT_OFFSYM,(OFFSYMMOD,a6)
-	ble	calcrpnlocctr2		;OSM_NOT_OFFSYM or OSM_NO_SYMBOL
+	brosm_not OSM_HAS_SYMBOL,calcrpnlocctr2
+
 	move.l	a1,-(sp)
 	movea.l	(OFFSYMTMP,a6),a1
 	brsym	SA_DEFINE,(SYM_ATTRIB,a1),@f
