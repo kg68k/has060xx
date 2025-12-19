@@ -583,6 +583,8 @@ getdcreal6:
 
 ;----------------------------------------------------------------
 ;	行頭のシンボルを定義する
+;	in :d2.l=シンボルの種類(ST_VALUE/ST_REAL/ST_REGSYM、d2.w>=0)
+;	out:d2.l=成功したら入力と同じ(d2.w>=0)/失敗したら-1
 defltopsym:
 	move.w	d2,-(sp)
 	bsr	encodeopr
@@ -594,18 +596,18 @@ defltopsym:
 	move.w	(sp)+,d2
 	tst.w	d0
 	bne	defsymbol		;未登録なら新しく登録する
-	cmp.b	(SYM_TYPE,a1),d2	;シンボルのタイプ
+
+	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),defltopsym01
+	cmp.b	(SYM_TYPE,a1),d2
 	bne	defltopsym02		;タイプの異なるシンボルと重複している
 	ztst.b	ST_VALUE,(SYM_TYPE,a1)
 	bne	defltopsym99
-	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),defltopsym01
-					;プレデファインシンボルを再定義しようとした
 defltopsym99:
 	moveq.l	#-1,d2
 	rts
 
 defltopsym01:
-	move.l	a1,(ERRMESSYM,a6)
+	move.l	a1,(ERRMESSYM,a6)	;プレデファインシンボルを再定義しようとした
 	bra	redeferr_predefine
 
 defltopsym02:
