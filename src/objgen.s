@@ -228,12 +228,13 @@ outxdef1:
 	bsr	outsymbol
 	bra	outxrefdef8
 
+outxref:	;.externで参照されなかったシンボル(SA_UNDEF)は外部参照にはしない
 outxref_by_u:
 	brsym	SA_UNDEF,(SYM_ATTRIB,a1),outxrefdef8
 		;.defined.シンボル名 で参照されただけなら外部参照にはしない
 outxref_by_globl:
 	move.b	#SECT_XREF,(SYM_EXTATR,a1)
-outxref:				;外部参照シンボルの出力
+;外部参照シンボルの出力
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)
 	addq.l	#1,(XREFSYMNO,a6)	;シンボル番号を付ける
 	move.l	(XREFSYMNO,a6),(SYM_VALUE,a1)

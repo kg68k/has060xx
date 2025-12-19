@@ -382,6 +382,7 @@ tablebody	.macro
 	pstbl	'extrn',    ~~xref
 	pstbl	'external', ~~xref
 	pstbl	'global',   ~~globl
+	pstbl	'extern',   ~~extern
 
 	pstbl	'text',     ~~text
 	pstbl	'data',     ~~data

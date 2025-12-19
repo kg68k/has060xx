@@ -811,6 +811,13 @@ pseudo_redeferr_a1:
 	bra	~~globl1
 
 ;---------------------------------------------------------------
+;	.extern	<シンボル>[,<シンボル>,…]
+~~extern::
+	moveq.l	#0,d2			;上位バイトを0にする(xdef/xref/globlは-1)
+	ffst.b	SECT_XREF,d2
+	bra	~~globl1
+
+;---------------------------------------------------------------
 ;	.globl	<シンボル>[,<シンボル>,…]
 ~~globl::
 	moveq.l	#SECT_GLOBL,d2
@@ -840,6 +847,8 @@ pseudo_redeferr_a1:
 @@:
 	move.b	d2,(SYM_EXTATR,a0)	;外部宣言属性をセット
 
+	tst.w	d2			;.externの場合は、最終的に定義されなかったら
+	bpl	@f			;外部定義させない
 	brsym_not SA_UNDEF,(SYM_ATTRIB,a0),@f	;最終的に定義されなかったら外部定義
 	ffst.b	SA_REFUNDEF,(SYM_ATTRIB,a0)	;されるよう、参照済みの扱いにしておく
 @@:
