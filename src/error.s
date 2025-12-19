@@ -44,6 +44,7 @@ warntbl	.macro
 	warn	1,1,indexszwarn,	'インデックスのサイズが指定されていません'
 	warn	1,1,redefwarn_set,	'シンボル %s を .set(=) で上書きしました'
 	warn	1,1,redefwarn_offsym,	'シンボル %s を .offsym で上書きしました'
+	warn	1,1,redefwarn_fset,	'シンボル %s を .fset で上書きしました'
 	warn	1,1,internalfpwarn,	'整数を単精度浮動小数点数の内部表現と見なします'
 
 	.endm
@@ -121,6 +122,7 @@ errtbl	.macro
 	error	1,redeferr_predefine,	'プレデファインシンボル %s を再定義しようとしました'
 	error	1,redeferr_set,		'シンボル %s は .set(=) 以外で定義されています'
 	error	1,redeferr_offsym,	'シンボル %s は .offsym 以外で定義されています'
+	error	1,redeferr_fset,	'シンボル %s は .fset 以外で定義されています'
 	error	1,badopeerr,		'命令が解釈できません'
 	error	1,badopeerr_local,	'ローカルラベルの記述が不正です'
 	error	1,badopeerr_locallen,	'ローカルラベルの桁数が多すぎるため定義できません'

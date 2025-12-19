@@ -166,7 +166,7 @@ usage_msg:
 	.dc.b	TAB,'-i <path>',TAB
 	.dc.b	'インクルードパス指定',CRLF
 	.dc.b	TAB,'-j[n]',TAB,TAB
-	.dc.b	'シンボルの上書き禁止条件の強化(0=しない,1=SET,2=OFFSYM,[3]=[1+2])',CRLF
+	.dc.b	'シンボルの上書き禁止条件の強化(0=しない,1=SET/FSET,2=OFFSYM,[3]=[1+2])',CRLF
 	.dc.b	TAB,'-k[n]',TAB,TAB
 	.dc.b	'68060のエラッタ対策(0=[する](-nは無効),[1]=しない)',CRLF
 	.dc.b	TAB,'-l',TAB,TAB

@@ -543,6 +543,15 @@ getdcreal6:
 ~~fset::
 	moveq.l	#ST_REAL,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),@f
+	br1st	SYM1ST_SET,(SYM_FIRST,a1),@f
+
+	move.l	a1,(ERRMESSYM,a6)	;fset以外で定義されている
+	tst.b	(OWSET,a6)
+	bne	redeferr_fset		;スイッチ-jにより警告またはエラー
+	bsr	redefwarn_fset
+@@:
+	ffst.b	SYM1ST_SET,(SYM_FIRST,a1)
 	bra	~~fequ1
 
 ;----------------------------------------------------------------
@@ -551,7 +560,9 @@ getdcreal6:
 	moveq.l	#ST_REAL,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
 	tst.w	d2
-	bmi	pseudo_redeferr_a1	;すでに定義済み
+	bmi	pseudo_redeferr_a1	;定義済シンボルならエラー
+
+	zclr.b	SYM1ST_OTHER,(SYM_FIRST,a1)
 ~~fequ1:
 	movea.l	a1,a2			;シンボルテーブルへのポインタ
 	move.l	(TEMPPTR,a6),d0
@@ -567,6 +578,8 @@ getdcreal6:
 	bsr	getdcreal		;浮動小数点実数オペランドを得る
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
+
+	move.b	#SA_DEFINE,(SYM_ATTRIB,a2)	;定義済シンボル
 	move.w	#T_FEQUSET,d0		;fequ/fset
 	move.b	d4,(SYM_FSIZE,a2)	;サイズ
 	move.b	d4,d0
@@ -600,9 +613,7 @@ defltopsym:
 	brsym	SA_PREDEFINE,(SYM_ATTRIB,a1),defltopsym01
 	cmp.b	(SYM_TYPE,a1),d2
 	bne	defltopsym02		;タイプの異なるシンボルと重複している
-	ztst.b	ST_VALUE,(SYM_TYPE,a1)
-	bne	defltopsym99
-defltopsym99:
+
 	moveq.l	#-1,d2
 	rts
 
@@ -647,15 +658,14 @@ pseudo_redeferr_a1:
 	bsr	defltopsym		;行頭のシンボルを定義する
 	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),~~set1
 					;未定義
-	tst.b	(SYM_FIRST,a1)		;SYM1ST_SETか?
-	blt	~~set1			;setで定義されている
-	move.l	a1,(ERRMESSYM,a6)
+	br1st	SYM1ST_SET,(SYM_FIRST,a1),~~set1
+
+	move.l	a1,(ERRMESSYM,a6)	;set以外で定義されている
 	tst.b	(OWSET,a6)
-	bne	redeferr_set
+	bne	redeferr_set		;スイッチ-jにより警告またはエラー
 	bsr	redefwarn_set
 ~~set1:
 	ffst.b	SYM1ST_SET,(SYM_FIRST,a1)
-	moveq.l	#-1,d2
 	bra	~~equ1
 
 ;----------------------------------------------------------------
@@ -663,10 +673,10 @@ pseudo_redeferr_a1:
 ~~equ::
 	moveq.l	#ST_VALUE,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
-	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a1),pseudo_redeferr_a1
-					;定義済シンボルならエラー
+	tst.w	d2
+	bmi	pseudo_redeferr_a1	;定義済シンボルならエラー
+
 	zclr.b	SYM1ST_OTHER,(SYM_FIRST,a1)
-	moveq.l	#0,d2
 ~~equ1:
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
 	bcc	pseudo_redeferr_a1	;.xref/.commシンボルだった
@@ -683,6 +693,7 @@ pseudo_redeferr_a1:
 	movea.l	a2,a1
 	tst.b	d0
 	bne	~~equ2			;式が定数でない
+
 	clr.w	(SYM_SECTION,a1)	;(SYM_ORGNUM)
 	move.b	#SA_DEFINE,(SYM_ATTRIB,a1)	;定義済シンボル
 	move.l	d1,(SYM_VALUE,a1)	;シンボル値

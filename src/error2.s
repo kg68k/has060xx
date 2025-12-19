@@ -27,6 +27,7 @@ insigbitwarn2::		bra	insigbitwarn
 indexszwarn2::		bra	indexszwarn
 redefwarn_set2::	bra	redefwarn_set
 redefwarn_offsym2::	bra	redefwarn_offsym
+;redefwarn_fset2::	bra	redefwarn_fset
 internalfpwarn2::	bra	internalfpwarn
 
 forcederr2::		bra	forcederr
@@ -34,6 +35,7 @@ redeferr2::		bra	redeferr
 redeferr_predefine2::	bra	redeferr_predefine
 redeferr_set2::		bra	redeferr_set
 redeferr_offsym2::	bra	redeferr_offsym
+;redeferr_fset2::	bra	redeferr_fset
 badopeerr2::		bra	badopeerr
 badopeerr_local2::	bra	badopeerr_local
 ilsymerr_value2::	bra	ilsymerr_value

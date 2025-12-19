@@ -96,12 +96,31 @@ brsym_not: .macro arg1,arg2,arg3
 .endm
 
 ;----------------------------------------------------------------
-;	SYM_FIRST シンボル定義方法(ST_VALUEのみ)
+;	SYM_FIRST シンボル定義方法(ST_VALUE/ST_REALのみ)
 ;----------------------------------------------------------------
 
 SYM1ST_SET:	.equ	$ff	;.set
 SYM1ST_OTHER:	.equ	$00	;その他
 SYM1ST_OFFSYM:	.equ	$01	;.offsym
+
+;----------------------------------------------------------------
+;	シンボル定義方法分岐マクロ
+
+br1st: .macro value,ea,label
+	.sizem sz,argc
+	.fail argc!=3
+
+	tst.b ea
+	.if value.eq.SYM1ST_SET
+		bmi&sz label
+	.elif value.eq.SYM1ST_OTHER
+		beq&sz label
+	.elif value.eq.SYM1ST_OFFSYM
+		bgt&sz label
+	.else
+		.fail 1
+	.endif
+.endm
 
 ;----------------------------------------------------------------
 ;	シンボルテーブル構造
@@ -132,7 +151,7 @@ SYM_ATTRIB:	.ds.b	1	;$0A 定義属性
 SYM_EXTATR:	.ds.b	1	;$0B 外部定義属性
 SYM_SECTION:	.ds.b	1	;$0C セクション
 SYM_ORGNUM:	.ds.b	1	;$0D アドレスシンボルのorgセクション番号
-SYM_FIRST:	.ds.b	1	;$0E 最初に定義した方法(ST_VALUEのみ)
+SYM_FIRST:	.ds.b	1	;$0E 最初に定義した方法(ST_VALUE/ST_REALのみ)
 				;    SYM1ST_* -1=set,0=その他,1=offsym
 		.ds.b	1	;$0F
 SYM_VALUE:	.ds.l	1	;$10 シンボルの持つ値
@@ -142,9 +161,11 @@ SYM_TBLLEN:			;$14
 ;	浮動小数点実数シンボル	(ST_REAL)
 	.offset	SYM_BEGIN
 SYM_FSIZE:	.ds.b	1	;$09 シンボルのサイズ(SZ_SINGLE/SZ_DOUBLE/SZ_EXTEND/SZ_PACKED)
-		.ds.w	1	;$0A
-SYM_FVPTR:	.ds.l	1	;$0C シンボル値へのポインタ
-				;$10
+		.ds.w	2	;$0A
+		.ds.b	1	;$0E 最初に定義した方法(ST_VALUE/ST_REALのみ)
+		.ds.b	1	;$0F
+SYM_FVPTR:	.ds.l	1	;$10 シンボル値へのポインタ
+				;$14
 
 ;----------------------------------------------------------------
 ;	regシンボル		(ST_REGSYM)

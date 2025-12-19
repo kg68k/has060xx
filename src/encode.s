@@ -56,10 +56,10 @@ deflabel::
 ;offsymのときはプレデファインシンボルでなければ二重定義エラーを出さない
 	brosm	OSM_NOT_OFFSYM,redeferr	;offsym中でないので二重定義エラー
 
-	tst.b	(SYM_FIRST,a1)		;SYM1ST_OFFSYMか?
-	bgt	deflabel81
+	br1st	SYM1ST_OFFSYM,(SYM_FIRST,a1),deflabel81
+
 	tst.b	(OWOFFSYM,a6)		;offsymのシンボルでない
-	bne	redeferr_offsym
+	bne	redeferr_offsym		;スイッチ-jにより警告またはエラー
 	bsr	redefwarn_offsym
 deflabel81:
 	cmpi.b	#SECT_COMM,(SYM_EXTATR,a1)
