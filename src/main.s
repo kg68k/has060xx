@@ -198,6 +198,8 @@ usage_msg:
 ;-z HAS拡張機能のワーニング禁止(廃止)
 	.dc.b	TAB,'-_',TAB,TAB
 	.dc.b	"外部定義・外部参照シンボルの先頭に'_'を挿入する",CRLF
+	.dc.b	TAB,'-.',TAB,TAB
+	.dc.b	"ドット('.')からはじまるラベル名を許可する",CRLF
 	.dc.b	'    環境変数 HAS の内容がコマンドラインの手前(-iは後ろ)に挿入されます',CRLF
 	.dc.b	0
 
@@ -580,6 +582,9 @@ optionsw1:
 	addq.w	#1,d2
 	cmpi.b	#'_',d0
 	beq	@f
+	addq.w	#1,d2
+	cmpi.b	#'.',d0
+	beq	@f
 
 	moveq.l	#$20,d2
 	or.b	d0,d2			;小文字化
@@ -601,6 +606,7 @@ optjp_tbl:
 	.dc.w	option_&ch-optjp_tbl
 	.endm
 	.dc.w	option_underscore-optjp_tbl
+	.dc.w	option_dot-optjp_tbl
 
 ;----------------------------------------------------------------
 ;	-t path		テンポラリパス指定
@@ -1210,6 +1216,13 @@ option_y_0:
 
 option_underscore:
 	move.b	#'_',(LEADINGSYMCHAR,a6)
+	rts
+
+;----------------------------------------------------------------
+;	-.		ドット(.)からはじまるラベル名を許可する
+
+option_dot:
+	st.b	(DOTLABEL,a6)
 	rts
 
 ;----------------------------------------------------------------

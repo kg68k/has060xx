@@ -178,23 +178,23 @@ encodeline::
 	beq	encodecmd99
 	cmp.b	#'#',d0
 	beq	encodecmd99
-encodeline1:
+
 	cmp.b	#'.',d0			;.xxxx 命令
-	beq	encodecmd1
+	beq	encline_dot
 	tst.b	(ISIFSKIP,a6)
 	beq	encodeline2
 	movea.l	a0,a1			;ifスキップ中の場合
 	moveq.l	#-2,d1			;ラベルを読み飛ばす
-encodeline01:
+@@:
 	addq.w	#1,d1
 	move.b	(a1)+,d0
 	cmp.b	#'.',d0
-	beq	encodeline02
+	beq	@f
 	cmp.b	#':',d0
-	beq	encodeline02
+	beq	@f
 	cmp.b	#' ',d0
-	bhi	encodeline01
-encodeline02:
+	bhi	@b
+@@:
 	subq.l	#1,a1
 	tst.w	d1
 	bmi	encodecmd9
@@ -288,6 +288,27 @@ encodeline11:
 	bra	encodeline10
 
 ;----------------------------------------------------------------
+;	ドットラベルの定義
+encline_dot:
+	tst.b	(DOTLABEL,a6)
+	beq	encodecmd1
+	cmpa.l	a0,a2
+	bne	encodecmd1		;行頭から始まっていない(行頭が空白文字)
+	addq.l	#1,a0
+	bsr	getword
+	cmpi.b	#':',(a1)
+	bne	encodecmd11		;':'がない
+	move.w	d1,d2
+	bsr	getcmdmac		;命令優先
+	tst.w	d0
+	beq	encodecmd41		;命令・マクロに一致した
+
+	movea.l	a2,a0			;ドットラベルとして認める
+	move.w	d2,d1			;文字列長-1
+	addq.w	#1,d1			;先頭の'.'も含める
+	bra	encodeline10
+
+;----------------------------------------------------------------
 ;	命令のコード化
 encodecmd:
 	cmp.b	#'.',(a0)
@@ -295,6 +316,7 @@ encodecmd:
 encodecmd1:				;'.'で始まる名前は命令優先
 	addq.l	#1,a0
 	bsr	getword
+encodecmd11:
 	bsr	getcmdmac		;命令優先
 	bra	encodecmd4
 
@@ -305,6 +327,7 @@ encodecmd3:
 encodecmd4:
 	tst.w	d0
 	bne	encodecmd9		;命令・マクロの誤り
+encodecmd41:
 	tst.l	(CMDTBLPTR,a6)
 	beq	encodecmd99		;命令がない
 encodecmd5:				;オペレーションサイズを得る
@@ -507,7 +530,7 @@ encodeopr99:				;オペランドが終了した
 encodeexop:
 	addq.l	#1,a0
 	bsr	getword
-	tst.w	d2
+	move.w	d1,d3
 	beq	encodesize		;1文字→サイズ指定
 	moveq.l	#1,d1
 	lea.l	(opname_tbl,pc),a4
@@ -531,9 +554,16 @@ encodeexop_real:			;演算子が存在しない
 	subq.l	#1,a0			;浮動小数点実数の可能性あり
 	bsr	strtox			;文字列を実数に変換する
 	tst.l	d0
-	bmi	exprerr			;変換できなければエラー
+	bmi	@f			;変換できなかった
 	move.w	d0,d3
 	bra	encodereal
+@@:
+	tst.b	(DOTLABEL,a6)		;a0='.'のアドレス
+	beq	exprerr			;変換エラーとして扱う
+
+	move.w	d3,d1			;文字列長-1
+	addq.w	#1,d1			;先頭の'.'も含める
+	bra	encodesymr3		;ドットラベルとして認める
 
 encodeexop4:				;演算子の場合
 	cmpi.b	#'.',(a3)+
@@ -551,6 +581,7 @@ encodeexop5:
 
 ;----------------------------------------------------------------
 ;	サイズ指定のコード化
+;	encodeexop_realに分岐する場合は、それまでにd3.wを破壊しないこと
 encodesize:
 	moveq.l	#$20,d0
 	or.b	(a0),d0
@@ -679,6 +710,7 @@ encodesymr2:
 	beq	encodelocal10		;'@...'はローカルラベル参照
 	cmpi.b	#'9',d0
 	bls	encodelocal20		;'[0-9]...'はローカルラベル参照
+encodesymr3:
 	move.l	a1,-(sp)
 	bsr	isdefdsym		;定義済みシンボルかどうかチェック
 	tst.w	d0
