@@ -11,7 +11,6 @@
 	.include	doscall.mac
 	.include	has.equ
 	.include	tmpcode.equ
-	.include	error2.equ
 	.include	work.equ
 
 	.cpu	68000
