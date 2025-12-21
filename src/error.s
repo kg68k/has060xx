@@ -339,7 +339,7 @@ printerr53:
 	clr.b	(a0)
 printerr6:
 	lea.l	(-128,a5),a0
-	bsrl	prnstdout,d0		;標準出力・PRNファイルにエラーメッセージを表示
+	bsr	prnstdout		;標準出力・PRNファイルにエラーメッセージを表示
 	movem.l	(sp)+,d0/d3/a0-a1
 	unlk	a5
 	rts

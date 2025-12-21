@@ -151,9 +151,9 @@ iloprerr_pseudo_tail:
 	;.offsymでシンボル指定があるときアラインメント処理できない
 	brosm	OSM_HAS_SYMBOL,offsymalignerr
 
-	btst.b	#0,(LOCATION+3,a6)
-	beq	@f
 	moveq.l	#0,d0
+	btst.b	d0,(LOCATION+3,a6)
+	beq	@f
 	bsr	wrt1bobj		;$00を出力して偶数境界に合わせる
 	addq.l	#1,(LTOPLOC,a6)
 @@:

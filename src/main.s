@@ -1252,7 +1252,7 @@ getcmdstring:
 ;	コマンドラインの数値を得る
 getcmdnum:
 	movem.l	a0-a1,-(sp)
-	bsrl	getnum,d0
+	bsr	getnum
 	beq	getcmdnum9
 	movem.l	(sp)+,a0-a1
 	moveq.l	#-1,d0
