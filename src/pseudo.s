@@ -1056,11 +1056,7 @@ offsymtailchk01:
 	bra	wrtd0l
 
 ;---------------------------------------------------------------
-;	skipfaultの戻り値(読み飛ばした部分の直後の疑似命令)
-SKIPFAULT_ENDIF		equ	0
-SKIPFAULT_ELSE		equ	1
-SKIPFAULT_ELSEIF	equ	2
-
+;	.if状態テーブルを必要なら拡大する
 enlarge_ifstattbl:
 	movem.l	d0-d1/a0-a1,-(sp)
 	moveq.l	#0,d0
@@ -1092,6 +1088,12 @@ enlarge_ifstattbl:
 	rts
 
 ;---------------------------------------------------------------
+;	skipfaultの戻り値(読み飛ばした部分の直後の疑似命令)
+SKIPF_ENDIF	equ	-1
+SKIPF_ELSE	equ	0
+SKIPF_ELSEIF	equ	1
+
+;---------------------------------------------------------------
 ;	.if	<式>
 ~~if::
 	bsr	ifcond
@@ -1106,8 +1108,9 @@ enlarge_ifstattbl:
 	beq	~~if9			;d0.b=0なら条件が成立
 ~~if2:
 	bsr	skipfault		;条件不成立部のソースを読み飛ばす
-	cmp.w	#SKIPFAULT_ELSE,d0
-	bcs	~~if9			;endifの場合
+	.fail	(SKIPF_ENDIF.sge.0).or.(SKIPF_ELSE.ne.0).or.(SKIPF_ELSEIF.sle.0)
+	tst.w	d0
+	bmi	~~if9			;endifの場合
 	beq	~~if_false_else		;elseの場合
 
 	bsr	ifcond			;elseifの場合
@@ -1229,13 +1232,13 @@ skipfif:				;if/iff/ifdef/ifndef
 skipfelse:				;else
 	tst.w	(IFSKIPNEST,a6)
 	bne	skipfault1
-	moveq.l	#SKIPFAULT_ELSE,d0
+	moveq.l	#SKIPF_ELSE,d0
 	bra	skipfend
 
 skipfelif:				;elseif
 	tst.w	(IFSKIPNEST,a6)
 	bne	skipfault1
-	moveq.l	#SKIPFAULT_ELSEIF,d0
+	moveq.l	#SKIPF_ELSEIF,d0
 	bra	skipfend
 
 skipfendif:				;endif
@@ -1246,7 +1249,7 @@ skipfendif:				;endif
 
 skipfendif1:
 	subq.w	#1,(IFNEST,a6)
-	moveq.l	#SKIPFAULT_ENDIF,d0
+	moveq.l	#SKIPF_ENDIF,d0
 skipfend:
 	clr.b	(ISIFSKIP,a6)
 	move.w	#-1,(LABNAMELEN,a6)
@@ -1264,8 +1267,9 @@ skipfend:
 
 	bsr	skipfault
 	move.l	(CMDTBLPTR,a6),(ERRMESSYM,a6)
-	cmp.w	#SKIPFAULT_ENDIF,d0
-	bne	misiferr_else_else	;elseの後にelse/elseifがあった
+	.fail	(SKIPF_ENDIF.sge.0).or.(SKIPF_ELSE.slt.0).or.(SKIPF_ELSEIF.slt.0)
+	tst.w	d0
+	bpl	misiferr_else_else	;elseの後にelse/elseifがあった
 	rts
 
 ;---------------------------------------------------------------
@@ -1279,9 +1283,10 @@ skipfend:
 	bne	misiferr_else_else	;このelseifより前にelseがあった
 
 	bsr	skipfault
-	subq.w	#SKIPFAULT_ELSE,d0
+	tst.w	d0
+	.fail	(SKIPF_ELSE.ne.0).or.(SKIPF_ELSEIF.sle.0)
 	beq	~~else
-	bcc	~~elseif
+	bgt	~~elseif
 	rts
 
 ;---------------------------------------------------------------
