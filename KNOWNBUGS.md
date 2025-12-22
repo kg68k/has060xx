@@ -28,12 +28,3 @@ foo: .ds.b 9
 bar: .ds.b 1
 .end
 ```
-
-## .ifなどの条件不成立ブロック内で.commentが機能しない
-```
-.if 0  ;.if 1ならOK
-  .comment end_of_comment
-    .if
-  end_of_comment
-.endif
-```

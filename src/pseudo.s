@@ -1218,6 +1218,9 @@ skipfault1:
 	lea.l	(~~endif,pc),a2
 	cmpa.l	a1,a2
 	beq	skipfendif
+	lea.l	(~~comment,pc),a2
+	cmpa.l	a1,a2
+	beq	skipfcomment
 	bra	skipfault1
 
 skipfault9:
@@ -1245,6 +1248,10 @@ skipfendif:				;endif
 	tst.w	(IFSKIPNEST,a6)
 	beq	skipfendif1
 	subq.w	#1,(IFSKIPNEST,a6)
+	bra	skipfault1
+
+skipfcomment:
+	bsr	~~comment		;comment
 	bra	skipfault1
 
 skipfendif1:
