@@ -182,22 +182,17 @@ f43gcut1:
 	bmi	~~dc0
 	cmp.b	#SZ_SINGLE,d0
 	bcc	dodcreal		;浮動小数点実数の.dc
-	tst.b	d0
-	bne	~~dc1
-	move.b	#SZ_SHORT,(CMDOPSIZE,a6)	;.b→.s
-	bra	~~dc2
-
+	bra	~~dc1
 ~~dc0:
 	move.b	#SZ_WORD,(CMDOPSIZE,a6)
 ~~dc1:
-~~dc2:
 	movea.l	(OPRBUFPTR,a6),a0
-~~dc3:
+@@:
 	bsr	dodcparam		;パラメータ1つについて処理
 	move.w	(a0)+,d0
 	beq	~~dc9
 	cmp.w	#','|OT_CHAR,d0
-	beq	~~dc3
+	beq	@b
 	bra	iloprerr
 
 ~~dc9:
@@ -244,26 +239,24 @@ dodcnum:				;パラメータ式
 	bsr	calcrpn
 	move.w	d0,d3
 	move.b	(EXPRSIZE,a6),d0	;式のサイズ
-	bpl	dodcnum11
-	cmpi.b	#OT_SIZE>>8,(a0)
-	bne	dodcnum1		;式に後続するサイズ指定がない
-	move.w	(a0)+,d0		;式に後続するサイズ
-dodcnum11:
-	ztst.b	SZ_BYTE,d0
-	bne	dodcnum0
-	move.b	#SZ_SHORT,d0		;.b→.s
-	bra	dodcnum3
+	bpl	@f
 
-dodcnum0:
+	move.b	(CMDOPSIZE,a6),d0
+	cmpi.b	#OT_SIZE>>8,(a0)
+	bne	dodcnum1		;式に後続するサイズ指定がないので.dcのサイズを使う
+					;(.b/.w/.lのみ)
+	move.w	(a0)+,d0		;式に後続するサイズ
+@@:
 	cmp.b	#SZ_SINGLE,d0
 	bcc	ilsizeerr		;実数は受け付けない(.bの意味になっていた.sも不可)
-	bra	dodcnum2		;サイズ指定がある
-
 dodcnum1:
-	move.b	(CMDOPSIZE,a6),d0	;サイズ指定がないので.dcのサイズを使う
-dodcnum2:
-	cmp.b	#SZ_SHORT,d0
-	beq	dodcnum3
+	ztst.b	SZ_BYTE,d0
+	bne	@f
+	;wrtimmにおけるSZ_BYTEはmove.b #imm,d0など「パディング1バイト+即値1バイト」
+	;の出力だが、.dc.bでは1バイトだけ出力する必要があるのでSZ_SHORTにすげ替える
+	moveq.l	#SZ_SHORT,d0		;.b→.s
+	bra	dodcnum3
+@@:
 	btst.b	#0,(LOCATION+3,a6)
 	beq	dodcnum3
 	bsr	alignwarn		;偶数境界に合っていないのでワーニングを出す
@@ -271,7 +264,7 @@ dodcnum3:
 	tst.w	d3
 	beq	wrtimm			;定数ならファイルに出力
 	cmp.b	#SZ_SHORT,d0
-	beq	dodcnumb
+	beq	dodcnumb		;.b
 	cmp.b	#SZ_WORD,d0
 	beq	dodcnumw
 	add.l	#2,(LOCATION,a6)	;.l
@@ -290,8 +283,8 @@ dodcstr:				;パラメータ文字列
 	bne	@f
 	move.w	(a0)+,d1		;$ffの場合のみ、続くワードが文字列長
 @@:
+	.fail	SZ_BYTE.ne.0
 	move.b	(CMDOPSIZE,a6),d2
-	cmp.b	#SZ_SHORT,d2
 	beq	dodcstrb
 	ext.w	d2			;.w/.lでの文字列書き込み
 	add.w	d2,d2
