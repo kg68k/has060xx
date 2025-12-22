@@ -117,7 +117,7 @@ ilsfterr		reg	ilsfterr2
 ;misiferr_else		reg	misiferr_else2
 ;misiferr_elseif	reg	misiferr_elseif2
 ;misiferr_endif		reg	misiferr_endif2
-;misiferr_else_elseif	reg	misiferr_else_elseif2
+;misiferr_else_else	reg	misiferr_else_else2
 misiferr_eof		reg	misiferr_eof2
 ;termerr_doublequote	reg	termerr_doublequote2
 ;termerr_singlequote	reg	termerr_singlequote2

@@ -1056,6 +1056,42 @@ offsymtailchk01:
 	bra	wrtd0l
 
 ;---------------------------------------------------------------
+;	skipfaultの戻り値(読み飛ばした部分の直後の疑似命令)
+SKIPFAULT_ENDIF		equ	0
+SKIPFAULT_ELSE		equ	1
+SKIPFAULT_ELSEIF	equ	2
+
+enlarge_ifstattbl:
+	movem.l	d0-d1/a0-a1,-(sp)
+	moveq.l	#0,d0
+	move.w	(IFNEST,a6),d0
+	cmp.l	(IFSTATLEN,a6),d0
+	bne	9f
+
+	.fail	IFSTATINILEN.eq.0
+	add.l	d0,d0			;テーブルサイズを2倍にする
+	move.l	d0,(IFSTATLEN,a6)
+
+	movea.l	(IFSTATPTR,a6),a0	;旧テーブル
+	move.l	(TEMPPTR,a6),d1
+	doeven	d1
+	movea.l	d1,a1			;新テーブル
+	move.l	a1,(IFSTATPTR,a6)
+
+	add.l	d0,d1			;テーブル末尾
+	move.l	d1,(TEMPPTR,a6)
+	bsr	memcheck
+
+	.fail	IFSTATINILEN.and.(4-1)
+	lsr.l	#1+2,d0			;2倍を戻す + ロングワード転送
+@@:	move.l	(a0)+,(a1)+		;旧テーブルの内容を新テーブルにコピー
+	subq.l	#1,d0			;(拡大した部分は初期化不要)
+	bne	@b
+9:
+	movem.l	(sp)+,d0-d1/a0-a1
+	rts
+
+;---------------------------------------------------------------
 ;	.if	<式>
 ~~if::
 	bsr	ifcond
@@ -1063,18 +1099,35 @@ offsymtailchk01:
 	seq.b	d0			;式が非零ならd0.b=0
 ~~if1:
 	addq.w	#1,(IFNEST,a6)
+	bsr	enlarge_ifstattbl
+	bsr	get_ifstataddr
+	clr.b	(a1)			;else出現フラグをクリア
 	tst.b	d0
 	beq	~~if9			;d0.b=0なら条件が成立
 ~~if2:
 	bsr	skipfault		;条件不成立部のソースを読み飛ばす
-	cmp.w	#2,d0
-	bne	~~if9			;else/endifの場合
+	cmp.w	#SKIPFAULT_ELSE,d0
+	bcs	~~if9			;endifの場合
+	beq	~~if_false_else		;elseの場合
+
 	bsr	ifcond			;elseifの場合
 	tst.l	d1
 	seq.b	d0
 	tst.b	d0
 	bne	~~if2			;再び不成立になった
 ~~if9:
+	rts
+
+~~if_false_else:
+	bsr	get_ifstataddr
+	st.b	(a1)			;elseが出現(成立)したので、以後else/elseifは使えない
+	rts
+
+get_ifstataddr:
+	move.w	(IFNEST,a6),-(sp)
+	clr.w	-(sp)
+	movea.l	(IFSTATPTR,a6),a1
+	adda.l	(sp)+,a1
 	rts
 
 ;---------------------------------------------------------------
@@ -1176,13 +1229,13 @@ skipfif:				;if/iff/ifdef/ifndef
 skipfelse:				;else
 	tst.w	(IFSKIPNEST,a6)
 	bne	skipfault1
-	moveq.l	#1,d0
+	moveq.l	#SKIPFAULT_ELSE,d0
 	bra	skipfend
 
 skipfelif:				;elseif
 	tst.w	(IFSKIPNEST,a6)
 	bne	skipfault1
-	moveq.l	#2,d0
+	moveq.l	#SKIPFAULT_ELSEIF,d0
 	bra	skipfend
 
 skipfendif:				;endif
@@ -1193,7 +1246,7 @@ skipfendif:				;endif
 
 skipfendif1:
 	subq.w	#1,(IFNEST,a6)
-	moveq.l	#0,d0
+	moveq.l	#SKIPFAULT_ENDIF,d0
 skipfend:
 	clr.b	(ISIFSKIP,a6)
 	move.w	#-1,(LABNAMELEN,a6)
@@ -1203,19 +1256,30 @@ skipfend:
 ;	.else
 ~~else::
 	tst.w	(IFNEST,a6)
-	beq	misiferr_else
+	beq	misiferr_else		;ifがないのに突然elseが書かれていた
+
+	bsr	get_ifstataddr
+	tas.b	(a1)
+	bne	misiferr_else_else	;このelseより前にelseがあった
+
 	bsr	skipfault
-	cmp.w	#2,d0
-	beq	misiferr_else_elseif	;elseの後にelseifがあった
+	move.l	(CMDTBLPTR,a6),(ERRMESSYM,a6)
+	cmp.w	#SKIPFAULT_ENDIF,d0
+	bne	misiferr_else_else	;elseの後にelse/elseifがあった
 	rts
 
 ;---------------------------------------------------------------
 ;	.elseif	<式>
 ~~elseif::
 	tst.w	(IFNEST,a6)
-	beq	misiferr_elseif
+	beq	misiferr_elseif		;ifがないのに突然elseifが書かれていた
+
+	bsr	get_ifstataddr
+	tst.b	(a1)
+	bne	misiferr_else_else	;このelseifより前にelseがあった
+
 	bsr	skipfault
-	subq.w	#1,d0
+	subq.w	#SKIPFAULT_ELSE,d0
 	beq	~~else
 	bcc	~~elseif
 	rts

@@ -204,7 +204,7 @@ errtbl	.macro
 	error	0,misiferr_else
 	error	0,misiferr_elseif
 	error	1,misiferr_endif,	'%s に対応する .if がありません'
-	error	1,misiferr_else_elseif,	'.else の後に .elseif があります'
+	error	1,misiferr_else_else,	'.else の後に %s があります'
 	error	1,misiferr_eof,		'.endif が足りません'
 	error	1,termerr_doublequote,	'"～"が閉じていません'
 	error	1,termerr_singlequote,	"'～'が閉じていません"

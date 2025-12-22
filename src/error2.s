@@ -119,7 +119,7 @@ ilsfterr2::		bra	ilsfterr
 ;misiferr_else2::	bra	misiferr_else
 ;misiferr_elseif2::	bra	misiferr_elseif
 ;misiferr_endif2::	bra	misiferr_endif
-;misiferr_else_elseif2::bra	misiferr_else_elseif
+;misiferr_else_else2::	bra	misiferr_else_else
 misiferr_eof2::		bra	misiferr_eof
 ;termerr_doublequote2::	bra	termerr_doublequote
 ;termerr_singlequote2::	bra	termerr_singlequote

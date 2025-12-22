@@ -284,6 +284,11 @@ workinit:
 	lea.l	(LOCSYMBUFEND,a6),a0
 	move.l	a0,(LOCSYMENDPTR,a6)
 
+	lea.l	(IFSTATTBL,a6),a0
+	move.l	a0,(IFSTATPTR,a6)
+	moveq.l	#IFSTATINILEN,d0
+	move.l	d0,(IFSTATLEN,a6)
+
 	leawork	SYMHASHTBL,a0
 	move.l	a0,(SYMHASHPTR,a6)
 	leawork	CMDHASHTBL,a0

@@ -37,27 +37,3 @@ bar: .ds.b 1
   end_of_comment
 .endif
 ```
-
-## .elseの後に.elseがあってもエラーにならない
-```
-.if 1
-  moveq #1,d0
-.else
-  moveq #2,d0
-.else
-  moveq #3,d0
-.endif
-```
-
-## .elseの後に.elseifがあってもエラーにならないことがある
-```
-.if 0
-  moveq #1,d0
-.else
-  moveq #2,d0
-.elseif 1
-  moveq #3,d0
-.endif
-```
-.elseが不成立の場合は直後の.elseifがエラーになるが、.elseが成立の場合はエラーにならない。
-
