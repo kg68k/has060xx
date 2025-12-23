@@ -51,12 +51,13 @@ asmmain0:
 	tst.l	d0
 	bmi	filopenabort
 	tst.b	(MAKEPRN,a6)
-	beq	asmmain1
+	beq	@f
 	movea.l	(PRNFILE,a6),a0
 	bsr	prnopen			;PRNファイルをオープンする
 	move.w	d0,(PRNHANDLE,a6)
-	bsr	prnpaging1		;タイトル行を出力
-asmmain1:
+	neg.b	(NOPAGEFF,a6)		;$ff -> $01 ページングなしなら
+					;初回出力時にタイトル行も出力する
+@@:
 	bsr	asmpass1		;パス1
 	bsr	asmpass2		;パス2
 	bsrl	asmpass3,d0		;パス3
@@ -97,9 +98,7 @@ asmmain4:
 	bsr	prnlout
 	tst.b	(NOPAGEFF,a6)
 	bne	asmmain5
-	st.b	(NOPAGEFF,a6)
-	lea.l	(pageff_msg,pc),a0
-	bsr	prnlout
+	bsr	prnlout_ff		;PRNファイル末尾に改ページコードを出力する
 asmmain5:
 	move.w	(PRNHANDLE,a6),-(sp)
 	DOS	_CLOSE			;PRNファイルのクローズ

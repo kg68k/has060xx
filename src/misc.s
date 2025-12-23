@@ -468,8 +468,14 @@ prnstdout1:
 ;	out:---
 prnlout::
 	tst.b	(NOPAGEFF,a6)
-	bne	prnlout1
-	bsr	prnpaging
+	bmi	prnlout1		;ページングなし(2回目以降)
+	beq	@f
+
+	st.b	(NOPAGEFF,a6)		;ページングなし(初回)
+	bsr	prnpaging1		;先にタイトル行を出力する
+	bra	prnlout1
+@@:
+	bsr	prnpaging		;ページングあり
 prnlout1:
 	move.l	d0,-(sp)
 	move.w	(PRNHANDLE,a6),-(sp)
@@ -486,6 +492,15 @@ prnlout9:
 	tst.b	(a0)
 	beq	prnlout2
 	bra	devfulabort
+
+;----------------------------------------------------------------
+;	PRNファイルに改ページコードを出力する
+prnlout_ff::
+	move.l	a0,-(sp)
+	lea.l	(pageff_msg,pc),a0
+	bsr	prnlout1
+	movea.l	(sp)+,a0
+	rts
 
 ;----------------------------------------------------------------
 ;	PRNファイルの改ページを行なう
@@ -513,11 +528,9 @@ prnnextpage9:
 prnpaging:
 	subq.w	#1,(PRNCOUNT,a6)
 	bhi	prnpaging9
-	move.l	a0,-(sp)
-	lea.l	(pageff_msg,pc),a0
-	bsr	prnlout1		;改ページコードを出力
-	movea.l	(sp)+,a0
-prnpaging1::
+	bcs	prnpaging1		;初回出力時は改ページしない
+	bsr	prnlout_ff		;改ページコードを出力
+prnpaging1:
 	link	a5,#-80
 	movem.l	d0-d1/a0-a1,-(sp)
 	addq.w	#1,(PRNSPAGE,a6)
@@ -562,15 +575,9 @@ prnpaging3:
 	bsr	strcpy
 	lea.l	(-80,a5),a0
 	bsr	prnlout1		;サブタイトル文字列・ページ数を表示
+prnpaging4:
 	lea.l	(crlf_msg,pc),a0
 	bsr	prnlout1
-	cmpi.w	#1,(PRNSPAGE,a6)
-	bne	prnpaging4
-	tst.w	(PRNMPAGE,a6)
-	beq	prnpaging4
-	bsr	prnlout1
-	subq.w	#1,(PRNCOUNT,a6)
-prnpaging4:
 	movem.l	(sp)+,d0-d1/a0-a1
 	unlk	a5
 prnpaging9:
@@ -592,7 +599,7 @@ tfrtitle9:
 	move.b	#' ',(a0)+
 	rts
 
-pageff_msg::	.dc.b	FF,0
+pageff_msg:	.dc.b	FF,0
 page_msg:	.dc.b	'Page ',0
 sym_msg:	.dc.b	'Symbols-',0
 	.even
