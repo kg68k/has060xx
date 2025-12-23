@@ -76,7 +76,7 @@ EAD_BDADR	equ	4	;ベースディスプレースメント付きアドレスレジ
 EAD_MEMADR	equ	5	;ポスト/プリインデックス付きメモリ間接
 EAD_DSPPC	equ	6	;ディスプレースメント付きPC間接
 EAD_IDXPC	equ	7	;インデックス付きPC間接
-EAD_BDPC	equ	8	;ベースディスプレースメント付きアPC間接
+EAD_BDPC	equ	8	;ベースディスプレースメント付きPC間接
 EAD_MEMPC	equ	9	;ポスト/プリインデックス付きPCメモリ間接
 EAD_ABSLW	equ	10	;絶対ロング/ショート
 EAD_IMM		equ	11	;イミディエイト

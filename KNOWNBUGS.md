@@ -5,9 +5,10 @@
 .cpu 68020
 b:
   lea (a,pc,d0.l),a0
-  .ds.b 32758
+  .dcb.w 32758/2,$4e71
   lea (b,pc,d0.l),a0
 a:
+  .dc $ff00
 ```
 あるいは
 ```
@@ -28,3 +29,7 @@ foo: .ds.b 9
 bar: .ds.b 1
 .end
 ```
+
+eamode.s `geteapm_idx5:`の`bpl geteapm_idx9`を`bpl geteapm_bd`に変えると
+エラーは出なくなるが、最適化の際に`(bd,pc,idx) ;bd=0`から`(d8,pc,idx)`への格下げが
+行われないためアセンブル結果が異なる。
