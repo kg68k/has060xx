@@ -111,7 +111,7 @@ CMDLINEPTR::	.ds.l	1	;コマンドライン文字列へのポインタ
 
 ;----------------------------------------------------------------
 ;	ファイル管理
-INCPATHPTR::	.ds.l	1	;INCPATHPTR/INCPATHCMDへのポインタ
+INCPATHPTR::	.ds.l	1	;INCPATHENVまたはINCPATHCMDへのポインタ
 INCPATHENV::	.ds.l	1	;環境変数で指定されたインクルードパス名のリスト
 INCPATHCMD::	.ds.l	1	;コマンドラインで指定されたインクルードパス名のリスト
 TEMPPATH::	.ds.l	1	;テンポラリパス名へのポインタ

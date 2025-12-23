@@ -227,14 +227,9 @@ srchincld6:				;ファイルが見つからなかった
 	bra	srchincld9
 
 srchincld7:				;ファイルが見つかった
-	movea.l	(TEMPPTR,a6),a0
-	movea.l	a0,a1
-	lea.l	(-128,a5),a2
-srchincld8:
-	move.b	(a2)+,(a1)+
-	bne	srchincld8
-	move.l	a1,(TEMPPTR,a6)
-	bsr	memcheck
+	lea.l	(-128,a5),a0
+	bsr	strdup
+	movea.l	d0,a0
 	moveq.l	#0,d0
 srchincld9:
 	movem.l	(sp)+,a1-a3

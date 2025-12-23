@@ -526,7 +526,7 @@ docmdline3end:
 	rts
 
 docmdline3:
-	move.l	a2,(INCPATHPTR,a6)
+	move.l	a2,(INCPATHPTR,a6)	;スイッチ-iのパスを追加するリスト
 	lea	(a1),a5
 docmdline3lp:
 	cmpa.l	a5,a0
@@ -628,39 +628,35 @@ skipstring:
 ;----------------------------------------------------------------
 ;	-i path		インクルードパス指定
 option_i:
-	movea.l	(INCPATHPTR,a6),a1	;INCPATHENV/INCPATHCMD
-	bra	option_i1
-option_i2:
+	move.l	(INCPATHPTR,a6),d0	;INCPATHENV/INCPATHCMD
+@@:
 	movea.l	d0,a1
-option_i1:
 	move.l	(a1),d0			;パス名チェインを1つたどる
-	bne	option_i2
+	bne	@b
 
-	move.l	(TEMPPTR,a6),d0		;チェインの終端
-	doquad	d0
-	move.l	d0,(a1)			;1つチェインを追加する
-	move.l	d0,a1
-	clr.l	(a1)+			;次のチェイン(現時点では終端)
+	movea.l	a0,a2			;a1.l=チェインの終端、(a1)=0
+	moveq.l	#4+4,d0
+	bsr	memalloc_quad
+	exg.l	a0,a2
+	move.l	a2,(a1)			;1つチェインを追加する
+	clr.l	(a2)+			;次のチェイン(現時点では終端)
 	bsr	getcmdstring
-	move.l	a0,(a1)+		;パス名
-	move.l	a1,(TEMPPTR,a6)
+	move.l	a0,(a2)+		;パス名
 	bra	skipstring
 
 ;----------------------------------------------------------------
 ;	-o name		オブジェクトファイル名
 option_o:
 	bsr	getcmdstring
-	move.l	a0,(OBJFILE,a6)
-	move.l	a0,-(sp)		;パスをスキップしてから'.'を検索する
-	bsr	has_filename_ext
+	move.l	a0,-(sp)
+	bsr	has_filename_ext	;パスをスキップしてから'.'を検索する
 	tst.b	d0
-	bne	9f			;拡張子あり
+	bne	@f			;拡張子あり
 
-	movea.l	(OBJFILE,a6),a0		;拡張子が省略されたら.oを加える
-	lea	(dot_o,pc),a1
+	lea	(dot_o,pc),a1		;拡張子が省略されたら.oを加える
 	bsr	strdupcat
-	move.l	d0,(OBJFILE,a6)
-9:
+@@:
+	move.l	a0,(OBJFILE,a6)
 	movea.l	(sp)+,a0
 	bra	skipstring
 
@@ -669,25 +665,22 @@ dot_o:
 	.even
 
 strdupcat:
-	movem.l	d1/a0-a3,-(sp)
-	movea.l	(TEMPPTR,a6),a2
-	lea	(a2),a3
-	bsr	strlen
-	adda.l	d1,a3
-	exg	a0,a1
-	bsr	strlen
-	adda.l	d1,a3
-	addq.l	#1,a3
-	move.l	a3,(TEMPPTR,a6)
-	bsr	memcheck
-
-	move.l	a2,d0			;新しい文字列のポインタ
-@@:	move.b	(a1)+,(a2)+
+	movem.l	d1/a1-a3,-(sp)
+	movea.l	a0,a2
+	bsr	strlen			;文字列1
+	move.l	d1,d0
+	movea.l	a1,a0
+	bsr	strlen			;文字列2
+	add.l	d1,d0
+	addq.l	#1,d0			;NUL
+	bsr	memalloc
+	movea.l	a0,a3
+@@:	move.b	(a2)+,(a3)+		;文字列1をコピー
 	bne	@b
-	subq.l	#1,a2
-@@:	move.b	(a0)+,(a2)+
+	subq.l	#1,a3
+@@:	move.b	(a1)+,(a3)+		;文字列2をコピー
 	bne	@b
-	movem.l	(sp)+,d1/a0-a3
+	movem.l	(sp)+,d1/a1-a3
 	rts
 
 ;----------------------------------------------------------------

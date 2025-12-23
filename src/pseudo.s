@@ -1578,23 +1578,17 @@ skipfend:
 ;---------------------------------------------------------------
 ;	.title	<文字列>
 ~~title::
-	movea.l	(TEMPPTR,a6),a1
-	move.l	a1,(PRNTITLE,a6)
-~~title1:				;タイトル文字列を得る
-	move.b	(a0)+,(a1)+
-	bne	~~title1
-	move.l	a1,(TEMPPTR,a6)
-	bra	memcheck
+	bsr	strdup
+	move.l	d0,(PRNTITLE,a6)
+	rts
 
 ;---------------------------------------------------------------
 ;	.subttl	<文字列>
 ~~subttl::
-	movea.l	(TEMPPTR,a6),a1
 	move.w	#T_SUBTTL,d0
 	bsr	wrtobjd0w
-	move.l	a1,d0
-	bsr	wrtd0l
-	bra	~~title1
+	bsr	strdup
+	bra	wrtd0l
 
 ;---------------------------------------------------------------
 ;	.comment	<文字列>
@@ -2212,13 +2206,12 @@ checksymdeb9:
 ;	.tag	<タグ名>
 ~~tag::
 	bsr	checksymdeb		;'-g'スイッチのチェック
-	movea.l	(TEMPPTR,a6),a1
 	move.w	#T_TAG,d0
 	bsr	wrtobjd0w
-	move.l	a1,d0			;タグ名へのポインタ
+	bsr	strdup			;指定されたタグ名をメモリに格納する
 	bsr	wrtd0l
 	move.b	#1,(SCD_LEN+SCDTEMP,a6)	;テーブルはロングデータ
-	bra	~~title1		;指定されたタグ名をメモリに格納する
+	rts
 
 ;---------------------------------------------------------------
 ;	.line	<式>
