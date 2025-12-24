@@ -1343,7 +1343,7 @@ skipfend:
 	DOS	_OPEN
 	addq.l	#6,sp
 	move.l	d0,d3			;d3=ファイルハンドル
-	bmi	nofileerr		;ファイルが見つからない
+	bmi	openfileerror		;ファイルが見つからない
 
 	move.l	d3,-(sp)
 	bsr	encodeopr
@@ -1461,14 +1461,20 @@ skipfend:
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	srchincld		;インクルードファイルを検索
 	tst.w	d0
-	bmi	nofileerr
+	bmi	openfileerror
 	bsr	openincld
 	tst.w	d0
-	bmi	nofileerr
+	bmi	openfileerror
 	move.w	#T_INCLD,d0
 	bsr	wrtobjd0w
 	move.l	a0,d0
 	bra	wrtd0l			;ファイル名へのポインタ
+
+openfileerror:
+	movea.l	(OPRBUFPTR,a6),a0
+	bsr	strdup
+	move.l	d0,(ERRMESTEXT,a6)
+	bra	nofileerr
 
 ;---------------------------------------------------------------
 ;	.request	<ファイル名>[,<ファイル名>,…]

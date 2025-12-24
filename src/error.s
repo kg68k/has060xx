@@ -67,11 +67,10 @@ warnout:
 	cmp.b	(WARNLEVEL,a6),d1
 	bhi	warnout9
 warnout1:
-	movem.l	d3/a0-a2,-(sp)
+	movem.l	a0-a2,-(sp)
 	add.w	d0,d0			;ワーニング番号×2
 	move.w	(warn_msg_tbl,pc,d0.w),d0
 	lea.l	(warn_msg_tbl,pc,d0.w),a2
-	move.l	(ERRMESSYM,a6),d3
 	moveq.l	#0,d1
 	bsr	printerr
 	cmpi.b	#3,(ASMPASS,a6)
@@ -86,7 +85,7 @@ warnout2:
 	DOS	_PRINT
 	lea.l	(10,sp),sp
 warnout8:
-	movem.l	(sp)+,d3/a0-a2
+	movem.l	(sp)+,a0-a2
 warnout9:
 	movem.l	(sp)+,d0-d1
 warnout99:
@@ -116,129 +115,151 @@ m_&lab:
 ;	エラー処理ルーチン
 ;----------------------------------------------------------------
 
+;errorマクロ
+;	引数1個: 直後のエラーと同一処理を行う
+;	引数2個: 通常のエラー定義。%s(ERRMESSYMのシンボル名)が使える
+;	引数3個: %sに加え、%t(ERRMESTEXTの文字列)が使える
+;		 第3引数にはUSE_TEXTを指定すること
+USE_TEXT	equ	1	;%tを使うメッセージ
+
 errtbl	.macro
-	error	1,forcederr,		'.fail によるエラー'
-	error	1,redeferr,		'シンボル %s は既に定義されています'
-	error	1,redeferr_predefine,	'プレデファインシンボル %s を再定義しようとしました'
-	error	1,redeferr_set,		'シンボル %s は .set(=) 以外で定義されています'
-	error	1,redeferr_offsym,	'シンボル %s は .offsym 以外で定義されています'
-	error	1,redeferr_fset,	'シンボル %s は .fset 以外で定義されています'
-	error	1,badopeerr,		'命令が解釈できません'
-	error	1,badopeerr_local,	'ローカルラベルの記述が不正です'
-	error	1,badopeerr_locallen,	'ローカルラベルの桁数が多すぎるため定義できません'
-	error	0,ilsymerr_value
-	error	0,ilsymerr_local
-	error	0,ilsymerr_real
-	error	1,ilsymerr_regsym,	'シンボル %s は種類が異なるので使えません'
-	error	1,ilsymerr_register,	'シンボル %s はレジスタ名なので使えません'
-	error	1,ilsymerr_predefxdef,	'プレデファインシンボル %s は外部定義宣言できません'
-	error	1,ilsymerr_predefxref,	'プレデファインシンボル %s は外部参照宣言できません'
-	error	1,ilsymerr_predefglobl,	'プレデファインシンボル %s はグローバル宣言できません'
-	error	1,ilsymerr_lookfor,	'シンボル %s の定義が参照方法と矛盾しています'
-	error	1,exprerr,		'記述が間違っています'
-	error	1,exprerr_ea,		'実効アドレスが解釈できません'
-	error	1,exprerr_cannotscale,	'スケールファクタは指定できません'
-	error	1,exprerr_scalefactor,	'スケールファクタの指定が間違っています'
-	error	1,exprerr_fullformat,	'フルフォーマットのアドレッシングは使えません'
-	error	1,exprerr_immediate,	'イミディエイトデータが解釈できません'
-	error	1,regerr,		'指定できないレジスタです'
-	error	1,regerr_opc,		'このアドレッシングでは opc は使えません'
-	error	1,iladrerr,		'指定できないアドレッシングです'
-	error	0,ilsizeerr_op		;'命令 %s には指定できないサイズです'
-	error	0,ilsizeerr_pseudo	;'疑似命令 %s には指定できないサイズです'
-	error	0,ilsizeerr_moveusp	;'MOVE USP はロングワードサイズのみ指定可能です'
-	error	0,ilsizeerr_cf_acc	;'MOVE ACC はロングワードサイズのみ指定可能です'
-	error	0,ilsizeerr_fpn		;'浮動小数点レジスタ直接アドレッシングは拡張サイズのみ指定可能です'
-	error	0,ilsizeerr_fprn	;'汎用レジスタ直接アドレッシングはロングワードサイズのみ指定可能です'
-	error	0,ilsizeerr_fpcr	;'FPCR/FPIAR/FPSR はロングワードサイズのみ指定可能です'
-	error	0,ilsizeerr_fmovemfpn	;'FMOVEM FPn は拡張サイズのみ指定可能です'
-	error	0,ilsizeerr_fmovemfpcr	;'FMOVEM FPcr はロングワードサイズのみ指定可能です'
-	error	1,ilsizeerr,		'指定できないサイズです'
-	error	0,ilsizeerr_pseudo_no
-	error	1,ilsizeerr_op_no,	'%s にはサイズを指定できません'
-	error	1,ilsizeerr_ccr,	'%s to CCR はバイトサイズのみ指定可能です'
-	error	1,ilsizeerr_sr,		'%s to SR はワードサイズのみ指定可能です'
-	error	1,ilsizeerr_an,		'アドレスレジスタはバイトサイズでアクセスできません'
-	error	1,ilsizeerr_movetosr,	'MOVE to CCR/SR はワードサイズのみ指定可能です'
-	error	1,ilsizeerr_movefrsr,	'MOVE from CCR/SR はワードサイズのみ指定可能です'
-	error	1,ilsizeerr_000_long,	'68000/68010 ではロングワードサイズは指定できません'
-	error	1,ilsizeerr_sftrotmem,	'メモリに対するシフト・ローテートはワードサイズのみ指定可能です'
-	error	1,ilsizeerr_bitmem,	'メモリに対するビット操作はバイトサイズのみ指定可能です'
-	error	1,ilsizeerr_bitreg,	'データレジスタに対するビット操作はロングワードサイズのみ指定可能です'
-	error	1,ilsizeerr_000_bccl,	'68000/68010 ではロングワードサイズの相対分岐はできません'
-	error	1,ilsizeerr_trapcc,	'オペランドのない TRAPcc にはサイズを指定できません'
-	error	1,iloprerr,		'不正なオペランドです'
-	error	1,iloprerr_not_fixed,	'引数が確定していません'
-	error	1,iloprerr_too_many,	'%s のオペランドが多すぎます'
-	error	1,iloprerr_pseudo_many,	'%s の引数が多すぎます'
-	error	1,iloprerr_local,	'ローカルラベルの参照が不正です'
-	error	1,iloprerr_locallen,	'ローカルラベルの桁数が多すぎるため参照できません'
-	error	1,iloprerr_ds_negative,	'%s の引数が負数です'
-	error	1,iloprerr_end_xref,	'.end に外部参照値は指定できません'
-	error	1,iloprerr_internalfp,	'浮動小数点数の内部表現の長さが合いません'
-	error	1,undefsymerr,		'シンボル %s が未定義です'
-	error	1,undefsymerr_local,	'ローカルラベルが未定義です'
-	error	1,undefsymerr_offsym,	'値を確定できません'
-	error	1,divzeroerr,		'0 で除算しました'
-	error	1,ilrelerr_outside,	'オフセットが範囲外です'
-	error	1,ilrelerr_const,	'定数ではなくアドレス値が必要です'
-	error	1,overflowerr,		'オーバーフローしました'
-	error	1,ilvalueerr,		'不正な値です'
-	error	1,ilquickerr_addsubq,	'データが 1～8 の範囲外です'
-	error	1,ilquickerr_moveq,	'データが -128～127 の範囲外です'
-	error	0,ilquickerr_sftrot
-	error	1,ilsfterr,		'シフト・ローテートのカウントが 1～8 の範囲外です'
-	error	1,featureerr_cpu,	'未対応の cpu です'
-	error	1,featureerr_xref,	'外部参照値の埋め込みはできません'
-	error	1,nosymerr_macro,	'マクロ名がありません'
-	error	1,nosymerr_pseudo,	'%s で定義するシンボルがありません'
-	error	1,tooinclderr,		'.include のネストが深すぎます'
-	error	1,nofileerr,		'%s するファイルが見つかりません'
-	error	1,mismacerr_exitm,	'マクロ展開中ではないのに %s があります'
-	error	0,mismacerr_endm
-	error	0,mismacerr_local
-	error	1,mismacerr_sizem,	'マクロ定義中ではないのに %s があります'
-	error	1,mismacerr_eof,	'.endm が足りません'
-	error	1,toomanylocsymerr,	'1 つのマクロの中のローカルシンボルが多すぎます'
-	error	1,macnesterr,		'マクロのネストが深すぎます'
-	error	0,misiferr_else
-	error	0,misiferr_elseif
-	error	1,misiferr_endif,	'%s に対応する .if がありません'
-	error	1,misiferr_else_else,	'.else の後に %s があります'
-	error	1,misiferr_eof,		'.endif が足りません'
-	error	1,termerr_doublequote,	'"～"が閉じていません'
-	error	1,termerr_singlequote,	"'～'が閉じていません"
-	error	1,termerr_bracket,	'<～>が閉じていません'
-	error	1,ilinterr,		'整数の記述が間違っています'
-	error	1,offsymalignerr,	'.offsym 中に %s は指定できません'
+	error	forcederr,		'.fail によるエラー'
+	error	redeferr,		'シンボル %s は既に定義されています'
+	error	redeferr_predefine,	'プレデファインシンボル %s を再定義しようとしました'
+	error	redeferr_set,		'シンボル %s は .set(=) 以外で定義されています'
+	error	redeferr_offsym,	'シンボル %s は .offsym 以外で定義されています'
+	error	redeferr_fset,		'シンボル %s は .fset 以外で定義されています'
+	error	badopeerr,		'命令が解釈できません'
+	error	badopeerr_local,	'ローカルラベルの記述が不正です'
+	error	badopeerr_locallen,	'ローカルラベルの桁数が多すぎるため定義できません'
+	error	ilsymerr_value
+	error	ilsymerr_local
+	error	ilsymerr_real
+	error	ilsymerr_regsym,	'シンボル %s は種類が異なるので使えません'
+	error	ilsymerr_register,	'シンボル %s はレジスタ名なので使えません'
+	error	ilsymerr_predefxdef,	'プレデファインシンボル %s は外部定義宣言できません'
+	error	ilsymerr_predefxref,	'プレデファインシンボル %s は外部参照宣言できません'
+	error	ilsymerr_predefglobl,	'プレデファインシンボル %s はグローバル宣言できません'
+	error	ilsymerr_lookfor,	'シンボル %s の定義が参照方法と矛盾しています'
+	error	exprerr,		'記述が間違っています'
+	error	exprerr_ea,		'実効アドレスが解釈できません'
+	error	exprerr_cannotscale,	'スケールファクタは指定できません'
+	error	exprerr_scalefactor,	'スケールファクタの指定が間違っています'
+	error	exprerr_fullformat,	'フルフォーマットのアドレッシングは使えません'
+	error	exprerr_immediate,	'イミディエイトデータが解釈できません'
+	error	regerr,			'指定できないレジスタです'
+	error	regerr_opc,		'このアドレッシングでは opc は使えません'
+	error	iladrerr,		'指定できないアドレッシングです'
+	error	ilsizeerr_op		;'命令 %s には指定できないサイズです'
+	error	ilsizeerr_pseudo	;'疑似命令 %s には指定できないサイズです'
+	error	ilsizeerr_moveusp	;'MOVE USP はロングワードサイズのみ指定可能です'
+	error	ilsizeerr_cf_acc	;'MOVE ACC はロングワードサイズのみ指定可能です'
+	error	ilsizeerr_fpn		;'浮動小数点レジスタ直接アドレッシングは拡張サイズのみ指定可能です'
+	error	ilsizeerr_fprn		;'汎用レジスタ直接アドレッシングはロングワードサイズのみ指定可能です'
+	error	ilsizeerr_fpcr		;'FPCR/FPIAR/FPSR はロングワードサイズのみ指定可能です'
+	error	ilsizeerr_fmovemfpn	;'FMOVEM FPn は拡張サイズのみ指定可能です'
+	error	ilsizeerr_fmovemfpcr	;'FMOVEM FPcr はロングワードサイズのみ指定可能です'
+	error	ilsizeerr,		'指定できないサイズです'
+	error	ilsizeerr_pseudo_no
+	error	ilsizeerr_op_no,	'%s にはサイズを指定できません'
+	error	ilsizeerr_ccr,		'%s to CCR はバイトサイズのみ指定可能です'
+	error	ilsizeerr_sr,		'%s to SR はワードサイズのみ指定可能です'
+	error	ilsizeerr_an,		'アドレスレジスタはバイトサイズでアクセスできません'
+	error	ilsizeerr_movetosr,	'MOVE to CCR/SR はワードサイズのみ指定可能です'
+	error	ilsizeerr_movefrsr,	'MOVE from CCR/SR はワードサイズのみ指定可能です'
+	error	ilsizeerr_000_long,	'68000/68010 ではロングワードサイズは指定できません'
+	error	ilsizeerr_sftrotmem,	'メモリに対するシフト・ローテートはワードサイズのみ指定可能です'
+	error	ilsizeerr_bitmem,	'メモリに対するビット操作はバイトサイズのみ指定可能です'
+	error	ilsizeerr_bitreg,	'データレジスタに対するビット操作はロングワードサイズのみ指定可能です'
+	error	ilsizeerr_000_bccl,	'68000/68010 ではロングワードサイズの相対分岐はできません'
+	error	ilsizeerr_trapcc,	'オペランドのない TRAPcc にはサイズを指定できません'
+	error	iloprerr,		'不正なオペランドです'
+	error	iloprerr_not_fixed,	'引数が確定していません'
+	error	iloprerr_too_many,	'%s のオペランドが多すぎます'
+	error	iloprerr_pseudo_many,	'%s の引数が多すぎます'
+	error	iloprerr_local,		'ローカルラベルの参照が不正です'
+	error	iloprerr_locallen,	'ローカルラベルの桁数が多すぎるため参照できません'
+	error	iloprerr_ds_negative,	'%s の引数が負数です'
+	error	iloprerr_end_xref,	'.end に外部参照値は指定できません'
+	error	iloprerr_internalfp,	'浮動小数点数の内部表現の長さが合いません'
+	error	undefsymerr,		'シンボル %s が未定義です'
+	error	undefsymerr_local,	'ローカルラベルが未定義です'
+	error	undefsymerr_offsym,	'値を確定できません'
+	error	divzeroerr,		'0 で除算しました'
+	error	ilrelerr_outside,	'オフセットが範囲外です'
+	error	ilrelerr_const,		'定数ではなくアドレス値が必要です'
+	error	overflowerr,		'オーバーフローしました'
+	error	ilvalueerr,		'不正な値です'
+	error	ilquickerr_addsubq,	'データが 1～8 の範囲外です'
+	error	ilquickerr_moveq,	'データが -128～127 の範囲外です'
+	error	ilquickerr_sftrot
+	error	ilsfterr,		'シフト・ローテートのカウントが 1～8 の範囲外です'
+	error	featureerr_cpu,		'未対応の cpu です'
+	error	featureerr_xref,	'外部参照値の埋め込みはできません'
+	error	nosymerr_macro,		'マクロ名がありません'
+	error	nosymerr_pseudo,	'%s で定義するシンボルがありません'
+	error	tooinclderr,		'.include のネストが深すぎます'
+	error	nofileerr,		'%s するファイル %t が見つかりません',USE_TEXT
+	error	mismacerr_exitm,	'マクロ展開中ではないのに %s があります'
+	error	mismacerr_endm
+	error	mismacerr_local
+	error	mismacerr_sizem,	'マクロ定義中ではないのに %s があります'
+	error	mismacerr_eof,		'.endm が足りません'
+	error	toomanylocsymerr,	'1 つのマクロの中のローカルシンボルが多すぎます'
+	error	macnesterr,		'マクロのネストが深すぎます'
+	error	misiferr_else
+	error	misiferr_elseif
+	error	misiferr_endif,		'%s に対応する .if がありません'
+	error	misiferr_else_else,	'.else の後に %s があります'
+	error	misiferr_eof,		'.endif が足りません'
+	error	termerr_doublequote,	'"～"が閉じていません'
+	error	termerr_singlequote,	"'～'が閉じていません"
+	error	termerr_bracket,	'<～>が閉じていません'
+	error	ilinterr,		'整数の記述が間違っています'
+	error	offsymalignerr,		'.offsym 中に %s は指定できません'
 	.endm
 
-error	.macro	cnt,lab,str
+error	.macro	lab,str,use_text
+	.sizem	sz,argc
 lab::
-  .if cnt+0
-	moveq.l	#n,d0
-n = n+(cnt+0)
-	bra	errout
+  .if argc==1
+	.exitm
   .endif
+	.fail	n>$7f
+	moveq.l	#n,d0
+  .if argc==3
+	.fail	use_text!=USE_TEXT
+	tas.b	d0			;%tを使うメッセージはERRMESTEXTも出力する
+  .endif
+	n: = n+1
+	bra	errout
 	.endm
 
 n = 0
 	errtbl
 
 errout::
-	move.l	(ERRMESSYM,a6),d3
-errout_d3::
 	cmpi.b	#3,(ASMPASS,a6)
-	beq	errout9			;パス3以外ではエラーメッセージを出力しない
-	or.w	#T_ERROR,d0		;T_ERROR|エラー番号
-	bsrl	wrtobjd0w,d2		;ファイルにエラーコードを出力
-	move.w	(ERRMESSYM+0,a6),d0
-	bsrl	wrtobjd0w,d2		;エラーメッセージに埋め込むシンボル
-	move.w	(ERRMESSYM+2,a6),d0
-	bsrl	wrtobjd0w,d2
-	bra	errout91		;パス3ではテンポラリコードを出力する必要はない
+	beq	errout_pass3
 
-errout9:
+;パス1、パス2ではエラーメッセージを出力せず、
+;テンポラリコードを出力してパス3にエラー情報を伝える
+	move.b	d0,-(sp)
+	or.w	#T_ERROR,d0		;T_ERROR|エラー番号
+	bsr	wrtobjd0w		;ファイルにエラーコードを出力
+	move.l	(ERRMESSYM,a6),d0
+	bsr	wrtd0l			;エラーメッセージに埋め込むシンボル
+	tst.b	(sp)+
+	bpl	errout91
+
+	move.l	(ERRMESTEXT,a6),d0	;%tを使うメッセージは埋め込む文字列も出力
+	bsr	wrtd0l
+	bra	errout91
+
+;パス3では発生したエラーを直ちに出力するか、または
+;テンポラリコードで伝播されたエラーを表示する
+errout_pass3::
+	andi.w	#$007f,d0
 	add.w	d0,d0			;エラー番号×2
 	move.w	(err_msg_tbl,pc,d0.w),d0
 	lea.l	(err_msg_tbl,pc,d0.w),a2
@@ -250,8 +271,9 @@ errout91:
 	move.l	(ERRRET,a6),-(sp)
 	rts				;エラー処理から復帰
 
-error	.macro	cnt,lab,str
-  .if cnt+0
+error	.macro	lab,str,use_text
+	.sizem	sz,argc
+  .if argc>=2
 	.dc.w	m_&lab-err_msg_tbl
   .endif
 	.endm
@@ -259,8 +281,9 @@ error	.macro	cnt,lab,str
 err_msg_tbl:
 	errtbl
 
-error	.macro	cnt,lab,str
-  .if cnt+0
+error	.macro	lab,str,use_text
+	.sizem	sz,argc
+  .if argc>=2
 m_&lab:
 	.dc.b	str,0
   .endif
@@ -272,11 +295,11 @@ m_&lab:
 ;----------------------------------------------------------------
 ;	エラー・ワーニングメッセージを出力する
 ;<d1.w:0='Warning',1='Error'
-;<d3.l:(ERRMESSYM,a6),%sがあるメッセージではd3=0は不可
 ;<a2.l:メッセージ文字列へのポインタ
+;	%sがあるメッセージでは(ERRMESSYM,a6)にシンボルを入れておくこと(0は不可)
 printerr:
 	link	a5,#-128
-	movem.l	d0/d3/a0-a1,-(sp)
+	movem.l	d0/a0-a1,-(sp)
 	lea.l	(-128,a5),a0
 	movea.l	(INPFILE,a6),a1		;ファイル名へのポインタ
 	moveq.l	#16,d0
@@ -299,9 +322,7 @@ printerr3:
 	bcs	printerr4
 	moveq.l	#0,d1			;6桁以上になるなら左詰め
 printerr4:
-	move.l	d2,-(sp)
-	bsrl	convdec,d2		;行番号
-	move.l	(sp)+,d2
+	bsr	convdec			;行番号
 	move.w	(sp)+,d1
 	lea.l	(warn_msg,pc),a1
 	tst.w	d1
@@ -319,19 +340,28 @@ printerr51:
 	beq	printerr53
 	cmp.b	#'%',d0
 	bne	printerr50
+	movea.l	a1,a2
 	cmpi.b	#'s',(a1)
+	beq	printerr_s
+	cmpi.b	#'t',(a1)
 	bne	printerr50
-	addq.l	#1,a1
-	exg.l	d3,a1
+
+;printerr_t:				;%t 任意の文字列
+	movea.l	(ERRMESTEXT,a6),a1
+	bra	printerr52
+
+printerr_s:				;%s シンボル名
+	movea.l	(ERRMESSYM,a6),a1
 	cmpi.b	#ST_OPCODE,(SYM_TYPE,a1)
-	bne	printerr52		;命令でない
+	bne	@f			;命令でない
 	tst.w	(SYM_ARCH,a1)
-	bne	printerr52		;疑似命令でない
+	bne	@f			;疑似命令でない
 	move.b	#'.',(a0)+		;疑似命令の先頭に'.'を付ける
-printerr52:
+@@:
 	movea.l	(SYM_NAME,a1),a1
+printerr52:
 	bsr	strcpy
-	movea.l	d3,a1
+	lea	(1,a2),a1		;メッセージ文字列の続きを処理する
 	bra	printerr51
 
 printerr53:
@@ -340,7 +370,7 @@ printerr53:
 printerr6:
 	lea.l	(-128,a5),a0
 	bsr	prnstdout		;標準出力・PRNファイルにエラーメッセージを表示
-	movem.l	(sp)+,d0/d3/a0-a1
+	movem.l	(sp)+,d0/a0-a1
 	unlk	a5
 	rts
 

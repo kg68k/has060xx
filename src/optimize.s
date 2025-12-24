@@ -178,7 +178,7 @@ xdefcmd:				;19xx .xdef
 subttlcmd:				;1Cxx .subttl
 incldopen:				;1Fxx includeファイル開始
 tagcmd:					;2Axx .tag
-error:					;38xx エラー発生
+error2w:
 	moveq.l	#2*2,d0
 	bra	tempskip		;2ワード読み飛ばす
 
@@ -189,7 +189,14 @@ reptcmd:				;24xx .rept展開開始
 	bra	tempskip		;3ワード読み飛ばす
 
 ;----------------------------------------------------------------
+error:					;38xx エラー発生
+	tst.b	d0
+	bpl	error2w			;ERRMESSYM(%s)のみ
+	bra	error4w			;ERRMESSYM(%s)とERRMESTEXT(%t)
+
+;----------------------------------------------------------------
 macdef:					;21xx マクロ定義開始
+error4w:
 	moveq.l	#4*2,d0
 	bra	tempskip		;4ワード読み飛ばす
 

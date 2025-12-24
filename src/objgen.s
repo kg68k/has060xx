@@ -460,10 +460,15 @@ cputype:				;39xx .cpu
 ;----------------------------------------------------------------
 error:
 	move.w	d0,d3
-	bsr	tmpreadd0l		;(ERRMESSYM,a6)
-	exg.l	d0,d3			;d0.w=エラーコード
-					;d3.l=シンボル(0=シンボルなし)
-	bra	errout_d3
+	bsr	tmpreadd0l
+	move.l	d0,(ERRMESSYM,a6)
+	tst.b	d3
+	bpl	@f
+	bsr	tmpreadd0l		;%tを使うメッセージ
+	move.l	d0,(ERRMESTEXT,a6)
+@@:
+	move.w	d3,d0			;d0.w=エラーコード
+	bra	errout_pass3
 
 ;----------------------------------------------------------------
 nopdeath:				;34xx 削除すべきNOP
