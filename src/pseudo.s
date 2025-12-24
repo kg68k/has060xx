@@ -257,9 +257,9 @@ dodcnum1:
 	moveq.l	#SZ_SHORT,d0		;.b→.s
 	bra	dodcnum3
 @@:
-	btst.b	#0,(LOCATION+3,a6)
-	beq	dodcnum3
-	bsr	alignwarn		;偶数境界に合っていないのでワーニングを出す
+	;個別サイズ指定機能があるためパラメータごとに検査が必要
+	;(ただし個別サイズ指定をしてない場合もパラメータごとにワーニングが出てしまう)
+	bsr	validate_align		;.w/.lなら偶数境界を調べる
 dodcnum3:
 	tst.w	d3
 	beq	wrtimm			;定数ならファイルに出力
@@ -324,10 +324,7 @@ dodcstrb:				;.bでの文字列書き込み
 ;----------------------------------------------------------------
 ;	浮動小数点実数の.dc
 dodcreal:
-	btst.b	#0,(LOCATION+3,a6)
-	beq	dodcreal1
-	bsr	alignwarn		;偶数境界に合っていないのでワーニングを出す
-dodcreal1:
+	bsr	validate_align		;偶数境界に合っていなければワーニングを出す
 	movea.l	(OPRBUFPTR,a6),a0
 	tst.w	(a0)
 	beq	iloprerr		;パラメータがない
@@ -381,55 +378,51 @@ getdcreal6:
 	bne	iloprerr_not_fixed	;式が定数でない
 	move.l	d1,(a4)+
 	dbra	d3,getdcreal5
-~~dcb9:
 	rts
 
 ;----------------------------------------------------------------
 ;	.dcb[.<サイズ>]	<長さ>,<式>
 ~~dcb::
 	bsr	encodeopr
-	tst.b	(CMDOPSIZE,a6)
-	beq	~~dcb1			;.bの場合
-	btst.b	#0,(LOCATION+3,a6)
-	beq	~~dcb1
-	bsr	alignwarn		;偶数境界に合っていないのでワーニングを出す
-~~dcb1:
 	bsr	calcopr
 	tst.w	d0
 	bne	ilvalueerr		;<長さ>が定数でない
 	tst.l	d1
-	beq.s	~~dcb9			;<長さ>が0の場合は何もしない
+	bmi	iloprerr_ds_negative	;<長さ>が負数ならエラー
 	cmp.l	#$01000000,d1
 	bhi	ilvalueerr		;<長さ>は1～16M
+
 	move.l	d1,-(sp)
 	cmpi.w	#','|OT_CHAR,(a0)+
 	bne	iloprerr		;,<式>がない
 	cmpi.b	#SZ_SINGLE,(CMDOPSIZE,a6)
 	bge	~~dcb10			;浮動小数点実数の.dcb
-	lea.l	(RPNBUF,a6),a1
+
+	lea.l	(RPNBUF,a6),a1		;整数の.dcb .b/.w/.l
 	bsr	convrpn
 	tst.w	d0
 	bmi	exprerr			;式変換に失敗
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
+
 	move.l	(sp),d0			;<長さ>
+	.fail	(SZ_NONE<$80).or.(SZ_BYTE!=0)
 	move.b	(CMDOPSIZE,a6),d2
-	bmi	~~dcb2
-	bne	~~dcb3
-	move.b	#SZ_SHORT,(CMDOPSIZE,a6)	;.b→.s
-	bra	~~dcb7
-
-~~dcb2:
+	bpl	@f
 	move.b	#SZ_WORD,(CMDOPSIZE,a6)	;省略時は.w
-	bra	~~dcb6
-
-~~dcb3:
-	cmp.b	#SZ_WORD,d2
-	beq	~~dcb6
+	bra	~~dcb_w
+@@:
+	bne	@f
+	move.b	#SZ_SHORT,(CMDOPSIZE,a6)	;.b→.s
+	bra	~~dcb_b
+@@:
+	subq.b	#SZ_WORD,d2
+	beq	~~dcb_w
 	add.l	d0,d0			;.l
-~~dcb6:
+~~dcb_w:
 	add.l	d0,d0			;.w
-~~dcb7:
+	bsr	validate_align		;.w/.lなら偶数境界を調べる
+~~dcb_b:
 	add.l	d0,(LOCATION,a6)
 	move.w	#T_DCB,d0
 	bsr	wrtobjd0w
@@ -441,6 +434,8 @@ getdcreal6:
 ~~dcb10:				;浮動小数点実数の.dcb
 	lea.l	(RPNBUFEX,a6),a3	;オペランド用バッファ
 	bsr	getdcreal		;浮動小数点実数オペランドを得る
+
+	bsr	validate_align		;偶数境界に合っていなければワーニングを出す
 	move.w	d5,d4
 	move.l	(sp),d0			;<長さ>
 	lsl.l	#2,d0
@@ -460,6 +455,13 @@ getdcreal6:
 	rts
 
 ;----------------------------------------------------------------
+;	偶数境界に合っていなければワーニングを出す
+validate_align:
+	btst.b	#0,(LOCATION+3,a6)
+	bne	alignwarn
+	rts
+
+;----------------------------------------------------------------
 ;	.ds[.<サイズ>]	<長さ>
 ~~ds::
 	;ここで行頭のラベルを定義しているのは、HAS060.X v3.09+60での.OFFSET
@@ -471,14 +473,14 @@ getdcreal6:
 	bsr	calcopr
 	tst.w	d0
 	bne	ilvalueerr		;<長さ>が定数でない
+	tst.l	d1
+	bmi	iloprerr_ds_negative	;<長さ>が負数ならエラー
 	tst.w	(a0)
 	bne	iloprerr_pseudo_tail	;行が終了していない
-	tst.l	d1
-	bmi	iloprerr_ds_negative	;すべてのセクションで、長さが負数ならエラー
 ~~ds_0:
+	.fail	(SZ_NONE<$80).or.(SZ_BYTE!=0)
 	move.b	(CMDOPSIZE,a6),d0
 	bmi	~~ds_w
-	ztst.b	SZ_BYTE,d0
 	beq	~~ds_b
 	cmp.b	#SZ_WORD,d0
 	beq	~~ds_w
@@ -500,9 +502,7 @@ getdcreal6:
 	add.l	d1,d1
 ~~ds_w:					;.w	(2bytes)
 	add.l	d1,d1
-	btst.b	#0,(LOCATION+3,a6)
-	beq	~~ds_b
-	bsr	alignwarn		;偶数境界に合っていないのでワーニングを出す
+	bsr	validate_align		;.b以外なら偶数境界を調べる
 ~~ds_b:					;.b	(1byte)
 	add.l	d1,(LOCATION,a6)
 	move.w	#T_DS,d0
