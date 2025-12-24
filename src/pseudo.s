@@ -558,15 +558,11 @@ getdcreal6:
 	zclr.b	SYM1ST_OTHER,(SYM_FIRST,a1)
 ~~fequ1:
 	movea.l	a1,a2			;シンボルテーブルへのポインタ
-	move.l	(TEMPPTR,a6),d0
-	doquad	d0
-	movea.l	d0,a3
-	move.l	d0,(SYM_FVPTR,a2)	;シンボル値へのポインタ
-	addq.l	#8,d0
-	addq.l	#4,d0			;(最大で12bytes)
-	move.l	d0,(TEMPPTR,a6)
-	bsr	memcheck
-	st.b	(SYM_FSIZE,a2)		;(move.b #-1,(SYM_FSIZE,a2))
+	moveq.l	#12,d0			;(最大で12bytes)
+	bsr	memalloc_quad
+	movea.l	a0,a3
+	move.l	a0,(SYM_FVPTR,a2)	;シンボル値へのポインタ
+	ffst.b	SZ_NONE,(SYM_FSIZE,a2)
 	movea.l	(OPRBUFPTR,a6),a0
 	bsr	getdcreal		;浮動小数点実数オペランドを得る
 	tst.w	(a0)
@@ -1051,7 +1047,7 @@ offsymtailchk01:
 ;---------------------------------------------------------------
 ;	.if状態テーブルを必要なら拡大する
 enlarge_ifstattbl:
-	movem.l	d0-d1/a0-a1,-(sp)
+	movem.l	d0/a0-a1,-(sp)
 	moveq.l	#0,d0
 	move.w	(IFNEST,a6),d0
 	cmp.l	(IFSTATLEN,a6),d0
@@ -1061,23 +1057,17 @@ enlarge_ifstattbl:
 	add.l	d0,d0			;テーブルサイズを2倍にする
 	move.l	d0,(IFSTATLEN,a6)
 
-	movea.l	(IFSTATPTR,a6),a0	;旧テーブル
-	move.l	(TEMPPTR,a6),d1
-	doeven	d1
-	movea.l	d1,a1			;新テーブル
-	move.l	a1,(IFSTATPTR,a6)
-
-	add.l	d0,d1			;テーブル末尾
-	move.l	d1,(TEMPPTR,a6)
-	bsr	memcheck
+	movea.l	(IFSTATPTR,a6),a1	;旧テーブル
+	bsr	memalloc_quad
+	move.l	a0,(IFSTATPTR,a6)	;新テーブル
 
 	.fail	IFSTATINILEN.and.(4-1)
 	lsr.l	#1+2,d0			;2倍を戻す + ロングワード転送
-@@:	move.l	(a0)+,(a1)+		;旧テーブルの内容を新テーブルにコピー
+@@:	move.l	(a1)+,(a0)+		;旧テーブルの内容を新テーブルにコピー
 	subq.l	#1,d0			;(拡大した部分は初期化不要)
 	bne	@b
 9:
-	movem.l	(sp)+,d0-d1/a0-a1
+	movem.l	(sp)+,d0/a0-a1
 	rts
 
 ;---------------------------------------------------------------

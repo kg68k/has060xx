@@ -250,14 +250,19 @@ getfilename5:
 	bne	getfilename25
 	bra	getfilename3
 
+;----------------------------------------------------------------
+;	4バイト整合したワークエリアのアドレスを返す
+gettempptr_quad::
+	move.l	(TEMPPTR,a6),d0
+	doquad	d0
+	move.l	d0,(TEMPPTR,a6)
+	rts
 
 ;----------------------------------------------------------------
 ;	ワークエリアからメモリを確保する(4バイト整合)
 memalloc_quad::
 	move.l	d0,-(sp)
-	move.l	(TEMPPTR,a6),d0
-	doquad	d0
-	move.l	d0,(TEMPPTR,a6)
+	bsr	gettempptr_quad
 	move.l	(sp)+,d0
 	bra	memalloc
 

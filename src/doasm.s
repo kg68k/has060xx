@@ -126,21 +126,16 @@ asmpass1::
 	clr.w	(SCDLN,a6)
 	clr.b	(ISMACDEF,a6)
 
-	move.l	(TEMPPTR,a6),d0		;数字ローカルラベルの番号のテーブルを初期化
-	doquad	d0
-	movea.l	d0,a0
-	move.w	(LOCALNUMMAX,a6),d1	;必ず偶数
-	add.w	d1,d1
-	lea.l	(a0,d1.w),a1
-	move.l	a1,(TEMPPTR,a6)
-	bsr	memcheck
+	moveq.l	#0,d0			;数字ローカルラベルの番号のテーブルを初期化
+	move.w	(LOCALNUMMAX,a6),d0	;必ず偶数
+	add.w	d0,d0
+	bsr	memalloc_quad
 	move.l	a0,(LOCALMAXPTR,a6)
-	moveq.l	#0,d0
-	lsr.w	#2,d1
-	subq.w	#1,d1
-asmpass101:
-	move.l	d0,(a0)+
-	dbra	d1,asmpass101
+	moveq.l	#0,d1
+	lsr.w	#2,d0
+	subq.w	#1,d0
+@@:	move.l	d1,(a0)+
+	dbra	d0,@b
 
 	bsr	resetlocctr		;ロケーションカウンタの初期化
 

@@ -302,8 +302,7 @@ workinit:
 	leawork	OPRBUF,a0
 	move.l	a0,(OPRBUFPTR,a6)
 
-	move.l	(TEMPPTR,a6),d0
-	doquad	d0			;ロングワード境界に合わせる
+	bsr	gettempptr_quad		;ロングワード境界に合わせる
 	move.l	(MEMLIMIT,a6),d1
 	sub.l	d0,d1			;d1=未使用領域のサイズ
 	move.l	d1,d2

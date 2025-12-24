@@ -1646,9 +1646,9 @@ scdinit0:				;'-g'スイッチが指定された場合
 	move.l	d0,(NUMOFSCD,a6)	;拡張シンボル情報の数
 	move.l	d0,(NUMOFFNC,a6)
 scdinit01:
-	move.l	(TEMPPTR,a6),d2
-	doeven	d2
-	movea.l	d2,a0
+	bsr	gettempptr_quad
+	move.l	d0,d2
+	movea.l	d0,a0
 	move.l	d2,(SCDLNPTR,a6)	;行番号データ用ワーク
 	move.l	(NUMOFLN,a6),d0
 	add.l	d0,d0
@@ -2105,9 +2105,7 @@ prnsymtbl9:
 ;----------------------------------------------------------------
 ;	シンボルへのポインタテーブルを作成し、昇順にソートする
 makesymptr:
-	move.l	(TEMPPTR,a6),d0
-	doquad	d0
-	move.l	d0,(TEMPPTR,a6)
+	bsr	gettempptr_quad
 	movea.l	d0,a3
 	movea.l	(MEMLIMIT,a6),a4
 	movea.l	a3,a0			;ポインタテーブルの先頭アドレス

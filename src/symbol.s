@@ -42,8 +42,7 @@ hashfnc	.macro	hashsize_minus_1
 ;	予約済みシンボルの初期化
 ;----------------------------------------------------------------
 defressym::
-	move.l	(TEMPPTR,a6),d0
-	doquad	d0			;念のため
+	bsr	gettempptr_quad
 	movea.l	d0,a3
 	lea.l	(reg_tbl,pc),a2		;レジスタ名シンボルの初期化
 	move.l	#SYMHASHSIZE-1,d5	;ロングにすること
@@ -463,31 +462,33 @@ getcmdmac9:				;マクロとして再検索する
 ;	out:a1=シンボルテーブルへのポインタ
 defsymbol::
 	movem.l	a2-a3,-(sp)
-	movea.l	(TEMPPTR,a6),a2
-	movea.l	a2,a3			;シンボル名へのポインタ
-defsymbol1:
-	move.b	(a0)+,(a3)+		;シンボル名をワークにコピー
-	dbra	d1,defsymbol1
-	clr.b	(a3)+
-	move.l	a3,(TEMPPTR,a6)
+	movea.l	a0,a3
+	moveq.l	#0,d0
+	move.w	d1,d0
+	addq.l	#1+1,d0			;文字列+NULの長さ
+	bsr	memalloc
+	movea.l	a0,a2
+@@:	move.b	(a3)+,(a0)+		;シンボル名をワークにコピー
+	dbra	d1,@b
+	clr.b	(a0)+
+
 	bsr	getsymtbl
 	move.l	a0,(BUCKET_OR_SYM_NEXT,a1)	;ハッシュチェインをつなぐ
 	movea.l	a0,a1
 	move.b	d2,(SYM_TYPE,a1)
 	move.l	a2,(SYM_NAME,a1)
 
-if SA_UNDEF.ne.0
-  move.b #SA_UNDEF,(SYM_ATTRIB,a1)
+.if SA_UNDEF.ne.0
+	move.b	#SA_UNDEF,(SYM_ATTRIB,a1)
 .endif
-
 .if SYM1ST_OTHER.ne.0
-  cmpi.b #ST_VALUE,d2
-  bne @f
-    move.b #SYM1ST_OTHER,(SYM_FIRST,a1)
-  @@:
+	cmpi.b	#ST_VALUE,d2
+	bne @f
+	move.b	#SYM1ST_OTHER,(SYM_FIRST,a1)
+@@:
 .endif
 	movem.l	(sp)+,a2-a3
-	bra	memcheck
+	rts
 
 ;----------------------------------------------------------------
 ;	シンボルテーブルのアドレスを得る
@@ -500,28 +501,27 @@ getsymtbl:
 	rts
 
 getsymtbl1:				;シンボルテーブルブロックを拡張する
-	move.l	(TEMPPTR,a6),d0
-	doquad	d0
-	movea.l	(SYMTBLCURBGN,a6),a0
-	move.l	d0,(a0)			;シンボルテーブルブロックのチェインをつなぐ
-	move.l	d0,(SYMTBLCURBGN,a6)
-	movea.l	d0,a0
-	add.l	#SYM_TBLLEN*SYMEXTCOUNT+4,d0
-	move.l	d0,(TEMPPTR,a6)
-	bsr	memcheck
-	move.l	d1,-(sp)
+	movem.l	d1/a1,-(sp)
+	move.l	#4+SYM_TBLLEN*SYMEXTCOUNT,d0
+	bsr	memalloc_quad
+	move.l	a0,d0
+	movea.l	(SYMTBLCURBGN,a6),a1
+	move.l	a0,(a1)			;シンボルテーブルブロックのチェインをつなぐ
+	move.l	a0,(SYMTBLCURBGN,a6)
+	clr.l	(a0)+			;チェインの終端
+	move.l	a0,(SYMTBLPTR,a6)
+
 	moveq.l	#0,d1
-	move.w	#SYM_TBLLEN*SYMEXTCOUNT/16,d0
-getsymtbl2:
+	move.w	#SYM_TBLLEN*SYMEXTCOUNT/16-1,d0
+@@:
   .rept 16/4
 	move.l	d1,(a0)+		;拡張したブロックをクリアする
   .endm
-	dbra	d0,getsymtbl2
-	move.l	(sp)+,d1
+	dbra	d0,@b
 	move.w	#SYMEXTCOUNT-1,(SYMTBLCOUNT,a6)
-	movea.l	(SYMTBLCURBGN,a6),a0
-	addq.l	#4,a0
-	move.l	a0,(SYMTBLPTR,a6)
+
+	movea.l	(SYMTBLPTR,a6),a0
+	movem.l	(sp)+,d1/a1
 	rts
 
 ;----------------------------------------------------------------
