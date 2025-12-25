@@ -62,33 +62,27 @@ asmmain0:
 	bsr	asmpass2		;パス2
 	bsrl	asmpass3,d0		;パス3
 	bsr	tempdelete		;テンポラリファイルの削除
-	tst.l	(NUMOFERR,a6)
-	beq	asmmain2
-	move.w	#1,-(sp)		;エラーがあった場合の終了コード
+
+	move.l	(NUMOFERR,a6),d0
+	tst.b	(WARNASERROR,a6)
+	beq	@f
+	or.l	(NUMOFWARN,a6),d0
+@@:	tst.l	d0
+	beq	asmmain_noerr
+
 	move.l	(OBJFILE,a6),-(sp)
 	DOS	_DELETE			;オブジェクトファイルを削除する
 	addq.l	#4,sp
-	lea.l	(beep_msg,pc),a0
-	bsr	printmsg		;ビープ音を鳴らす
-	movea.l	(LINEBUFPTR,a6),a0
-	lea.l	(fatal_msg1,pc),a1
-	bsr	strcpy
-	move.l	(NUMOFERR,a6),d0
-	moveq.l	#0,d1			;(左詰め)
-	bsr	convdec
-	lea.l	(fatal_msg2,pc),a1
-	bsr	strcpy
-	clr.b	(a0)
-	movea.l	(LINEBUFPTR,a6),a0
-	bra	asmmain3
-
-asmmain2:
-	clr.w	-(sp)			;エラーがなかった場合の終了コード
-	lea.l	(no_msg,pc),a0
+	bsr	print_errorcount
+	move.w	#1,-(sp)		;エラーがあった場合の終了コード
+	bra	asmmain4
+asmmain_noerr:
 	tst.b	(DISPTITLE,a6)
-	beq	asmmain4
-asmmain3:
+	beq	@f
+	lea.l	(no_msg,pc),a0
 	bsr	printmsg
+@@:
+	clr.w	-(sp)			;エラーがなかった場合の終了コード
 asmmain4:
 	tst.b	(MAKEPRN,a6)
 	beq	asmmain6
@@ -129,6 +123,34 @@ asmmain8:
 	bsrl	makesymfile,d0		;シンボルファイルを標準出力へ出力
 asmmain9:
 	DOS	_EXIT2
+
+
+;----------------------------------------------------------------
+;	エラー数の表示
+;----------------------------------------------------------------
+
+print_errorcount:
+	movea.l	(LINEBUFPTR,a6),a0
+	move.l	(NUMOFERR,a6),d0
+	lea.l	(fatal_msg_err,pc),a1
+	bsr	tostr_errcount
+
+	move.l	(NUMOFWARN,a6),d0
+	beq	@f			;ワーニング0個のときは個数を表示しない
+	lea.l	(fatal_msg_warn,pc),a1
+	bsr	tostr_errcount
+@@:
+	lea.l	(fatal_msg2,pc),a1
+	bsr	strcpy
+
+	movea.l	(LINEBUFPTR,a6),a0
+	bsr	printmsg
+	bra	play_beep
+
+tostr_errcount:
+	bsr	strcpy
+	moveq.l	#0,d1			;(左詰め)
+	bra	convdec
 
 
 ;----------------------------------------------------------------
@@ -199,6 +221,8 @@ usage_msg:
 	.dc.b	"外部定義・外部参照シンボルの先頭に'_'を挿入する",CRLF
 	.dc.b	TAB,'-.',TAB,TAB
 	.dc.b	"ドット('.')からはじまるラベル名を許可する",CRLF
+	.dc.b	TAB,'-Werror',TAB,TAB
+	.dc.b	'ワーニングをエラーとして扱う',CRLF
 	.dc.b	'    環境変数 HAS の内容がコマンドラインの手前(-iは後ろ)に挿入されます',CRLF
 	.dc.b	0
 
@@ -206,8 +230,9 @@ multifile_msg:	.dc.b	'複数のファイル名は指定できません',CRLF
 		.dc.b	0
 
 no_msg:		.dc.b	'エラーはありません',CRLF,0
-fatal_msg1:	.dc.b	'エラーが ',0
-fatal_msg2:	.dc.b	' 個ありました．アセンブルを中止します',CRLF,0
+fatal_msg_err:	.dc.b	'エラーが ',0
+fatal_msg_warn:	.dc.b	' 個、警告が ',0
+fatal_msg2:	.dc.b	' 個ありました。アセンブルを中止します',CRLF,0
 
 env_has:	.dc.b	'HAS',0		;コマンドラインに追加する環境変数名
 env_g2as:	.dc.b	'G2AS',0
@@ -579,24 +604,25 @@ optionsw:
 optionsw1:
 	move.b	(a0)+,d0
 	beq	optionsw0
-	moveq.l	#'z'-'a'+1,d2		;アルファベット以外を先に判別
-	cmpi.b	#'1',d0
-	beq	@f
-	addq.w	#1,d2
-	cmpi.b	#'_',d0
-	beq	@f
-	addq.w	#1,d2
-	cmpi.b	#'.',d0
-	beq	@f
+
+	lea.l	(optjp2_tbl,pc),a1	;大小区別しないアルファベット以外を先に判別
+	move.w	(a1)+,d1
+@@:
+	move.w	(a1)+,d2
+	cmp.b	d0,d1
+	beq	optionsw2
+	move.w	(a1)+,d1
+	bne	@b
 
 	moveq.l	#$20,d2
 	or.b	d0,d2			;小文字化
 	subi	#'a',d2
 	cmpi	#'z'-'a',d2
 	bhi	usage			;該当するオプションスイッチがない
-@@:
+
 	add	d2,d2
 	move	(optjp_tbl,pc,d2.w),d2
+optionsw2:
 	jsr	(optjp_tbl,pc,d2.w)
 	bra	optionsw1
 optionsw0:
@@ -605,11 +631,16 @@ optionsw0:
 ;----------------------------------------------------------------
 ;	オプションスイッチのジャンプテーブル
 optjp_tbl:
-	.irpc	ch,abcdefghijklmnopqrstuvwxyz1
+	.irpc	ch,abcdefghijklmnopqrstuvwxyz
 	.dc.w	option_&ch-optjp_tbl
 	.endm
-	.dc.w	option_underscore-optjp_tbl
-	.dc.w	option_dot-optjp_tbl
+
+optjp2_tbl:
+	.dc.w	'1',option_1-optjp_tbl
+	.dc.w	'W',option_upperW-optjp_tbl
+	.dc.w	'_',option_underscore-optjp_tbl
+	.dc.w	'.',option_dot-optjp_tbl
+	.dc.w	0
 
 ;----------------------------------------------------------------
 ;	-t path		テンポラリパス指定
@@ -850,6 +881,28 @@ option_f5:
 	move.w	d1,(PRNCODEWIDTH,a6)	;コード部の幅
 option_f6:
 	rts
+
+;----------------------------------------------------------------
+;	-Werror		ワーニングをエラーとして扱う
+
+option_upperW:
+	movea.l	a0,a1
+	lea.l	(str_error,pc),a2
+	bsr	strcmp_a1a2
+	bne	option_w		;-Werror以外は-w [level]として扱う
+;option_Werror:
+	st.b	(WARNASERROR,a6)
+	bra	skipstring
+
+strcmp_a1a2:
+@@:	cmpm.b	(a1)+,(a2)+
+	bne	@f
+	tst.b	(-1,a1)
+	bne	@b
+@@:	rts
+
+str_error:	.dc.b	'error',0
+	.even
 
 ;----------------------------------------------------------------
 ;	-w [level]	ワーニング出力レベルの指定

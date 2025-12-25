@@ -163,13 +163,17 @@ SYMTBLCOUNT::	.ds.w	1	;残りのシンボルテーブル数
 
 ;----------------------------------------------------------------
 ;	オプションスイッチ他フラグ
+	.even
+X_FSCC::	.ds.b	sizeofCPUTYPE	;FScc→FBcc
+X_MOVEP::	.ds.b	sizeofCPUTYPE	;MOVEP展開(展開するCPUのビットが1)
+
 MAKEPRN::	.ds.b	1	;PRNファイルを作成するならtrue			(-p)
 ALLXREF::	.ds.b	1	;未定義シンボルをXREFするならtrue		(-u)
 ALLXDEF::	.ds.b	1	;全シンボルをXDEFするならtrue			(-d)
 OPTIMIZE::	.ds.b	1	;前方参照の最適化をしないならtrue		(-n)
 MAKESYM::	.ds.b	1	;シンボルファイルを作成するならtrue		(-x)
 NOPAGEFF::	.ds.b	1	;PRNファイルのページングをしないならtrue	(-f)
-DISPTITLE::	.ds.b	1	;起動時にタイトルを表示しないならtrue		(-l)
+DISPTITLE::	.ds.b	1	;起動時にタイトルを表示するならtrue		(-l)
 WARNLEVEL::	.ds.b	1	;ワーニング出力レベル(0～4)			(-w)
 EXTSHORT::	.ds.b	1	;外部参照オフセットのデフォルトがロングならtrue	(-e)
 MAKESYMDEB::	.ds.b	1	;SCD用デバッグ情報を出力するならtrue		(-g)
@@ -180,6 +184,10 @@ PCTOABSLNOTALL::.ds.b	1	;-b4でないときtrue
 PCTOABSLCAN::	.ds.b	1	;-b4でなくてlea/pea/jmp/jsrのときtrue
 ABSLTOOPC::	.ds.b	1	;絶対ロングを(d,OPC)にするならtrue		(-1)
 ABSLTOOPCCAN::	.ds.b	1	;ABSLTOOPCを無効化する
+
+LEADINGSYMCHAR::.ds.b	1	;外部定義・外部参照シンボルの先頭に挿入する文字	(-_)
+DOTLABEL::	.ds.b	1	;ドット(.)からはじまるラベル名を許可するならtrue (-.)
+WARNASERROR::	.ds.b	1	;ワーニングをエラー扱いするならtrue		(-Werror)
 
 G2ASMODE::	.ds.b	1	;g2asモード
 MAKESCD::	.ds.b	1	;SCD用シンボル情報を出力するならtrue
@@ -206,15 +214,9 @@ OPTSUBADDI0::	.ds.b	1	;SUBI/ADDI#0を最適化するならtrue
 OPTBSR::	.ds.b	1	;直後へのbsrをpeaにするならtrue
 OPTJMPJSR::	.ds.b	1	;jmp/jsrを最適化するならtrue
 BRATOJBRA::	.ds.b	1	;BRA/BSR/BccをJBRA/JBSR/JBccにするならtrue
-	.even
-X_FSCC::	.ds.b	sizeofCPUTYPE	;FScc→FBcc
-X_MOVEP::	.ds.b	sizeofCPUTYPE	;MOVEP展開(展開するCPUのビットが1)
 
 MAKEALIGN::	.ds.b	1	;拡張アラインメント情報を出力するならtrue
 MAXALIGN::	.ds.b	1	;ソース中で使用された最大のアライン値(2^n)
-
-LEADINGSYMCHAR:	.ds.b	1	;外部定義・外部参照シンボルの先頭に挿入する文字	(-_)
-DOTLABEL:	.ds.b	1	;ドット(.)からはじまるラベル名を許可するならtrue (-.)
 
 ;----------------------------------------------------------------
 ;	アセンブルコード
@@ -305,6 +307,7 @@ RPNBUFEX::	.ds.w	128	;逆ポーランド式バッファ/定数値
 ;----------------------------------------------------------------
 ;	エラー処理
 NUMOFERR::	.ds.l	1	;Fatal errorの数
+NUMOFWARN::	.ds.l	1	;ワーニングの数
 SPSAVE::	.ds.l	1	;エラー処理後のspの値
 ERRRET::	.ds.l	1	;エラー処理後の戻りアドレス
 ERRMESSYM::	.ds.l	1	;エラーメッセージに埋め込むシンボル

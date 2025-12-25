@@ -322,10 +322,13 @@ filopenabort::
 abort:					;プログラム中断
 	bsr	printmsg
 	DOS	_ALLCLOSE		;全ファイルをクローズする
-	lea.l	(beep_msg,pc),a0
-	bsr	printmsg
+	bsr	play_beep
 	move.w	#1,-(sp)
 	DOS	_EXIT2
+
+play_beep::
+	lea.l	(beep_msg,pc),a0
+	bra	printmsg
 
 nomem_msg:	.dc.b	'Abort: メモリが不足しています',CRLF,0
 devful_msg:	.dc.b	'Abort: ディスクがいっぱいです',CRLF,0

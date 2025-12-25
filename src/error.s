@@ -66,7 +66,7 @@ n = 0
 warnout:
 	cmp.b	(WARNLEVEL,a6),d1
 	bhi	warnout9
-warnout1:
+
 	movem.l	a0-a2,-(sp)
 	add.w	d0,d0			;ワーニング番号×2
 	move.w	(warn_msg_tbl,pc,d0.w),d0
@@ -86,6 +86,7 @@ warnout2:
 	lea.l	(10,sp),sp
 warnout8:
 	movem.l	(sp)+,a0-a2
+	addq.l	#1,(NUMOFWARN,a6)
 warnout9:
 	movem.l	(sp)+,d0-d1
 warnout99:
