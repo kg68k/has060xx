@@ -359,7 +359,8 @@ aligncmd:				;14xx アラインメントの調整
 	GETFPTR	TEMPFILPTR,d1		;現在のファイルポインタ位置を得る
 	bsr	tmpreadd0w		;前回のパディング長を読み出す
 	sub.w	d2,d0			;最適化によって減ったバイト数
-	adda.w	d0,a4
+	ext.l	d0
+	adda.l	d0,a4
 	move.w	d2,d0
 	bra	fmodify			;ロケーションカウンタ値を修正する
 
@@ -742,12 +743,13 @@ indexadr0:
 	bsr	skipexpr1		;最適化対象でないので後続の式を読み飛ばす
 indexadr1:
 	ext.w	d2
-	move.b	(indexadr_tbl,pc,d2.w),d2
-	adda.w	d2,a5
+	moveq.l	#0,d0
+	move.b	(indexadr_tbl,pc,d2.w),d0
+	adda.l	d0,a5
 indexadr9:
 	rts
 
-indexadr_tbl:	.dc.b	-1,4,6,2
+indexadr_tbl:	.dc.b	0,4,6,2
 
 indexadr8:				;最適化できない場合
 	and.b	#3,d2			;(ESZ_OPTビットをクリア)
@@ -1078,8 +1080,9 @@ bracmd0:
 	and.b	#3,d2			;$40を消す
 bracmd1:
 	ext.w	d2
-	move.b	(bracmd_tbl,pc,d2.w),d2
-	adda.w	d2,a5
+	moveq.l	#0,d0
+	move.b	(bracmd_tbl,pc,d2.w),d0
+	adda.l	d0,a5
 	rts
 
 bracmd_tbl:	.dc.b	0,4,6,2
@@ -1255,8 +1258,9 @@ jbracmd:				;31xx jbra/jbsr/jb<cc>
 	bsr	skipexpr1		;最適化対象でないので後続の式を読み飛ばす
 jbracmd1:
 	ext.w	d2
-	move.b	(jbracmd_tbl,pc,d2.w),d2
-	adda.w	d2,a5
+	moveq.l	#0,d0
+	move.b	(jbracmd_tbl,pc,d2.w),d0
+	adda.l	d0,a5
 	rts
 
 jbracmd_tbl:	.dc.b	0,4,8,2

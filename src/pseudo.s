@@ -1384,11 +1384,11 @@ skipfend:
 	bmi	~~insert_seek_error	;指定された位置までシークできない
 
 ~~insert_read_loop:
-	movea.w	#256,a2			;今回転送するサイズ
-	cmp.l	a2,d1
-	bcc	~~insert6
-	move.l	d1,a2			;d1>=256でなければd1だけ転送する
-~~insert6:
+	movea.l	#OBJCONBUFSIZE,a2	;今回転送するサイズ
+	cmpa.l	d1,a2
+	bls	@f
+	move.l	d1,a2			;d1<バッファサイズならd1だけ転送する
+@@:
 	move.l	a2,-(sp)		;今回のサイズ
 	pea.l	(OBJCONBUF,a6)		;オブジェクトバッファに直接読み出す
 	move.w	d3,-(sp)
@@ -1398,7 +1398,8 @@ skipfend:
 	bmi	~~insert_size_error	;指定されたサイズを読み出せない
 	cmp.l	a2,d0
 	beq	~~insert7		;今回のサイズを読み出せた
-	cmpa.w	#-1,a1
+	moveq.l	#-1,d4
+	cmpa.l	d4,a1
 	bne	~~insert_size_error	;サイズが指定されたのに,
 					;今回のサイズを読み出せなかった.
 					;つまり,指定されたサイズを読み出せない
