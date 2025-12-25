@@ -1436,11 +1436,18 @@ skipfend:
 	lea.l	(RPNBUF,a6),a1
 	bsr	convrpn
 	tst.w	d0
-	bmi	exprerr			;式変換に失敗
+	bmi	insert_exprerr		;式変換に失敗
 	bsr	calcrpn
 	tst.w	d0
-	bne	ilvalueerr		;定数でない
+	bne	insert_ilvalueerr	;定数でない
 	rts
+
+insert_exprerr:
+	bsr	~~insert_close
+	bra	exprerr
+insert_ilvalueerr:
+	bsr	~~insert_close
+	bra	ilvalueerr
 
 ~~insert_seek_error:
 ~~insert_size_error:
