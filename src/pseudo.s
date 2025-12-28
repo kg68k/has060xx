@@ -536,8 +536,9 @@ validate_align:
 ~~fset::
 	moveq.l	#ST_REAL,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
-	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),@f
-	br1st	SYM1ST_SET,(SYM_FIRST,a1),@f
+	tst.w	d2
+	bpl	@f				;未定義のシンボル
+	br1st	SYM1ST_SET,(SYM_FIRST,a1),@f	;.fsetで定義されているシンボル
 
 	move.l	a1,(ERRMESSYM,a6)	;fset以外で定義されている
 	tst.b	(OWSET,a6)
@@ -603,8 +604,9 @@ defltopsym:
 	cmp.b	(SYM_TYPE,a1),d2
 	bne	defltopsym02		;タイプの異なるシンボルと重複している
 
+	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),@f
 	moveq.l	#-1,d2
-	rts
+@@:	rts
 
 defltopsym01:
 	move.l	a1,(ERRMESSYM,a6)	;プレデファインシンボルを再定義しようとした
@@ -645,15 +647,15 @@ pseudo_redeferr_a1:
 ~~set::
 	moveq.l	#ST_VALUE,d2
 	bsr	defltopsym		;行頭のシンボルを定義する
-	brsym	SA_REFUNDEF,SA_UNDEF,(SYM_ATTRIB,a1),~~set1
-					;未定義
-	br1st	SYM1ST_SET,(SYM_FIRST,a1),~~set1
+	tst.w	d2
+	bpl	@f				;未定義のシンボル
+	br1st	SYM1ST_SET,(SYM_FIRST,a1),@f	;.setで定義されているシンボル
 
 	move.l	a1,(ERRMESSYM,a6)	;set以外で定義されている
 	tst.b	(OWSET,a6)
 	bne	redeferr_set		;スイッチ-jにより警告またはエラー
 	bsr	redefwarn_set
-~~set1:
+@@:
 	ffst.b	SYM1ST_SET,(SYM_FIRST,a1)
 	bra	~~equ1
 
