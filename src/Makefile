@@ -2,7 +2,7 @@
 
 
 AS = has060 -c4 -u
-# -sUNIX_NEWLINE=1 …メッセージの改行コードを$0Aにする
+# -sUNIX_NEWLINE …メッセージの改行コードを$0Aにする
 
 LK = hlk -e4 -x
 

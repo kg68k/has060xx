@@ -13,11 +13,6 @@
 __HAS_EQU__	equ	1
 
 ;----------------------------------------------------------------
-  .ifndef UNIX_NEWLINE
-UNIX_NEWLINE	equ	0		;メッセージの改行コード(0=$0D0A,1=$0A)
-  .endif
-
-;----------------------------------------------------------------
 ;	定数の定義
 ;----------------------------------------------------------------
 BELL		equ	$07
@@ -30,10 +25,10 @@ EOF		equ	$1A
 STDOUT		equ	1
 STDERR		equ	2
 
-  .if UNIX_NEWLINE=0
-CRLF		reg	CR,LF
-  .else
+  .ifdef UNIX_NEWLINE
 CRLF		reg	LF
+  .else
+CRLF		reg	CR,LF
   .endif
 
 ;ハッシュテーブルのサイズを32768未満の2のべき乗にする
@@ -129,7 +124,7 @@ GETFPTR	.macro	adr,reg
 ;----------------------------------------------------------------
 ;	改行コードをバッファに書き込む
 writecrlf: .macro ea_aipi
-  .if UNIX_NEWLINE=0
+  .ifndef UNIX_NEWLINE
 	move.b	#CR,ea_aipi
   .endif
 	move.b	#LF,ea_aipi
