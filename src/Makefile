@@ -19,7 +19,7 @@ SRC1 = Makefile doscall.mac eamode.equ error2.equ has.equ register.equ \
 	symbol.equ tmpcode.equ work.equ
 SRC2 = doasm.s eamode.s encode.s error.s error2.s expr.s \
 	fexpr.s file.s hupair.s macro.s main.s misc.s objgen.s opname.s \
-	optimize.s pseudo.s regname.s symbol.s
+	optimize.s pseudo.s regname.s symbol.s trampoline.s
 
 SRC = $(SRC1) $(SRC2)
 
@@ -27,7 +27,7 @@ SRC = $(SRC1) $(SRC2)
 #link順序に注意
 
 OBJ = main.o hupair.o optimize.o doasm.o file.o misc.o symbol.o \
-	error2.o pseudo.o expr.o macro.o encode.o \
+	error2.o trampoline.o pseudo.o expr.o macro.o encode.o \
 	eamode.o objgen.o error.o regname.o fexpr.o opname.o
 
 

@@ -60,7 +60,7 @@ asmmain0:
 @@:
 	bsr	asmpass1		;パス1
 	bsr	asmpass2		;パス2
-	bsrl	asmpass3,d0		;パス3
+	bsr	asmpass3_		;パス3
 	bsr	tempdelete		;テンポラリファイルの削除
 
 	move.l	(NUMOFERR,a6),d0
@@ -111,7 +111,7 @@ asmmain6:
 	bsr	prnlout
 	lea.l	(crlf_msg,pc),a0
 	bsr	prnlout
-	bsrl	makesymfile,d0		;シンボルファイルの作成
+	bsr	makesymfile_		;シンボルファイルの作成
 	move.w	d0,-(sp)
 	DOS	_CLOSE			;シンボルファイルのクローズ
 	addq.l	#2,sp
@@ -120,7 +120,7 @@ asmmain6:
 asmmain8:
 	move.w	#STDOUT,(PRNHANDLE,a6)
 
-	bsrl	makesymfile,d0		;シンボルファイルを標準出力へ出力
+	bsr	makesymfile_		;シンボルファイルを標準出力へ出力
 asmmain9:
 	DOS	_EXIT2
 

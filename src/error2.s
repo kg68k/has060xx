@@ -129,8 +129,6 @@ misiferr_eof2::		bra	misiferr_eof
 
 ;errout2::		bra	errout
 
-crlf_msg::		.dc.b	CRLF,0
-
 
 ;----------------------------------------------------------------
 	.end

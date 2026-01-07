@@ -2821,7 +2821,7 @@ outobjconst:
 	cmp.b	#ESZ_ABS,d2
 	bcc	outobjcon_abs
 outobjcon_imm:				;イミディエイトデータ
-	bsrl	chkdtsize,d0
+	bsr	chkdtsize_
 	move.l	d1,d0
 	cmp.b	#SZ_SHORT,d2
 	beq	out1bobj		;.s

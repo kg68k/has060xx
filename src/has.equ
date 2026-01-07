@@ -93,14 +93,6 @@ bran68	.macro	label
 	.endm
 
 ;----------------------------------------------------------------
-;	32bitオフセットのbsrを行う
-bsrl	.macro	adr,reg
-@currentpc:
-	move.l	#adr-@currentpc,reg
-	jsr	(@currentpc,pc,reg.l)
-	.endm
-
-;----------------------------------------------------------------
 ;	a6レジスタ(WORKBEGIN)からの16ビットの相対lea
 llea	.macro	adr,reg
 	lea.l	(adr-WORKBEGIN,a6),reg
