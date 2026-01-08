@@ -18,7 +18,7 @@ copyright	reg	'(C) 1990-1994/1996-2023 Y.Nakamura/M.Kamada'	;title_msgの著作�
 
 version_x	reg	'2.0.0-dev'
 verno_x		equ	$02_00_00	;__HAS060X__の値
-copyright_x	reg	'(C) 2025 TcbnErik'
+copyright_x	reg	'(C) 2026 TcbnErik'
 
   .endif	;__VERSION_EQU__
 
