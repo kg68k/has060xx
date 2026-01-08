@@ -119,7 +119,7 @@ asmmain6:
 	lea.l	(main_crlf_msg,pc),a0
 	bsr	prnlout
 	bsrl	makesymfile,d0		;シンボルファイルの作成
-	move.w	d0,-(sp)
+	move.w	(PRNHANDLE,a6),-(sp)
 	DOS	_CLOSE			;シンボルファイルのクローズ
 	addq.l	#2,sp
 	bra	asmmain9
