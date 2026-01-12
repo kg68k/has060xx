@@ -1161,7 +1161,13 @@ symdefchk1:
 symdefchk2:
 	subq.l	#1,a1
 	move.l	a1,(LINEPTR,a6)
-	bra	isdefdsym
+	bsr	isdefdsym
+	tst.w	d0
+	bmi	@f			;未登録だった
+	brsym	SA_NODET,SA_DEFINE,SA_PREDEFINE,(SYM_ATTRIB,a1),@f
+	moveq.l	#-1,d0			;SA_REFUNDEF/SA_UNDEF
+@@:
+	rts
 
 ;---------------------------------------------------------------
 ;	.ifの条件不成立部のソースを読み飛ばす
