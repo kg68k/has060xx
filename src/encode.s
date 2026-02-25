@@ -250,8 +250,8 @@ encodeline46:
 	bsr	getmaccmd
 	tst.w	d0
 	bne	encodeline5
-	tst.l	(CMDTBLPTR,a6)		;2語目も命令→1語目は命令と同名のラベル
-	bne	encodecmd5
+	tst.l	(CMDTBLPTR,a6)		;2語目も命令(コメント以外)
+	bne	encodecmd5		;→1語目は命令と同名のラベル
 encodeline5:
 	movea.l	(LABNAMEPTR,a6),a0
 	move.w	#-1,(LABNAMELEN,a6)	;ラベルの取り消し
@@ -296,6 +296,8 @@ encline_dot:
 	bne	encodecmd1		;行頭から始まっていない(行頭が空白文字)
 	addq.l	#1,a0
 	bsr	getword
+	tst.w	d2
+	bmi	encodecmd11
 	cmpi.b	#':',(a1)
 	bne	encodecmd11		;':'がない
 	move.w	d1,d2
@@ -1215,6 +1217,29 @@ getbin6:
 ;----------------------------------------------------------------
 
 ;----------------------------------------------------------------
+;	文字列からシンボルを抜き出す
+;	in :a0=文字列を指すポインタ
+;	out:a1=抜き出した語の次の文字を指すポインタ
+;	    d1.w=抜き出した語の長さ-1/d2.w=語として抜き出せない文字なら-1
+getsymbol::
+	tst.b	(DOTLABEL,a6)
+	beq	getword
+	movea.l	a0,a1
+	cmp.b	#'.',(a1)+
+	bne	getword
+
+	moveq.l	#0,d0
+	moveq.l	#-2,d1
+@@:
+	move.b	(a1)+,d0
+	move.b	(wordtbl,pc,d0.w),d2
+	bgt	@b			;語に使える文字
+	beq	getword8		;語に使えない文字
+	tst.b	(a1)+			;2バイト文字の1バイト目
+	bne	@b
+	bra	getword8
+
+;----------------------------------------------------------------
 ;	文字列から1語を抜き出す
 ;	in :a0=文字列を指すポインタ
 ;	out:a1=抜き出した語の次の文字を指すポインタ
@@ -1223,22 +1248,21 @@ getword::
 	moveq.l	#0,d0
 	movea.l	a0,a1
 	moveq.l	#-2,d1
-getword1:
+@@:
 	move.b	(a1)+,d0
-	move.b	(wordtbl,pc,d0.w),d0
+	move.b	(wordtbl,pc,d0.w),d2
+	bgt	@b			;語に使える文字
 	beq	getword8		;語に使えない文字
-	bgt	getword1		;語に使える文字
 	tst.b	(a1)+			;2バイト文字の1バイト目
-	bne	getword1
+	bne	@b
 getword8:
 	add.w	a1,d1
 	sub.w	a0,d1			;語の長さ-1
 	move.w	d1,d2
-	bpl	getword9
-	clr.w	d1
-	rts
-
-getword9:
+	bpl	@f
+	clr.w	d1			;語として抜き出せない文字なら
+	rts				;d1.w=0, d2.w=-1
+@@:
 	subq.l	#1,a1
 	rts
 

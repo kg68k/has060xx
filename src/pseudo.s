@@ -1142,7 +1142,7 @@ get_ifstataddr:
 ;---------------------------------------------------------------
 ;	シンボルが登録済かどうかを調べる
 symdefchk:
-	bsr	getword
+	bsr	getsymbol
 	tst.w	d2
 	bmi	iloprerr		;シンボルがない
 	move.b	(a1)+,d0
