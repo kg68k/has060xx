@@ -268,10 +268,10 @@ encodeline8:
 encodeline10:
 	addq.l	#1,a1
 	cmpi.b	#':',(a1)
-	bne	encodeline11
+	bne	@f
 	addq.l	#1,a1
 	st.b	(LABXDEF,a6)		;xxxx:: 外部定義ラベル
-encodeline11:
+@@:
 	move.l	a0,(LABNAMEPTR,a6)
 	move.w	d1,(LABNAMELEN,a6)
 	movea.l	a1,a0
@@ -298,13 +298,23 @@ encline_dot:
 	bsr	getword
 	tst.w	d2
 	bmi	encodecmd11
-	cmpi.b	#':',(a1)
-	bne	encodecmd11		;':'がない
+
 	move.w	d1,d2
 	bsr	getcmdmac		;命令優先
 	tst.w	d0
 	beq	encodecmd41		;命令・マクロに一致した
 
+	move.b	(a1),d0
+	cmpi.b	#':',d0
+	beq	@f			;.xxx: ドットラベル
+	cmpi.b	#'.',d0
+	bne	encodecmd9		;命令でもラベルでもなかった
+;.xxx.～
+	lea	(1,a2),a0		;先頭の'.'を飛ばす(.xxx: と文字列長の扱いを合わせるため)
+	bsr	consume_dotlabel_suffix
+	cmpi.b	#':',(a1)
+	bne	encodecmd9		;':'がなければドットラベルとして認めない
+@@:
 	movea.l	a2,a0			;ドットラベルとして認める
 	move.w	d2,d1			;文字列長-1
 	addq.w	#1,d1			;先頭の'.'も含める
@@ -562,10 +572,18 @@ encodeexop_real:			;演算子が存在しない
 @@:
 	tst.b	(DOTLABEL,a6)		;a0='.'のアドレス
 	beq	exprerr			;変換エラーとして扱う
-
+	cmpi.b	#'.',(a1)
+	beq	@f
+;.xxx ドットラベル
 	move.w	d3,d1			;文字列長-1
 	addq.w	#1,d1			;先頭の'.'も含める
 	bra	encodesymr3		;ドットラベルとして認める
+@@:
+;.xxx.～ ドットラベル
+;語として有効な文字と'.'はすべてドットラベルとして取り込む
+;そのため.and.など.～.形式の演算子を直接繋げられない仕様
+	bsr	consume_dotlabel_suffix
+	bra	encodesymr3
 
 encodeexop4:				;演算子の場合
 	cmpi.b	#'.',(a3)+
@@ -1224,17 +1242,29 @@ getbin6:
 getsymbol::
 	tst.b	(DOTLABEL,a6)
 	beq	getword
-	movea.l	a0,a1
-	cmp.b	#'.',(a1)+
+	cmp.b	#'.',(a0)
 	bne	getword
 
+	movea.l	a0,a1
+	bra	consume_dotlabel_suffix
+
+;----------------------------------------------------------------
+;	文字列からドットラベルの後続部分を取り込む
+;	in :a0.l ドットラベルの先頭
+;	    a1.l ドットラベルの後続部分
+;	out:a1=抜き出した語の次の文字を指すポインタ
+;	    d1.w=抜き出した語の長さ-1/d2.w=語として抜き出せない文字なら-1
+consume_dotlabel_suffix:
 	moveq.l	#0,d0
-	moveq.l	#-2,d1
 @@:
 	move.b	(a1)+,d0
 	move.b	(wordtbl,pc,d0.w),d2
 	bgt	@b			;語に使える文字
-	beq	getword8		;語に使えない文字
+	bmi	2f
+	cmpi.b	#'.',d0
+	beq	@b			;'.'からはじまるシンボルはそれ以降の'.'も許可する
+	bra	getword8		;語に使えない文字
+2:
 	tst.b	(a1)+			;2バイト文字の1バイト目
 	bne	@b
 	bra	getword8
@@ -1247,7 +1277,6 @@ getsymbol::
 getword::
 	moveq.l	#0,d0
 	movea.l	a0,a1
-	moveq.l	#-2,d1
 @@:
 	move.b	(a1)+,d0
 	move.b	(wordtbl,pc,d0.w),d2
@@ -1256,8 +1285,10 @@ getword::
 	tst.b	(a1)+			;2バイト文字の1バイト目
 	bne	@b
 getword8:
-	add.w	a1,d1
-	sub.w	a0,d1			;語の長さ-1
+	move.l	a1,d1
+	sub.l	a0,d1
+	subq.w	#2,d1			;語の長さ-1
+	.fail	MAXLINELEN>$ffff
 	move.w	d1,d2
 	bpl	@f
 	clr.w	d1			;語として抜き出せない文字なら
