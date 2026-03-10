@@ -40,6 +40,8 @@
 	bmi	nosymerr_macro		;マクロ名がない
 	move.w	#-1,(LABNAMELEN,a6)	;定義するのでラベルを取り消す
 	movea.l	(LABNAMEPTR,a6),a0
+	cmp.b	#'.',(a0)
+	beq	ilsymerr_dotmacro
 	bsr	isdefdmac
 	tst.w	d0
 	beq	~~macro5

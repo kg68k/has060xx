@@ -142,6 +142,7 @@ errtbl	.macro
 	error	ilsymerr_predefxref,	'プレデファインシンボル %s は外部参照宣言できません'
 	error	ilsymerr_predefglobl,	'プレデファインシンボル %s はグローバル宣言できません'
 	error	ilsymerr_lookfor,	'シンボル %s の定義が参照方法と矛盾しています'
+	error	ilsymerr_dotmacro,	'マクロ名に . は使えません'
 	error	exprerr,		'記述が間違っています'
 	error	exprerr_ea,		'実効アドレスが解釈できません'
 	error	exprerr_cannotscale,	'スケールファクタは指定できません'
