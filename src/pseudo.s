@@ -1074,9 +1074,13 @@ enlarge_ifstattbl:
 
 ;---------------------------------------------------------------
 ;	skipfaultの戻り値(読み飛ばした部分の直後の疑似命令)
-SKIPF_ENDIF	equ	-1
-SKIPF_ELSE	equ	0
-SKIPF_ELSEIF	equ	1
+	.offset	0
+SKIPF_ELSE:	.ds.w	1
+SKIPF_ELSEIF:	.ds.w	1
+SKIPF_ELIFDEF:	.ds.w	1
+SKIPF_ELIFNDEF:	.ds.w	1
+SKIPF_ENDIF:	.ds.w	1
+	.text
 
 ;---------------------------------------------------------------
 ;	.if	<式>
@@ -1089,27 +1093,42 @@ SKIPF_ELSEIF	equ	1
 	bsr	enlarge_ifstattbl
 	bsr	get_ifstataddr
 	clr.b	(a1)			;else出現フラグをクリア
-	tst.b	d0
-	beq	~~if9			;d0.b=0なら条件が成立
 ~~if2:
-	bsr	skipfault		;条件不成立部のソースを読み飛ばす
-	.fail	(SKIPF_ENDIF.sge.0).or.(SKIPF_ELSE.ne.0).or.(SKIPF_ELSEIF.sle.0)
-	tst.w	d0
-	bmi	~~if9			;endifの場合
-	beq	~~if_false_else		;elseの場合
-
-	bsr	ifcond			;elseifの場合
-	tst.l	d1
-	seq.b	d0
 	tst.b	d0
-	bne	~~if2			;再び不成立になった
-~~if9:
+	beq	~~if_satisfied		;d0.b=0なら条件が成立
+
+	bsr	skipfault		;条件不成立部のソースを読み飛ばす
+	jmp	(@f,pc,d0.w)
+@@:
+	bra.s	~~if_skip_else
+	bra.s	~~if_skip_elif
+	bra.s	~~if_skip_elifdef
+	bra.s	~~if_skip_elifndef
+	bra	~~if_skip_endif
+
+~~if_skip_endif:
+~~if_satisfied:
 	rts
 
-~~if_false_else:
+~~if_skip_else:
 	bsr	get_ifstataddr
 	st.b	(a1)			;elseが出現(成立)したので、以後else/elseifは使えない
 	rts
+
+~~if_skip_elif:
+	bsr	ifcond
+	tst.l	d1
+	seq.b	d0			;式が非零ならd0.b=0
+	bra	~~if2
+
+~~if_skip_elifdef:
+	bsr	symdefchk		;シンボルが登録済ならd0.b=0
+	bra	~~if2
+
+~~if_skip_elifndef:
+	bsr	symdefchk		;シンボルが登録済ならd0.b=0
+	not.b	d0
+	bra	~~if2
 
 get_ifstataddr:
 	move.w	(IFNEST,a6),-(sp)
@@ -1188,24 +1207,25 @@ skipfault1:
 	beq	skipfault1		;命令がない
 	movea.l	d0,a1
 	move.l	(SYM_FUNC,a1),a1
-	lea.l	(~~if,pc),a2
+.irp	label,~~if,~~iff,~~ifdef,~~ifndef
+	lea.l	(label,pc),a2
 	cmpa.l	a1,a2
 	beq	skipfif
-	lea.l	(~~iff,pc),a2
-	cmpa.l	a1,a2
-	beq	skipfif
-	lea.l	(~~ifdef,pc),a2
-	cmpa.l	a1,a2
-	beq	skipfif
-	lea.l	(~~ifndef,pc),a2
-	cmpa.l	a1,a2
-	beq	skipfif
+.endm
 	lea.l	(~~else,pc),a2
 	cmpa.l	a1,a2
 	beq	skipfelse
+
 	lea.l	(~~elseif,pc),a2
 	cmpa.l	a1,a2
 	beq	skipfelif
+	lea.l	(~~elifdef,pc),a2
+	cmpa.l	a1,a2
+	beq	skipfelifdef
+	lea.l	(~~elifndef,pc),a2
+	cmpa.l	a1,a2
+	beq	skipfelifndef
+
 	lea.l	(~~endif,pc),a2
 	cmpa.l	a1,a2
 	beq	skipfendif
@@ -1233,6 +1253,18 @@ skipfelif:				;elseif
 	tst.w	(IFSKIPNEST,a6)
 	bne	skipfault1
 	moveq.l	#SKIPF_ELSEIF,d0
+	bra	skipfend
+
+skipfelifdef:				;elifdef
+	tst.w	(IFSKIPNEST,a6)
+	bne	skipfault1
+	moveq.l	#SKIPF_ELIFDEF,d0
+	bra	skipfend
+
+skipfelifndef:				;elifndef
+	tst.w	(IFSKIPNEST,a6)
+	bne	skipfault1
+	moveq.l	#SKIPF_ELIFNDEF,d0
 	bra	skipfend
 
 skipfendif:				;endif
@@ -1265,10 +1297,22 @@ skipfend:
 
 	bsr	skipfault
 	move.l	(CMDTBLPTR,a6),(ERRMESSYM,a6)
-	.fail	(SKIPF_ENDIF.sge.0).or.(SKIPF_ELSE.slt.0).or.(SKIPF_ELSEIF.slt.0)
-	tst.w	d0
-	bpl	misiferr_else_else	;elseの後にelse/elseifがあった
+	jmp	(@f,pc,d0.w)
+@@:
+	bra.s	~~else_skip_else
+	bra.s	~~else_skip_elif
+	bra.s	~~else_skip_elifdef
+	bra.s	~~else_skip_elifndef
+	bra	~~else_skip_endif
+
+~~else_skip_endif:
 	rts
+
+~~else_skip_else:
+~~else_skip_elif:
+~~else_skip_elifdef:
+~~else_skip_elifndef:
+	bra	misiferr_else_else	;elseの後にelse/elseifがあった
 
 ;---------------------------------------------------------------
 ;	.elseif	<式>
@@ -1281,11 +1325,28 @@ skipfend:
 	bne	misiferr_else_else	;このelseifより前にelseがあった
 
 	bsr	skipfault
-	tst.w	d0
-	.fail	(SKIPF_ELSE.ne.0).or.(SKIPF_ELSEIF.sle.0)
-	beq	~~else
-	bgt	~~elseif
+	jmp	(@f,pc,d0.w)
+@@:
+	bra.s	~~else
+	bra.s	~~elseif
+	bra.s	~~elseif		;elifdef
+	bra.s	~~elseif		;elifndef
+	bra	~~elif_skip_endif
+
+~~elif_skip_endif:
 	rts
+
+;---------------------------------------------------------------
+;	.elifdef	<シンボル>
+;	skipfaultでSKIPF_ELIFDEFを返す必要があるので、~~elseifと同じアドレスにしないこと
+~~elifdef::
+	bra	~~elseif
+
+;---------------------------------------------------------------
+;	.elifndef	<シンボル>
+;	skipfaultでSKIPF_ELIFNDEFを返す必要があるので、~~elseifと同じアドレスにしないこと
+~~elifndef::
+	bra	~~elseif
 
 ;---------------------------------------------------------------
 ;	.endif

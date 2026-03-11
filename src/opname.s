@@ -407,6 +407,8 @@ tablebody	.macro
 	pstbl	'else',     ~~else
 	pstbl	'elseif',   ~~elseif
 	pstbl	'elif',     ~~elseif
+	pstbl	'elifdef',  ~~elifdef
+	pstbl	'elifndef', ~~elifndef
 	pstbl	'endif',    ~~endif
 	pstbl	'endc',     ~~endif
 
