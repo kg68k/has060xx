@@ -39,11 +39,10 @@ asmmain::
 	bsr	makeprndate		;日時文字列の作成
 	bsr	docmdline		;コマンドラインの解釈
 	bsr	predefinesymbol		;プレデファインシンボルの定義
-	tst.b	(DISPTITLE,a6)
-	beq	asmmain0
+
 	lea.l	(title_msg,pc),a0
-	bsr	printmsg
-asmmain0:
+	bsr	printmsg_l
+
 	lea.l	(SOURCEPTR,a6),a0
 	move.l	a0,(INPFILPTR,a6)
 	movea.l	(SOURCEFILE,a6),a0
@@ -63,27 +62,21 @@ asmmain0:
 	bsr	asmpass3_		;パス3
 	bsr	tempdelete		;テンポラリファイルの削除
 
-	move.l	(NUMOFERR,a6),d0
-	tst.b	(WARNASERROR,a6)
-	beq	@f
-	or.l	(NUMOFWARN,a6),d0
-@@:	tst.l	d0
+	bsr	error_occurred
+	tst.l	d0
 	beq	asmmain_noerr
 
 	move.l	(OBJFILE,a6),-(sp)
 	DOS	_DELETE			;オブジェクトファイルを削除する
 	addq.l	#4,sp
+	movea.l	(LINEBUFPTR,a6),a0
 	bsr	print_errorcount
-	move.w	#1,-(sp)		;エラーがあった場合の終了コード
 	bra	asmmain4
 asmmain_noerr:
-	tst.b	(DISPTITLE,a6)
-	beq	@f
 	lea.l	(no_msg,pc),a0
-	bsr	printmsg
-@@:
-	clr.w	-(sp)			;エラーがなかった場合の終了コード
+	bsr	printmsg_l
 asmmain4:
+;a0=PRNファイルに出力する文字列
 	tst.b	(MAKEPRN,a6)
 	beq	asmmain6
 	tst.b	(ISPRNSTDOUT,a6)
@@ -122,15 +115,29 @@ asmmain8:
 
 	bsr	makesymfile_		;シンボルファイルを標準出力へ出力
 asmmain9:
+	bsr	error_occurred
+	move	d0,-(sp)
 	DOS	_EXIT2
 
+;----------------------------------------------------------------
+;	アセンブルエラーが発生したか調べる
+;	out:d0.l=エラーなしなら0 / エラーありなら1
+error_occurred:
+	move.l	(NUMOFERR,a6),d0
+	bne	1f
+	tst.b	(WARNASERROR,a6)
+	beq	@f
+	move.l	(NUMOFWARN,a6),d0	;-Werror指定時は警告もエラーとして扱う
+	beq	@f
+1:	moveq.l	#1,d0
+@@:	rts
 
 ;----------------------------------------------------------------
 ;	エラー数の表示
-;----------------------------------------------------------------
-
+;	in :a0=文字列バッファのポインタ
+;	out:a0=入力と同じ
 print_errorcount:
-	movea.l	(LINEBUFPTR,a6),a0
+	move.l	a0,-(sp)
 	move.l	(NUMOFERR,a6),d0
 	lea.l	(fatal_msg_err,pc),a1
 	bsr	tostr_errcount
@@ -143,9 +150,11 @@ print_errorcount:
 	lea.l	(fatal_msg2,pc),a1
 	bsr	strcpy
 
-	movea.l	(LINEBUFPTR,a6),a0
+	movea.l	(sp),a0
 	bsr	printmsg
-	bra	play_beep
+	bsr	play_beep
+	movea.l	(sp)+,a0
+	rts
 
 tostr_errcount:
 	bsr	strcpy
