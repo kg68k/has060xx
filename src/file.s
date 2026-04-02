@@ -745,13 +745,13 @@ readline1:
 readline2:
 	move.b	(a2)+,d0
 	cmp.b	#CR,d0
-	beq	readline3		;CRは読み飛ばす
+	beq	readline1		;CRは読み飛ばす
 	cmp.b	#LF,d0
 	beq	readline5
 	cmp.b	#EOF,d0
 	beq	readline4
+
 	move.b	d0,(a0)+
-readline3:
 	dbra	d3,readline1
 	bra	readline5		;1行が最大長を超えた
 
