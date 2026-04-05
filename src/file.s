@@ -467,6 +467,9 @@ readbuf:
 	DOS	_READ
 	lea.l	(10,sp),sp
 	move.l	d0,(F_DATALEN,a1)
+	bpl	@f
+	clr.l	(F_DATALEN,a1)
+@@:
 	clr.l	(F_PTROFST,a1)
 	rts
 
@@ -728,19 +731,18 @@ readline:
 	movea.l	(F_BUFPTR,a1),a2
 	move.l	(F_PTROFST,a1),d3
 	move.l	(F_DATALEN,a1),d2
-	adda.l	d3,a2
+	adda.l	d3,a2			;読み込みアドレス
 	move.l	d2,d1
-	sub.l	d3,d1
-	addq.l	#1,d1
+	sub.l	d3,d1			;残りバイト数
 	move.w	#MAXLINELEN-2,d3
 readline1:
 	subq.l	#1,d1
-	bhi	readline2
+	bcc	readline2
 	bsr	readbuf			;バッファが空なので読み込む
-	subq.l	#1,d0
-	bmi	readline8
-	move.l	(F_DATALEN,a1),d1
-	move.l	d1,d2
+	move.l	d0,d2
+	ble	readline_eof		;ファイル末尾または読み込みエラー
+	move.l	d0,d1
+	subq.l	#1,d1			;残りバイト数
 	movea.l	(F_BUFPTR,a1),a2
 readline2:
 	move.b	(a2)+,d0
@@ -755,19 +757,26 @@ readline2:
 	dbra	d3,readline1
 	bra	readline5		;1行が最大長を超えた
 
-readline4:				;EOF
-	cmp.w	#MAXLINELEN-2,d3
-	beq	readline8		;行頭のEOFならそこでファイル終了
 readline5:				;LF
 	clr.b	(a0)
 	moveq.l	#0,d0
 readline9:
-	subq.l	#1,d1
-	sub.l	d1,d2
+	sub.l	d1,d2			;バッファから消費したバイト数
 	move.l	d2,(F_PTROFST,a1)
 	movem.l	(sp)+,d1-d3/a0-a2
 	rts
 
+readline_eof:				;ファイル末尾または読み込みエラー
+	moveq.l	#0,d1
+	moveq.l	#0,d2
+;最後の行に改行がない場合は無視するのではなく、有効な行として扱う。
+;(ファイル構造としては不適切なのでエラーとして扱う手もある)
+readline4:				;EOF
+;行頭のEOFならそこでファイル終了
+;行中のEOFなら有効な行として扱う。その後ろにデータが続く場合はファイル終了ではなく
+;次の行として扱うが、通常のファイル構造ではないので特に対処していない。
+	cmp.w	#MAXLINELEN-2,d3
+	bne	readline5
 readline8:				;エラー/ファイルの終了
 	moveq.l	#-1,d0
 	bra	readline9
