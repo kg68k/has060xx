@@ -1614,6 +1614,9 @@ openfileerror:
 ;---------------------------------------------------------------
 ;	.page	[+/<式>]
 ~~page::
+	move.b	(a0),d0
+	cmp.b	#'*',d0
+	beq	~~page2			;*はコメントとして扱う
 	bsr	encodeopr
 	movea.l	(OPRBUFPTR,a6),a0
 	lea.l	(RPNBUF,a6),a1
