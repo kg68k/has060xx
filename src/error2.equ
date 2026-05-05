@@ -5,7 +5,7 @@
 ;		< error2.equ >
 ;
 ;		Copyright 1997-99  by M.Kamada
-;		Copyright 2025     by TcbnErik
+;		Copyright 2026     by TcbnErik
 ;----------------------------------------------------------------
 
 
@@ -125,7 +125,7 @@ misiferr_eof		reg	misiferr_eof2
 ;ilinterr		reg	ilinterr2
 ;offsymalignerr		reg	offsymalignerr2
 
-errout			reg	errout2
+;errout			reg	errout2
 
 
 	.text

@@ -5,7 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2016  by M.Kamada
-;			  2025       by TcbnErik
+;			  2026       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -378,6 +378,7 @@ getdcreal6:
 	bne	iloprerr_not_fixed	;式が定数でない
 	move.l	d1,(a4)+
 	dbra	d3,getdcreal5
+~~dcb9:
 	rts
 
 ;----------------------------------------------------------------
@@ -388,6 +389,7 @@ getdcreal6:
 	tst.w	d0
 	bne	ilvalueerr		;<長さ>が定数でない
 	tst.l	d1
+	beq.s	~~dcb9			;<長さ>が0の場合は何もしない
 	bmi	iloprerr_ds_negative	;<長さ>が負数ならエラー
 	cmp.l	#$01000000,d1
 	bhi	ilvalueerr		;<長さ>は1～16M
