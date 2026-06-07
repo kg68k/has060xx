@@ -333,11 +333,11 @@ wrt1bobj0::				;(ロケーションカウンタは変更しない)
 	bne	wrt1bobj9
 	movem.l	d1/a0,-(sp)
 	move.w	(OBJCONCTR,a6),d1
-	cmp.w	#$0100,d1
-	bcs	wrt1bobj1
+	cmp.w	#OBJCONBUFSIZE,d1
+	bcs	@f
 	bsr	flushobj
 	clr.w	d1
-wrt1bobj1:
+@@:
 	lea.l	(OBJCONBUF,a6),a0
 	move.b	d0,(a0,d1.w)
 	addq.w	#1,(OBJCONCTR,a6)
@@ -435,6 +435,8 @@ tmpreadd0w9:
 ;	オブジェクトバッファをフラッシュする
 ;	in :---
 ;	out:---
+;	テンポラリデータとオブジェクトファイルの出力で共用しているので、
+;	T_CONSTはオブジェクトコマンド$10_00(定数出力)と同じ値でなければならない
 flushobj::
 	movem.l	d0-d1/a0,-(sp)
 	move.w	(OBJCONCTR,a6),d0
@@ -442,6 +444,7 @@ flushobj::
 	move.w	d0,d1
 	subq.w	#1,d0
 	or.w	#T_CONST,d0
+	.fail	T_CONST.ne.$10_00
 	bsr	tmpwrtd0w
 	lea.l	(OBJCONBUF,a6),a0
 flushobj1:
