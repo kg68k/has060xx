@@ -447,6 +447,10 @@ flushobj::
 	.fail	T_CONST.ne.$10_00
 	bsr	tmpwrtd0w
 	lea.l	(OBJCONBUF,a6),a0
+
+	;奇数バイト時の最後のワードの下位バイトを$00にする。奇偶判定を
+	;省いてバッファ満杯時にも書き込むので、1バイト多く確保しておくこと
+	clr.b	(a0,d1.w)
 flushobj1:
 	move.w	(a0)+,d0
 	bsr	tmpwrtd0w
