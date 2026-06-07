@@ -5,7 +5,7 @@
 ;
 ;		Copyright 1990-1994  by Y.Nakamura
 ;			  1996-2015  by M.Kamada
-;			  2025       by TcbnErik
+;			  2026       by TcbnErik
 ;----------------------------------------------------------------
 
 	.include	has.equ
@@ -15,9 +15,23 @@
 	.include	eamode.equ
 	.include	work.equ
 
+
+;.ds.bのデータがあれば出力する
+flushdsb:	.macro	label
+	.sizem	sz,argc
+	tst.l	(DSBSIZE,a6)
+	.if	argc>=1
+	beq	label
+	.else
+	beq	@skip
+	.endif
+	bsr	outdsb
+@skip:
+.endm
+
+
 	.cpu	68000
 	.text
-
 
 ;----------------------------------------------------------------
 ;	パス3(オブジェクトファイルの生成)
@@ -1316,10 +1330,7 @@ sectchg:				;15xx セクション変更
 offsymcmd:				;37xx .offsym
 	clr.w	d0
 	bsr	chgsection		;offsetセクションに変更
-	tst.l	(DSBSIZE,a6)
-	beq	offsymcmd1
-	bsr	outdsb
-offsymcmd1:
+	flushdsb
 	bsr	flushobj		;オブジェクトバッファをフラッシュ
 	st.b	(ISOBJOUT,a6)		;以後のオブジェクト出力を抑制
 	bsr	tmpreadd0l		;初期値を読み出す
@@ -1337,10 +1348,7 @@ offsymcmd1:
 ofstcmd:				;16xx .offset
 	clr.w	d0
 	bsr	chgsection		;offsetセクションに変更
-	tst.l	(DSBSIZE,a6)
-	beq	ofstcmd1
-	bsr	outdsb
-ofstcmd1:
+	flushdsb
 	bsr	flushobj		;オブジェクトバッファをフラッシュ
 	st.b	(ISOBJOUT,a6)		;以後のオブジェクト出力を抑制
 	bsr	tmpreadd0l
@@ -3095,10 +3103,7 @@ out1wobj:
 ;	in :d0.b=出力データ
 ;	out:---
 out1bobj:
-	tst.l	(DSBSIZE,a6)
-	beq	out1bobj1
-	bsr	outdsb
-out1bobj1:
+	flushdsb
 	tst.b	(MAKEPRN,a6)
 	beq	out1bobj2
 	move.l	a0,-(sp)
@@ -3114,9 +3119,7 @@ out1bobj2:
 ;	in :d0.w=出力データ
 ;	out:---
 outobj1w:
-	tst.l	(DSBSIZE,a6)
-	beq	wrtobjd0w
-	bsr	outdsb
+	flushdsb	wrtobjd0w
 	bra	wrtobjd0w
 
 ;----------------------------------------------------------------
